@@ -1,0 +1,59 @@
+[
+  {
+    "type": "trainee",
+    "id": 1,
+    "userId": 1,
+    "dateOfBirth": "2001-02-10",
+    "address": "Edinburgh street 14",
+    "user": {
+      "id" : 1,
+      "firstName": "John",
+      "lastName": "Doe",
+      "username": "John.Doe",
+      "password": "fs56v6s",
+      "isActive": true
+    }
+  },
+  {
+    "type": "trainee",
+    "id": 2,
+    "userId": 2,
+    "dateOfBirth": "2001-02-05",
+    "address": "Edinburgh street 5",
+    "user": {
+      "id": 2,
+      "firstName": "John",
+      "lastName": "Doe",
+      "username": "John.Doe",
+      "password": "h5d&d+w",
+      "isActive": true
+    }
+  },
+
+  {
+    "type": "trainer",
+    "id": 3,
+    "userId": 3,
+    "specialization": "aerobics",
+    "user": {
+      "id": 3,
+      "firstName": "Ash",
+      "lastName": "Simon",
+      "username" : "Ash.Simon",
+      "password": "mad586",
+      "isActive": true
+    }
+  },
+
+  {
+    "type": "training",
+    "id" : 5,
+    "trainerID" : 3,
+    "traineeID" : 1,
+    "trainingName" : "yoga",
+    "trainingType" : "STRETCHING",
+    "trainingDate" : "2024-09-09",
+    "trainingDuration" : 60
+  }
+
+]
