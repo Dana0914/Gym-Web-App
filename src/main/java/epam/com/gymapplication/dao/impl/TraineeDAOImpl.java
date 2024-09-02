@@ -30,7 +30,9 @@ public class TraineeDAOImpl implements TraineeDAO {
             throw new DaoException("Trainee must not be null");
         }
         traineeStorage.put(trainee.getId(), trainee);
-        logger.info("Trainee saved successfully {}", trainee);
+        logger.info("Trainee saved successfully {} ", trainee);
+
+
 
     }
 
@@ -53,8 +55,13 @@ public class TraineeDAOImpl implements TraineeDAO {
             throw new DaoException("Id must not be null, and must be a valid id");
         }
         Optional<Trainee> traineeToRemove = findById(id);
-        logger.info("Trainee deleted successfully by id");
-        return traineeStorage.remove(traineeToRemove.get().getId(), traineeToRemove.get());
+        if (traineeToRemove.isPresent()) {
+            logger.info("Trainee deleted successfully");
+            traineeStorage.remove(traineeToRemove.get().getId(), traineeToRemove.get());
+            return true;
+        }
+        logger.info("Trainee was not deleted {}", traineeToRemove);
+        return false;
 
     }
 
@@ -64,11 +71,13 @@ public class TraineeDAOImpl implements TraineeDAO {
             logger.warn("Trainee id does not exist or is invalid");
             return Optional.empty();
         }
-        Trainee traineeById = traineeStorage.get(id);
-        logger.info("Trainee found by id {}", traineeById);
-        if (traineeById != null) {
-            return Optional.of(traineeById);
+        if (traineeStorage.containsKey(id)) {
+            Trainee trainee = traineeStorage.get(id);
+            logger.info("Trainee found by id {}", id);
+            return Optional.of(trainee);
         }
+
+        logger.warn("No Trainee found with id {}", id);
         return Optional.empty();
 
     }

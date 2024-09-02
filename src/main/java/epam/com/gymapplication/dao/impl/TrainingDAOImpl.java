@@ -2,6 +2,7 @@ package epam.com.gymapplication.dao.impl;
 
 import epam.com.gymapplication.customexception.DaoException;
 import epam.com.gymapplication.dao.TrainingDAO;
+import epam.com.gymapplication.model.Trainer;
 import epam.com.gymapplication.model.Training;
 import epam.com.gymapplication.model.TrainingType;
 import org.slf4j.Logger;
@@ -54,8 +55,13 @@ public class TrainingDAOImpl implements TrainingDAO {
             throw new DaoException("Training must not be null and it must have valid id");
         }
         Optional<Training> trainingToRemove = findById(id);
-        logger.info("Training deleted successfully");
-        return trainingStorage.remove(trainingToRemove.get().getId(), trainingToRemove.get());
+        if (trainingToRemove.isPresent()) {
+            logger.info("Training deleted successfully");
+            trainingStorage.remove(trainingToRemove.get().getId(), trainingToRemove.get());
+            return true;
+        }
+        logger.info("Training was not deleted {}", trainingToRemove);
+        return false;
     }
 
     @Override
@@ -64,11 +70,12 @@ public class TrainingDAOImpl implements TrainingDAO {
             logger.warn("Training id does not exist");
             return Optional.empty();
         }
-        logger.info("Training found successfully");
-        Training foundTrainingById = trainingStorage.get(id);
-        if (foundTrainingById != null) {
-            return Optional.of(foundTrainingById);
+        if (trainingStorage.containsKey(id)) {
+            Training training = trainingStorage.get(id);
+            logger.info("Training found by id {}", id);
+            return Optional.of(training);
         }
+        logger.warn("No Training found with id {}", id);
         return Optional.empty();
     }
 

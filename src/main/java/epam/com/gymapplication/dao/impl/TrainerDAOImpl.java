@@ -52,9 +52,14 @@ public class TrainerDAOImpl implements TrainerDAO {
         if (id == null || id <= 0) {
             throw new DaoException("Trainer must not be null and it must have valid id");
         }
-        Optional<Trainer> traineeToRemove = findById(id);
-        logger.info("Trainer deleted successfully");
-        return trainerStorage.remove(traineeToRemove.get().getId(), traineeToRemove.get());
+        Optional<Trainer> trainerToRemove = findById(id);
+        if (trainerToRemove.isPresent()) {
+            logger.info("Trainer deleted successfully");
+            trainerStorage.remove(trainerToRemove.get().getId(), trainerToRemove.get());
+            return true;
+        }
+        logger.info("Trainer was not deleted {}", trainerToRemove);
+        return false;
 
 
     }
@@ -65,13 +70,13 @@ public class TrainerDAOImpl implements TrainerDAO {
             logger.warn("Trainer must not be null and it must have valid id");
             return Optional.empty();
         }
-        Trainer trainerById = trainerStorage.get(id);
-        logger.info("Trainer found by id {}", trainerById);
-        if (trainerById != null) {
-            return Optional.of(trainerById);
+        if (trainerStorage.containsKey(id)) {
+            Trainer trainer = trainerStorage.get(id);
+            logger.info("Trainer found by id {}", id);
+            return Optional.of(trainer);
         }
+        logger.warn("No Trainer found with id {}", id);
         return Optional.empty();
-
     }
 
     @Override
