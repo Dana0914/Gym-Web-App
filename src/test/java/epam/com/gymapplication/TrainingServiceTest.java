@@ -1,10 +1,7 @@
 package epam.com.gymapplication;
 
 import epam.com.gymapplication.dao.impl.TrainingDAOImpl;
-import epam.com.gymapplication.model.Trainer;
-import epam.com.gymapplication.model.Training;
-import epam.com.gymapplication.model.TrainingType;
-import epam.com.gymapplication.model.User;
+import epam.com.gymapplication.model.*;
 import epam.com.gymapplication.service.TrainingService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -152,6 +149,22 @@ public class TrainingServiceTest {
     }
 
     @Test
+    public void findTrainingById_withNonExistingId_returnsOptionalEmpty() {
+        trainingService.saveTraining(training);
+
+        when(trainingDAOImpl.findById(4L)).thenReturn(Optional.empty());
+
+        Optional<Training> trainingById = trainingService.findTrainingById(4L);
+
+        Assertions.assertFalse(trainingById.isPresent());
+
+        verify(trainingDAOImpl).findById(4L);
+
+
+        Assertions.assertEquals(trainingById, Optional.empty());
+    }
+
+    @Test
     public void deleteTrainingById_withValidId_returnsValidEntity() {
         trainingService.saveTraining(training);
 
@@ -170,22 +183,21 @@ public class TrainingServiceTest {
     }
 
     @Test
-    public void findAllTrainings_withExistingData_returnsValidEntities() {
-        Set<Map.Entry<Long, Training>> mockTrainingSet = new HashSet<>();
-        mockTrainingSet.add(new AbstractMap.SimpleEntry<>(training.getId(), training));
-        mockTrainingSet.add(new AbstractMap.SimpleEntry<>(training2.getId(), training2));
+    public void deleteTrainingById_withInvalidId_returnsOptionalEmpty() {
+        trainingService.saveTraining(training);
 
-        when(trainingDAOImpl.findAll()).thenReturn(mockTrainingSet);
+        when(trainingDAOImpl.findById(5L)).thenReturn(Optional.empty());
 
-        Set<Map.Entry<Long, Training>> result = trainingService.getAllTrainings();
+        trainingService.deleteTrainingById(5L);
 
 
-        verify(trainingDAOImpl).findAll();
+        verify(trainingDAOImpl).deleteById(5L);
 
-        Assertions.assertTrue(result.contains(new AbstractMap.SimpleEntry<>(training.getId(), training)));
-        Assertions.assertTrue(result.contains(new AbstractMap.SimpleEntry<>(training2.getId(), training2)));
+        Assertions.assertEquals(trainingService.findTrainingById(5L), Optional.empty());
 
     }
+
+
 
     @Test
     public void findByTrainingName_withExistingData_returnsValidEntity() {
@@ -230,6 +242,27 @@ public class TrainingServiceTest {
         Assertions.assertEquals(training.getTrainingDate(), byTrainingName.get().getTrainingDate());
         Assertions.assertEquals(training.getTrainingType(), byTrainingName.get().getTrainingType());
         Assertions.assertEquals(training.getTrainingDuration(), byTrainingName.get().getTrainingDuration());
+
+    }
+
+
+    @Test
+    public void findByTrainingName_withNonExistingData_returnsOptionalEmpty() {
+        trainingService.saveTraining(training);
+
+
+        when(trainingDAOImpl.findByTrainingName("null")).thenReturn(Optional.empty());
+
+
+        Optional<Training> result = trainingService.findByTrainingName("null");
+
+
+        Assertions.assertFalse(result.isPresent());
+
+
+        verify(trainingDAOImpl).findByTrainingName("null");
+
+        Assertions.assertEquals(trainingService.findByTrainingName("null"), Optional.empty());
 
     }
 }

@@ -2,6 +2,7 @@ package epam.com.gymapplication;
 
 
 import epam.com.gymapplication.dao.impl.TrainerDAOImpl;
+import epam.com.gymapplication.model.Trainee;
 import epam.com.gymapplication.model.Trainer;
 import epam.com.gymapplication.model.User;
 import epam.com.gymapplication.service.TrainerService;
@@ -131,6 +132,21 @@ public class TrainerServiceTest {
     }
 
     @Test
+    public void findTrainerById_withNonExistingId_returnsOptionalEmpty() {
+        trainerService.saveTrainer(trainer);
+
+        when(trainerDAOImpl.findById(4L)).thenReturn(Optional.empty());
+
+        Optional<Trainer> trainerById = trainerService.findTrainerById(4L);
+
+        Assertions.assertFalse(trainerById.isPresent());
+
+        verify(trainerDAOImpl).findById(4L);
+
+        Assertions.assertEquals(trainerById, Optional.empty());
+    }
+
+    @Test
     public void deleteTrainerById_withValidId_returnsValidEntity() {
         trainerService.saveTrainer(trainer);
 
@@ -143,6 +159,21 @@ public class TrainerServiceTest {
         verify(trainerDAOImpl).deleteById(trainer.getId());
 
         Assertions.assertEquals(trainerService.findTrainerById(trainer.getId()), Optional.empty());
+
+    }
+
+    @Test
+    public void deleteTrainerById_withInvalidId_returnsOptionalEmpty() {
+        trainerService.saveTrainer(trainer);
+
+        when(trainerDAOImpl.findById(5L)).thenReturn(Optional.empty());
+
+        trainerService.deleteTrainerById(5L);
+
+
+        verify(trainerDAOImpl).deleteById(5L);
+
+        Assertions.assertEquals(trainerService.findTrainerById(5L), Optional.empty());
 
     }
 
@@ -196,6 +227,45 @@ public class TrainerServiceTest {
         verify(trainerDAOImpl).findByLastName(trainer.getUser().getLastName());
 
         Assertions.assertEquals(trainerService.findByLastName(trainer.getUser().getLastName()), Optional.of(trainer));
+    }
+
+    @Test
+    public void findByFirstName_withNonExistingData_returnsOptionalEmpty() {
+        trainerService.saveTrainer(trainer);
+
+
+        when(trainerDAOImpl.findByFirstName("George")).thenReturn(Optional.empty());
+
+
+        Optional<Trainer> result = trainerService.findByFirstName("George");
+
+
+        Assertions.assertFalse(result.isPresent());
+
+        verify(trainerDAOImpl).findByFirstName("George");
+
+        Assertions.assertEquals(trainerService.findByFirstName("George"), Optional.empty());
+
+    }
+
+    @Test
+    public void findByLastName_withNonExistingData_returnsOptionalEmpty() {
+        trainerService.saveTrainer(trainer);
+
+
+        when(trainerDAOImpl.findByLastName("Bush")).thenReturn(Optional.empty());
+
+
+        Optional<Trainer> result = trainerService.findByLastName("Bush");
+
+
+        Assertions.assertFalse(result.isPresent());
+
+
+        verify(trainerDAOImpl).findByLastName("Bush");
+
+        Assertions.assertEquals(trainerService.findByLastName("Bush"), Optional.empty());
+
     }
 
 

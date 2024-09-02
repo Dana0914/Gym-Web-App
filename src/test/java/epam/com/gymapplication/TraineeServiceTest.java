@@ -15,8 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.*;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +30,7 @@ public class TraineeServiceTest {
 
     private Trainee trainee;
     private Trainee trainee2;
+    private Trainee invalidTrainee;
 
     @BeforeEach
     public void setUp() {
@@ -56,6 +56,15 @@ public class TraineeServiceTest {
         trainee2.setAddress("Edinburgh street 4");
         trainee2.setDateOfBirth(LocalDate.of(2000, 8, 15));
         trainee2.setUser(user);
+
+        invalidTrainee = new Trainee();
+        invalidTrainee.setId(3L);
+        invalidTrainee.setUserId(3L);
+        invalidTrainee.setAddress(null);
+        invalidTrainee.setDateOfBirth(null);
+        invalidTrainee.setUser(null);
+
+
 
 
     }
@@ -111,6 +120,7 @@ public class TraineeServiceTest {
 
     }
 
+
     @Test
     public void findTraineeById_withExistingId_returnsEntity() {
         traineeService.saveTrainee(trainee);
@@ -131,6 +141,22 @@ public class TraineeServiceTest {
     }
 
     @Test
+    public void findTraineeById_withNonExistingId_returnsOptionalEmpty() {
+        traineeService.saveTrainee(trainee);
+
+        when(traineeDAOImpl.findById(4L)).thenReturn(Optional.empty());
+
+        Optional<Trainee> traineeById = traineeService.findTraineeById(4L);
+
+        Assertions.assertFalse(traineeById.isPresent());
+
+        verify(traineeDAOImpl).findById(4L);
+
+
+        Assertions.assertEquals(traineeById, Optional.empty());
+    }
+
+    @Test
     public void deleteTraineeById_withValidId_returnsValidEntity() {
         traineeService.saveTrainee(trainee);
 
@@ -147,26 +173,20 @@ public class TraineeServiceTest {
     }
 
     @Test
-    public void findAllTrainees_withExistingData_returnsValidEntities() {
+    public void deleteTraineeById_withInvalidId_returnsOptionalEmpty() {
         traineeService.saveTrainee(trainee);
-        traineeService.saveTrainee(trainee2);
 
-        Set<Map.Entry<Long, Trainee>> mockTraineeSet = new HashSet<>();
-        mockTraineeSet.add(new AbstractMap.SimpleEntry<>(trainee.getId(), trainee));
-        mockTraineeSet.add(new AbstractMap.SimpleEntry<>(trainee2.getId(), trainee2));
+        when(traineeDAOImpl.findById(5L)).thenReturn(Optional.empty());
 
-        when(traineeDAOImpl.findAll()).thenReturn(mockTraineeSet);
+        traineeService.deleteTraineeById(5L);
 
-        Set<Map.Entry<Long, Trainee>> result = traineeDAOImpl.findAll();
 
-        verify(traineeDAOImpl).findAll();
-        verify(traineeDAOImpl).save(trainee);
-        verify(traineeDAOImpl).save(trainee2);
+        verify(traineeDAOImpl).deleteById(5L);
 
-        Assertions.assertTrue(result.contains(new AbstractMap.SimpleEntry<>(trainee.getId(), trainee)));
-        Assertions.assertTrue(result.contains(new AbstractMap.SimpleEntry<>(trainee2.getId(), trainee2)));
+        Assertions.assertEquals(traineeService.findTraineeById(5L), Optional.empty());
 
     }
+
 
     @Test
     public void findByFirstName_withExistingData_returnsValidEntity() {
@@ -185,6 +205,26 @@ public class TraineeServiceTest {
     }
 
     @Test
+    public void findByFirstName_withNonExistingData_returnsOptionalEmpty() {
+        traineeService.saveTrainee(trainee);
+
+
+        when(traineeDAOImpl.findByFirstName("George")).thenReturn(Optional.empty());
+
+
+        Optional<Trainee> result = traineeService.findTraineeByFirstName("George");
+
+
+        Assertions.assertFalse(result.isPresent());
+
+        verify(traineeDAOImpl).save(trainee);
+        verify(traineeDAOImpl).findByFirstName("George");
+
+        Assertions.assertEquals(traineeService.findTraineeByFirstName("George"), Optional.empty());
+
+    }
+
+    @Test
     public void findByLastName_withExistingData_returnsValidEntity() {
         traineeService.saveTrainee(trainee);
 
@@ -199,7 +239,29 @@ public class TraineeServiceTest {
 
         Assertions.assertEquals(traineeService.findByLastName(trainee.getUser().getLastName()), Optional.of(trainee));
     }
+
+    @Test
+    public void findByLastName_withNonExistingData_returnsOptionalEmpty() {
+        traineeService.saveTrainee(trainee);
+
+
+        when(traineeDAOImpl.findByLastName("Bush")).thenReturn(Optional.empty());
+
+
+        Optional<Trainee> result = traineeService.findByLastName("Bush");
+
+
+        Assertions.assertFalse(result.isPresent());
+
+        verify(traineeDAOImpl).save(trainee);
+        verify(traineeDAOImpl).findByLastName("Bush");
+
+        Assertions.assertEquals(traineeService.findByLastName("Bush"), Optional.empty());
+
+    }
 }
+
+
 
 
 

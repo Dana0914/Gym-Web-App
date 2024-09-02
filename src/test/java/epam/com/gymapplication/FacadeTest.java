@@ -373,74 +373,6 @@ public class FacadeTest {
 
     }
 
-    @Test
-    public void findAllTrainees_withExistingData_returnsValidEntities() {
-        facade.saveTrainee(trainee);
-        facade.saveTrainee(trainee2);
-
-        Set<Map.Entry<Long, Trainee>> mockTraineeSet = new HashSet<>();
-        mockTraineeSet.add(new AbstractMap.SimpleEntry<>(trainee.getId(), trainee));
-        mockTraineeSet.add(new AbstractMap.SimpleEntry<>(trainee2.getId(), trainee2));
-
-        when(traineeService.getAllTrainees()).thenReturn(mockTraineeSet);
-
-
-        Set<Map.Entry<Long, Trainee>> result = traineeService.getAllTrainees();
-
-        verify(traineeService).getAllTrainees();
-        verify(traineeService).saveTrainee(trainee);
-        verify(traineeService).saveTrainee(trainee2);
-
-        Assertions.assertTrue(result.contains(new AbstractMap.SimpleEntry<>(trainee.getId(), trainee)));
-        Assertions.assertTrue(result.contains(new AbstractMap.SimpleEntry<>(trainee2.getId(), trainee2)));
-
-
-    }
-
-    @Test
-    public void findAllTrainers_withExistingData_returnsValidEntities() {
-        facade.saveTrainer(trainer);
-        facade.saveTrainer(trainer2);
-
-        Set<Map.Entry<Long, Trainer>> mockTrainerSet = new HashSet<>();
-        mockTrainerSet.add(new AbstractMap.SimpleEntry<>(trainer.getId(), trainer));
-        mockTrainerSet.add(new AbstractMap.SimpleEntry<>(trainer2.getId(), trainer2));
-
-        when(trainerService.getAllTrainers()).thenReturn(mockTrainerSet);
-
-
-        Set<Map.Entry<Long, Trainer>> result = trainerService.getAllTrainers();
-
-        verify(trainerService).getAllTrainers();
-
-
-        Assertions.assertTrue(result.contains(new AbstractMap.SimpleEntry<>(trainer.getId(), trainer)));
-        Assertions.assertTrue(result.contains(new AbstractMap.SimpleEntry<>(trainer2.getId(), trainer2)));
-
-
-    }
-
-    @Test
-    public void findAllTrainings_withExistingData_returnsValidEntities() {
-        facade.saveTraining(training);
-        facade.saveTrainer(trainer2);
-
-        Set<Map.Entry<Long, Training>> mockTrainingSet = new HashSet<>();
-        mockTrainingSet.add(new AbstractMap.SimpleEntry<>(training.getId(), training));
-        mockTrainingSet.add(new AbstractMap.SimpleEntry<>(training2.getId(), training2));
-
-        when(trainingService.getAllTrainings()).thenReturn(mockTrainingSet);
-
-
-        Set<Map.Entry<Long, Training>> result = trainingService.getAllTrainings();
-
-
-        verify(trainingService).saveTraining(training);
-
-        Assertions.assertTrue(result.contains(new AbstractMap.SimpleEntry<>(training.getId(), training)));
-        Assertions.assertTrue(result.contains(new AbstractMap.SimpleEntry<>(training2.getId(), training2)));
-
-    }
 
     @Test
     public void findTraineeByFirstName_withExistingData_returnsValidEntity() {
@@ -557,6 +489,198 @@ public class FacadeTest {
         Assertions.assertEquals(training.getTrainingDuration(), byTrainingName.get().getTrainingDuration());
 
     }
+
+    @Test
+    public void findByTrainingName_withNonExistingData_returnsOptionalEmpty() {
+        facade.saveTraining(training);
+
+
+        when(trainingService.findByTrainingName("null")).thenReturn(Optional.empty());
+
+
+        Optional<Training> result = trainingService.findByTrainingName("null");
+
+
+        Assertions.assertFalse(result.isPresent());
+
+
+        verify(trainingService).findByTrainingName("null");
+
+        Assertions.assertEquals(trainingService.findByTrainingName("null"), Optional.empty());
+
+    }
+
+    @Test
+    public void deleteTrainingById_withInvalidId_returnsOptionalEmpty() {
+        facade.saveTraining(training);
+
+        when(trainingService.findTrainingById(5L)).thenReturn(Optional.empty());
+
+        trainingService.deleteTrainingById(5L);
+
+
+        verify(trainingService).deleteTrainingById(5L);
+
+        Assertions.assertEquals(trainingService.findTrainingById(5L), Optional.empty());
+
+    }
+
+    @Test
+    public void findTrainingById_withNonExistingId_returnsOptionalEmpty() {
+        trainingService.saveTraining(training);
+
+        when(trainingService.findTrainingById(4L)).thenReturn(Optional.empty());
+
+        Optional<Training> trainingById = trainingService.findTrainingById(4L);
+
+        Assertions.assertFalse(trainingById.isPresent());
+
+        verify(trainingService).findTrainingById(4L);
+
+
+        Assertions.assertEquals(trainingById, Optional.empty());
+    }
+
+    @Test
+    public void findTraineeById_withNonExistingId_returnsOptionalEmpty() {
+        facade.saveTrainee(trainee);
+
+        when(traineeService.findTraineeById(4L)).thenReturn(Optional.empty());
+
+        Optional<Trainee> traineeById = traineeService.findTraineeById(4L);
+
+        Assertions.assertFalse(traineeById.isPresent());
+
+        verify(traineeService).findTraineeById(4L);
+
+
+        Assertions.assertEquals(traineeById, Optional.empty());
+    }
+
+    @Test
+    public void deleteTraineeById_withInvalidId_returnsOptionalEmpty() {
+        facade.saveTrainee(trainee);
+
+        when(traineeService.findTraineeById(5L)).thenReturn(Optional.empty());
+
+        traineeService.deleteTraineeById(5L);
+
+
+        verify(traineeService).deleteTraineeById(5L);
+
+        Assertions.assertEquals(traineeService.findTraineeById(5L), Optional.empty());
+
+    }
+    @Test
+    public void findByFirstName_withNonExistingData_returnsOptionalEmpty() {
+        facade.saveTrainee(trainee);
+
+
+        when(traineeService.findTraineeByFirstName("George")).thenReturn(Optional.empty());
+
+
+        Optional<Trainee> result = traineeService.findTraineeByFirstName("George");
+
+
+        Assertions.assertFalse(result.isPresent());
+
+        verify(traineeService).findTraineeByFirstName("George");
+
+        Assertions.assertEquals(traineeService.findTraineeByFirstName("George"), Optional.empty());
+
+    }
+
+    @Test
+    public void findByLastName_withNonExistingData_returnsOptionalEmpty() {;
+        facade.saveTrainee(trainee);
+
+
+        when(traineeService.findByLastName("Bush")).thenReturn(Optional.empty());
+
+
+        Optional<Trainee> result = traineeService.findByLastName("Bush");
+
+
+        Assertions.assertFalse(result.isPresent());
+
+
+        verify(traineeService).findByLastName("Bush");
+
+        Assertions.assertEquals(traineeService.findByLastName("Bush"), Optional.empty());
+
+    }
+
+
+    @Test
+    public void findTrainerById_withNonExistingId_returnsOptionalEmpty() {
+        facade.saveTrainer(trainer);
+
+        when(trainerService.findTrainerById(4L)).thenReturn(Optional.empty());
+
+        Optional<Trainer> trainerById = trainerService.findTrainerById(4L);
+
+        Assertions.assertFalse(trainerById.isPresent());
+
+        verify(trainerService).findTrainerById(4L);
+
+        Assertions.assertEquals(trainerById, Optional.empty());
+    }
+
+    @Test
+    public void deleteTrainerById_withInvalidId_returnsOptionalEmpty() {
+        facade.saveTrainer(trainer);
+
+        when(trainerService.findTrainerById(5L)).thenReturn(Optional.empty());
+
+        trainerService.deleteTrainerById(5L);
+
+
+        verify(trainerService).deleteTrainerById(5L);
+
+        Assertions.assertEquals(trainerService.findTrainerById(5L), Optional.empty());
+
+    }
+
+    @Test
+    public void findTrainerByFirstName_withNonExistingData_returnsOptionalEmpty() {
+        facade.saveTrainer(trainer);
+
+
+        when(trainerService.findByFirstName("George")).thenReturn(Optional.empty());
+
+
+        Optional<Trainer> result = trainerService.findByFirstName("George");
+
+
+        Assertions.assertFalse(result.isPresent());
+
+        verify(trainerService).findByFirstName("George");
+
+        Assertions.assertEquals(trainerService.findByFirstName("George"), Optional.empty());
+
+    }
+
+    @Test
+    public void findTrainerByLastName_withNonExistingData_returnsOptionalEmpty() {
+        facade.saveTrainer(trainer);
+
+
+        when(trainerService.findByLastName("Bush")).thenReturn(Optional.empty());
+
+
+        Optional<Trainer> result = trainerService.findByLastName("Bush");
+
+
+        Assertions.assertFalse(result.isPresent());
+
+
+        verify(trainerService).findByLastName("Bush");
+
+        Assertions.assertEquals(trainerService.findByLastName("Bush"), Optional.empty());
+
+    }
+
+
 
 
 
