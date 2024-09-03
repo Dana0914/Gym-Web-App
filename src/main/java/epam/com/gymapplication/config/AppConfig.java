@@ -16,7 +16,7 @@ import epam.com.gymapplication.service.TrainerService;
 import epam.com.gymapplication.service.TrainingService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ResourceLoader;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,18 +48,8 @@ public class AppConfig {
 
 
     @Bean
-    public StorageInitializer storageInit(Map<Long, Trainee> traineeStorage,
-                                          Map<Long, Trainer> trainerStorage,
-                                          Map<Long, Training> trainingStorage,
-                                          ResourceLoader resourceLoader,
-                                          ObjectMapper objectMapper,
-                                          PasswordGenerator passwordGenerator,
-                                          UserProfileService userProfileService) {
-        return new StorageInitializer(
-                traineeStorage, trainerStorage,
-                trainingStorage, resourceLoader,
-                objectMapper, passwordGenerator,
-                userProfileService);
+    public StorageInitializer storageInit() {
+        return new StorageInitializer();
     }
 
     @Bean
@@ -82,28 +72,28 @@ public class AppConfig {
 
     @Bean
     public TraineeService traineeService() {
-        return new TraineeService(traineeDAO());
+        return new TraineeService();
     }
 
     @Bean
     public TrainerService trainerService() {
-        return new TrainerService(trainerDAO());
+        return new TrainerService();
     }
     @Bean
     public TrainingService trainingService() {
-        return new TrainingService(trainingDAO());
+        return new TrainingService();
     }
     @Bean
     public TraineeDAOImpl traineeDAO() {
-        return new TraineeDAOImpl(traineeStorage());
+        return new TraineeDAOImpl();
     }
     @Bean
     public TrainingDAOImpl trainingDAO() {
-        return new TrainingDAOImpl(trainingStorage());
+        return new TrainingDAOImpl();
     }
     @Bean
     public TrainerDAOImpl trainerDAO() {
-        return new TrainerDAOImpl(trainerStorage());
+        return new TrainerDAOImpl();
     }
 
 }

@@ -29,39 +29,32 @@ import java.util.Map;
 public class StorageInitializer {
     private static final Logger logger = LoggerFactory.getLogger(StorageInitializer.class);
 
-    private final Map<Long, Trainee> traineeStorage;
-    private final Map<Long, Trainer> trainerStorage;
-    private final Map<Long, Training> trainingStorage;
+    @Autowired
+    private Map<Long, Trainee> traineeStorage;
 
-    private final ResourceLoader resourceLoader;
+    @Autowired
+    private Map<Long, Trainer> trainerStorage;
 
-    private final ObjectMapper objectMapper;
+    @Autowired
+    private Map<Long, Training> trainingStorage;
 
-    private final PasswordGenerator passwordGenerator;
+    @Autowired
+    private ResourceLoader resourceLoader;
 
-    private final UserProfileService userProfileService;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private PasswordGenerator passwordGenerator;
+
+
+    @Autowired
+    private UserProfileService userProfileService;
 
     @Value("${classpath:init-data.json}")
     private String file;
 
 
-    @Autowired
-    public StorageInitializer(Map<Long, Trainee> traineeStorage,
-                              Map<Long, Trainer> trainerStorage,
-                              Map<Long, Training> trainingStorage,
-                              ResourceLoader resourceLoader,
-                              ObjectMapper objectMapper,
-                              PasswordGenerator passwordGenerator,
-                              UserProfileService userProfileService) {
-
-        this.traineeStorage = traineeStorage;
-        this.trainerStorage = trainerStorage;
-        this.trainingStorage = trainingStorage;
-        this.resourceLoader = resourceLoader;
-        this.objectMapper = objectMapper;
-        this.passwordGenerator = passwordGenerator;
-        this.userProfileService = userProfileService;
-    }
 
     @PostConstruct
     public void initializeStorage() {

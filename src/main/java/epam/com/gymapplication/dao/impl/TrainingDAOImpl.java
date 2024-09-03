@@ -2,7 +2,6 @@ package epam.com.gymapplication.dao.impl;
 
 import epam.com.gymapplication.customexception.DaoException;
 import epam.com.gymapplication.dao.TrainingDAO;
-import epam.com.gymapplication.model.Trainer;
 import epam.com.gymapplication.model.Training;
 import epam.com.gymapplication.model.TrainingType;
 import org.slf4j.Logger;
@@ -18,10 +17,11 @@ import java.util.Set;
 @Repository
 public class TrainingDAOImpl implements TrainingDAO {
     private static final Logger logger = LoggerFactory.getLogger(TrainingDAOImpl.class);
-    private final Map<Long, Training> trainingStorage;
+    private Map<Long, Training> trainingStorage;
+
 
     @Autowired
-    public TrainingDAOImpl(Map<Long, Training> trainingStorage) {
+    public void setTrainingStorage(Map<Long, Training> trainingStorage) {
         this.trainingStorage = trainingStorage;
     }
 

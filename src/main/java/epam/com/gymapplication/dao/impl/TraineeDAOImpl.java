@@ -16,13 +16,13 @@ import java.util.Set;
 @Repository
 public class TraineeDAOImpl implements TraineeDAO {
     private static final Logger logger = LoggerFactory.getLogger(TraineeDAOImpl.class);
-    private final Map<Long, Trainee> traineeStorage;
+
+    private Map<Long, Trainee> traineeStorage;
 
     @Autowired
-    public TraineeDAOImpl(Map<Long, Trainee> traineeStorage) {
+    public void setTraineeStorage(Map<Long, Trainee> traineeStorage) {
         this.traineeStorage = traineeStorage;
     }
-
 
     @Override
     public void save(Trainee trainee) throws DaoException {

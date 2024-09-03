@@ -17,12 +17,10 @@ import java.util.Set;
 @Service
 public class TrainingService {
     private static final Logger logger = LoggerFactory.getLogger(TrainingService.class);
-    private final TrainingDAOImpl trainingDAOImpl;
 
     @Autowired
-    public TrainingService(TrainingDAOImpl trainingDAOImpl) {
-        this.trainingDAOImpl = trainingDAOImpl;
-    }
+    private TrainingDAOImpl trainingDAOImpl;
+
 
     public void saveTraining(Training training) throws ServiceException {
         try {

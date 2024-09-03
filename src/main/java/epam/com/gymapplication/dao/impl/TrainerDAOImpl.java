@@ -16,10 +16,10 @@ import java.util.Set;
 @Repository
 public class TrainerDAOImpl implements TrainerDAO {
     private static final Logger logger = LoggerFactory.getLogger(TrainerDAOImpl.class);
-    private final Map<Long, Trainer> trainerStorage;
+    private Map<Long, Trainer> trainerStorage;
 
     @Autowired
-    public TrainerDAOImpl(Map<Long, Trainer> trainerStorage) {
+    public void setTrainerStorage(Map<Long, Trainer> trainerStorage) {
         this.trainerStorage = trainerStorage;
     }
 
