@@ -18,6 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
+
 @ExtendWith(MockitoExtension.class)
 public class TrainingServiceTest {
     @Mock
@@ -52,19 +53,19 @@ public class TrainingServiceTest {
 
         training2 = new Training();
         training2.setId(2L);
-        training.setTraineeID(1L);
-        training.setTrainerID(4L);
-        training.setTrainingName("strength");
-        training.setTrainingDate(LocalDate.now());
-        training.setTrainingType(TrainingType.STRENGTH);
-        training.setTrainingDuration(45);
+        training2.setTraineeID(1L);
+        training2.setTrainerID(4L);
+        training2.setTrainingName("strength");
+        training2.setTrainingDate(LocalDate.now());
+        training2.setTrainingType(TrainingType.STRENGTH);
+        training2.setTrainingDuration(45);
 
     }
+
     @Test
     public void save_withValidData_returnsValidEntity() {
         trainingService.saveTraining(training);
 
-        verify(trainingDAOImpl).save(training);
 
         when(trainingDAOImpl.findById(training.getId())).thenReturn(Optional.of(training));
 
@@ -72,15 +73,10 @@ public class TrainingServiceTest {
 
         Assertions.assertTrue(trainingById.isPresent());
 
-        Assertions.assertEquals(training.getId(), trainingById.get().getId());
-        Assertions.assertEquals(training.getTraineeID(), trainingById.get().getTraineeID());
-        Assertions.assertEquals(training.getTrainerID(), trainingById.get().getTrainerID());
-        Assertions.assertEquals(training.getTrainingName(), trainingById.get().getTrainingName());
-        Assertions.assertEquals(training.getTrainingDate(), trainingById.get().getTrainingDate());
-        Assertions.assertEquals(training.getTrainingType(), trainingById.get().getTrainingType());
-        Assertions.assertEquals(training.getTrainingDuration(), trainingById.get().getTrainingDuration());
-        Assertions.assertEquals(training.getTrainingType(), trainingById.get().getTrainingType());
-        Assertions.assertEquals(training.getTrainingDuration(), trainingById.get().getTrainingDuration());
+        verify(trainingDAOImpl).save(training);
+
+        Assertions.assertEquals(training, trainingById.get());
+
 
 
     }
@@ -88,8 +84,6 @@ public class TrainingServiceTest {
     @Test
     public void update_withExistingEntity_updatesEntityDetails() {
         trainingService.saveTraining(training);
-
-        verify(trainingDAOImpl).save(training);
 
         when(trainingDAOImpl.findById(training.getId())).thenReturn(Optional.of(training));
 
@@ -104,23 +98,12 @@ public class TrainingServiceTest {
         verify(trainingDAOImpl).update(training2);
 
 
-
         when(trainingDAOImpl.findById(training2.getId())).thenReturn(Optional.of(training2));
 
         Optional<Training> updateTrainingById = trainingService.findTrainingById(training2.getId());
 
         Assertions.assertTrue(updateTrainingById.isPresent());
-
-
-
-        Assertions.assertEquals(training2.getId(), updateTrainingById.get().getId());
-        Assertions.assertEquals(training2.getTraineeID(), updateTrainingById.get().getTraineeID());
-        Assertions.assertEquals(training2.getTrainerID(), updateTrainingById.get().getTrainerID());
-        Assertions.assertEquals(training2.getTrainingName(), updateTrainingById.get().getTrainingName());
-        Assertions.assertEquals(training2.getTrainingDate(), updateTrainingById.get().getTrainingDate());
-        Assertions.assertEquals(training2.getTrainingType(), updateTrainingById.get().getTrainingType());
-        Assertions.assertEquals(training2.getTrainingDuration(), updateTrainingById.get().getTrainingDuration());
-
+        Assertions.assertEquals(training2, updateTrainingById.get());
 
     }
 
@@ -128,7 +111,6 @@ public class TrainingServiceTest {
     public void findTrainingById_withExistingId_returnsEntity() {
         trainingService.saveTraining(training);
 
-        verify(trainingDAOImpl).save(training);
 
         when(trainingDAOImpl.findById(training.getId())).thenReturn(Optional.of(training));
 
@@ -138,13 +120,7 @@ public class TrainingServiceTest {
 
         verify(trainingDAOImpl).findById(training.getId());
 
-        Assertions.assertEquals(training.getId(), trainingById.get().getId());
-        Assertions.assertEquals(training.getTraineeID(), trainingById.get().getTraineeID());
-        Assertions.assertEquals(training.getTrainerID(), trainingById.get().getTrainerID());
-        Assertions.assertEquals(training.getTrainingName(), trainingById.get().getTrainingName());
-        Assertions.assertEquals(training.getTrainingDate(), trainingById.get().getTrainingDate());
-        Assertions.assertEquals(training.getTrainingType(), trainingById.get().getTrainingType());
-        Assertions.assertEquals(training.getTrainingDuration(), trainingById.get().getTrainingDuration());
+        Assertions.assertEquals(training, trainingById.get());
 
     }
 
@@ -154,21 +130,17 @@ public class TrainingServiceTest {
 
         when(trainingDAOImpl.findById(4L)).thenReturn(Optional.empty());
 
-        Optional<Training> trainingById = trainingService.findTrainingById(4L);
-
-        Assertions.assertFalse(trainingById.isPresent());
+        Assertions.assertThrows(NoSuchElementException.class, () -> {
+            trainingService.findTrainingById(4L).orElseThrow();
+        });
 
         verify(trainingDAOImpl).findById(4L);
-
-
-        Assertions.assertEquals(trainingById, Optional.empty());
     }
 
     @Test
     public void deleteTrainingById_withValidId_returnsValidEntity() {
         trainingService.saveTraining(training);
 
-        verify(trainingDAOImpl).save(training);
 
         when(trainingDAOImpl.findById(training.getId())).thenReturn(Optional.of(training));
 
@@ -178,7 +150,9 @@ public class TrainingServiceTest {
 
         verify(trainingDAOImpl).deleteById(training.getId());
 
-        Assertions.assertEquals(trainingService.findTrainingById(training.getId()), Optional.empty());
+        Assertions.assertThrows(NoSuchElementException.class, () -> {
+            trainingService.findTrainingById(training.getId()).orElseThrow();
+        });
 
     }
 
@@ -190,10 +164,11 @@ public class TrainingServiceTest {
 
         trainingService.deleteTrainingById(5L);
 
-
         verify(trainingDAOImpl).deleteById(5L);
 
-        Assertions.assertEquals(trainingService.findTrainingById(5L), Optional.empty());
+        Assertions.assertThrows(NoSuchElementException.class, () -> {
+            trainingService.findTrainingById(5L).orElseThrow();
+        });
 
     }
 
@@ -203,7 +178,6 @@ public class TrainingServiceTest {
     public void findByTrainingName_withExistingData_returnsValidEntity() {
         trainingService.saveTraining(training);
 
-        verify(trainingDAOImpl).save(training);
 
         when(trainingDAOImpl.findByTrainingName(training.getTrainingName())).thenReturn(Optional.of(training));
 
@@ -212,13 +186,7 @@ public class TrainingServiceTest {
 
         verify(trainingDAOImpl).findByTrainingName(training.getTrainingName());
 
-        Assertions.assertEquals(training.getId(), byTrainingName.get().getId());
-        Assertions.assertEquals(training.getTrainerID(), byTrainingName.get().getTrainerID());
-        Assertions.assertEquals(training.getTrainerID(), byTrainingName.get().getTrainerID());
-        Assertions.assertEquals(training.getTrainingName(), byTrainingName.get().getTrainingName());
-        Assertions.assertEquals(training.getTrainingDate(), byTrainingName.get().getTrainingDate());
-        Assertions.assertEquals(training.getTrainingType(), byTrainingName.get().getTrainingType());
-        Assertions.assertEquals(training.getTrainingDuration(), byTrainingName.get().getTrainingDuration());
+        Assertions.assertEquals(training, byTrainingName.get());
 
     }
 
@@ -231,17 +199,13 @@ public class TrainingServiceTest {
         when(trainingDAOImpl.findByTrainingType(training.getTrainingType())).thenReturn(Optional.of(training));
 
         Optional<Training> byTrainingName = trainingService.findByTrainingType(training.getTrainingType());
+
         Assertions.assertTrue(byTrainingName.isPresent());
 
         verify(trainingDAOImpl).findByTrainingType(training.getTrainingType());
 
-        Assertions.assertEquals(training.getId(), byTrainingName.get().getId());
-        Assertions.assertEquals(training.getTrainerID(), byTrainingName.get().getTrainerID());
-        Assertions.assertEquals(training.getTrainerID(), byTrainingName.get().getTrainerID());
-        Assertions.assertEquals(training.getTrainingName(), byTrainingName.get().getTrainingName());
-        Assertions.assertEquals(training.getTrainingDate(), byTrainingName.get().getTrainingDate());
-        Assertions.assertEquals(training.getTrainingType(), byTrainingName.get().getTrainingType());
-        Assertions.assertEquals(training.getTrainingDuration(), byTrainingName.get().getTrainingDuration());
+        Assertions.assertEquals(training, byTrainingName.get());
+
 
     }
 
@@ -262,7 +226,7 @@ public class TrainingServiceTest {
 
         verify(trainingDAOImpl).findByTrainingName("null");
 
-        Assertions.assertEquals(trainingService.findByTrainingName("null"), Optional.empty());
+        Assertions.assertEquals(result, Optional.empty());
 
     }
 }

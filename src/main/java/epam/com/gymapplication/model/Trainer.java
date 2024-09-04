@@ -2,7 +2,10 @@ package epam.com.gymapplication.model;
 
 import java.util.Objects;
 
-public class Trainer extends UserBase{
+
+
+public class Trainer extends UserBase {
+
     private Long id;
     private Long userId;
     private String specialization;

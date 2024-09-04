@@ -5,7 +5,10 @@ import epam.com.gymapplication.model.Trainer;
 
 import java.util.Map;
 
+
+
 public class UserProfileService {
+
     private static int counter = 1;
     private static int serialNumber;
     private final Map<Long, Trainee> traineeStorage;
@@ -14,6 +17,7 @@ public class UserProfileService {
 
     public UserProfileService(Map<Long, Trainee> traineeStorage,
                             Map<Long, Trainer> trainerStorage) {
+
         this.traineeStorage = traineeStorage;
         this.trainerStorage = trainerStorage;
     }
@@ -35,6 +39,7 @@ public class UserProfileService {
                 counter++;
             }
         }
+
         serialNumber = counter;
         for (Trainer trainer : trainerStorage.values()) {
             if (trainer.getUser().getUsername().equals(username)) {
@@ -42,6 +47,7 @@ public class UserProfileService {
                 counter++;
             }
         }
+
         serialNumber = counter;
         return username;
 

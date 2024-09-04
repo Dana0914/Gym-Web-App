@@ -29,6 +29,7 @@ public class Facade {
     public Facade(TraineeService traineeService,
                   TrainerService trainerService,
                   TrainingService trainingService) {
+
         this.traineeService = traineeService;
         this.trainerService = trainerService;
         this.trainingService = trainingService;
@@ -37,186 +38,178 @@ public class Facade {
     public void saveTrainee(Trainee trainee) {
         try {
             traineeService.saveTrainee(trainee);
-            logger.info("Trainee saved successfully");
+            logger.info("Trainee saved {}", trainee);
         } catch (Exception e) {
-            logger.error("Error in saving trainee ", e);
+            logger.error("Exception in saving trainee ", e);
         }
     }
 
     public void saveTrainer(Trainer trainer) {
         try {
             trainerService.saveTrainer(trainer);
-            logger.info("Trainer saved successfully");
+            logger.info("Trainer saved {}", trainer);
         } catch (Exception e) {
-            logger.error("Error in saving trainer", e);
+            logger.error("Exception in saving trainer", e);
         }
     }
 
     public void saveTraining(Training training) {
         try {
             trainingService.saveTraining(training);
-            logger.info("Training saved successfully");
+            logger.info("Training saved {}", training);
         } catch (Exception e) {
-            logger.error("Error in saving training", e);
+            logger.error("Exception in saving training", e);
         }
     }
 
     public void updateTrainee(Trainee trainee) {
         try {
             traineeService.updateTrainee(trainee);
-            logger.info("Trainee updated successfully");
+            logger.info("Trainee updated {}", trainee);
         } catch (Exception e) {
-            logger.error("Error in updating trainee", e);
+            logger.error("Exception in updating trainee", e);
         }
     }
 
     public void updateTrainer(Trainer trainer) {
         try {
             trainerService.updateTrainer(trainer);
-            logger.info("Trainer updated successfully");
+            logger.info("Trainer updated {}", trainer);
         } catch (Exception e) {
-            logger.error("Error in updating trainer", e);
+            logger.error("Exception in updating trainer", e);
         }
     }
 
     public void updateTraining(Training training) {
         try {
             trainingService.updateTraining(training);
-            logger.info("Training updated successfully");
+            logger.info("Training updated {}", training);
         } catch (Exception e) {
-            logger.error("Error in updating training", e);
+            logger.error("Exception in updating training", e);
         }
     }
 
     public void deleteTraineeById(Long id) {
         try {
             traineeService.deleteTraineeById(id);
-            logger.info("Trainee deleted by its id successfully");
+            logger.info("Trainee deleted by its id {}", id);
         } catch (Exception e) {
-            logger.error("Error in deleting trainee by id", e);
+            logger.error("Exception in deleting trainee by id", e);
         }
     }
 
     public void deleteTrainerById(Long id) {
         try {
             trainerService.deleteTrainerById(id);
-            logger.info("Trainer deleted by its id successfully");
+            logger.info("Trainer deleted by its id {}", id);
         } catch (Exception e) {
-            logger.error("Error in deleting trainer by id", e);
+            logger.error("Exception in deleting trainer by id", e);
         }
     }
 
     public void deleteTrainingById(Long id) {
         try {
             trainingService.deleteTrainingById(id);
-            logger.info("Training deleted by its id successfully");
+            logger.info("Training deleted by its id {}", id);
         } catch (Exception e) {
-            logger.error("Error in deleting training by id", e);
+            logger.error("Exception in deleting training by id", e);
         }
     }
 
     public Optional<Trainee> getTraineeById(Long id) {
-        if (traineeService.findTraineeById(id).isPresent()) {
-            logger.info("Trainee found by its id successfully");
+        try {
             return traineeService.findTraineeById(id);
+        } catch (Exception e) {
+            logger.error("Exception in getting trainee by id", e);
         }
-        logger.info("Trainee not found");
         return Optional.empty();
+
+
     }
 
     public Optional<Trainer> getTrainerById(Long id) {
-        if (trainerService.findTrainerById(id).isPresent()) {
-            logger.info("Trainer found by its id successfully");
-            return trainerService.findTrainerById(id);
-        }
-        logger.info("Trainer not found");
-        return Optional.empty();
+        Optional<Trainer> trainerById = trainerService.findTrainerById(id);
+        return Optional.of(trainerById).orElseThrow();
     }
 
     public Optional<Training> getTrainingById(Long id) {
-        if (trainingService.findTrainingById(id).isPresent()) {
-            logger.info("Training found by its id successfully");
-            return trainingService.findTrainingById(id);
-        }
-        logger.info("Training not found");
-        return Optional.empty();
+        Optional<Training> trainingById = trainingService.findTrainingById(id);
+        return Optional.of(trainingById).orElseThrow();
     }
 
     public Set<Map.Entry<Long, Trainee>> getAllTrainees() {
-        logger.info("Get all trainee entries successfully");
         return traineeService.getAllTrainees();
     }
 
     public Set<Map.Entry<Long, Trainer>> getAllTrainers() {
-        logger.info("Get all trainer entries successfully");
         return trainerService.getAllTrainers();
     }
 
     public Set<Map.Entry<Long, Training>> getAllTrainings() {
-        logger.info("Get all training entries successfully");
         return trainingService.getAllTrainings();
     }
 
     public Optional<Trainee> findTraineeByFirstName(String firstName) {
-        if (traineeService.findTraineeByFirstName(firstName).isPresent()) {
-            logger.info("Trainee found by its first name successfully");
+        try {
             return traineeService.findTraineeByFirstName(firstName);
+        } catch (Exception e) {
+            logger.error("Exception in finding trainee by its first name", e);
         }
-        logger.info("Trainee not found");
         return Optional.empty();
     }
 
     public Optional<Trainee> findTraineeByLastName(String lastName) {
-        if (traineeService.findByLastName(lastName).isPresent()) {
-            logger.info("Trainee found by its last name successfully");
+        try {
             return traineeService.findByLastName(lastName);
+        } catch (Exception e) {
+            logger.error("Exception in finding trainee by its last name", e);
         }
-        logger.info("Trainee not found");
         return Optional.empty();
     }
 
     public Optional<Trainer> findTrainerByFirstName(String firstName) {
-        if (trainerService.findByFirstName(firstName).isPresent()) {
-            logger.info("Trainer found by its first name successfully");
+        try {
             return trainerService.findByFirstName(firstName);
+        } catch (Exception e) {
+            logger.error("Exception in finding trainer by its first name", e);
         }
-        logger.info("Trainer not found");
         return Optional.empty();
     }
 
     public Optional<Trainer> findTrainerByLastName(String lastName) {
-        if (trainerService.findByLastName(lastName).isPresent()) {
-            logger.info("Trainer found by its last name successfully");
+        try {
             return trainerService.findByLastName(lastName);
+        } catch (Exception e) {
+            logger.error("Exception in finding trainer by its last name", e);
         }
-        logger.info("Trainer not found");
         return Optional.empty();
     }
 
     public Optional<Training> findByTrainingName(String trainingName) {
-        if (trainingService.findByTrainingName(trainingName).isPresent()) {
-            logger.info("Training found by its trainingName successfully");
+        try {
             return trainingService.findByTrainingName(trainingName);
+        } catch (Exception e) {
+            logger.error("Exception in finding training by its training name", e);
         }
-        logger.info("Training not found");
         return Optional.empty();
     }
 
     public Optional<Trainer> findTrainerBySpecialization(String specialization) {
-        if (trainerService.findBySpecialization(specialization).isPresent()) {
-            logger.info("Trainer found by its specialization successfully");
+        try {
             return trainerService.findBySpecialization(specialization);
+        } catch (Exception e) {
+            logger.error("Exception in finding trainer by its specialization", e);
         }
-        logger.info("Trainer not found");
         return Optional.empty();
     }
 
     public Optional<Training> findTrainingByTrainingType(TrainingType trainingType) {
-        if (trainingService.findByTrainingType(trainingType).isPresent()) {
-            logger.info("Training found by its trainingType successfully");
+        try {
             return trainingService.findByTrainingType(trainingType);
+        } catch (Exception e) {
+            logger.error("Exception in finding training by its training type", e);
         }
-        logger.info("Training not found");
         return Optional.empty();
+
     }
 }

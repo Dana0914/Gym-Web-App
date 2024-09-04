@@ -27,6 +27,7 @@ import java.util.Map;
 @Component
 @PropertySource("${storage.init.file.path}")
 public class StorageInitializer {
+
     private static final Logger logger = LoggerFactory.getLogger(StorageInitializer.class);
 
     @Autowired

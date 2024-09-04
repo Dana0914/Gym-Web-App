@@ -9,7 +9,10 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class Training extends UserBase{
+
+
+public class Training extends UserBase {
+
     Long id;
     Long trainerID;
     Long traineeID;
@@ -122,6 +125,10 @@ public class Training extends UserBase{
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, trainerID, traineeID, trainingName, trainingType, trainingDate, trainingDuration);
+        return Objects.hash(
+                id,
+                trainerID, traineeID,
+                trainingName, trainingType,
+                trainingDate, trainingDuration);
     }
 }
