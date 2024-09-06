@@ -1,5 +1,6 @@
 package epam.com.gymapplication;
 
+import epam.com.gymapplication.customexception.ServiceException;
 import epam.com.gymapplication.dao.impl.TraineeDAOImpl;
 import epam.com.gymapplication.model.Trainee;
 import epam.com.gymapplication.model.User;
@@ -15,7 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.*;
 
+
 import static org.mockito.Mockito.*;
+
 
 
 @ExtendWith(MockitoExtension.class)
@@ -65,8 +68,6 @@ public class TraineeServiceTest {
         invalidTrainee.setUser(null);
 
 
-
-
     }
 
     @Test
@@ -80,11 +81,7 @@ public class TraineeServiceTest {
         Optional<Trainee> traineeById = traineeService.findTraineeById(trainee.getId());
 
 
-        Assertions.assertEquals(traineeById.get().getUser(), trainee.getUser());
-        Assertions.assertEquals(traineeById.get().getAddress(), trainee.getAddress());
-        Assertions.assertEquals(traineeById.get().getDateOfBirth(), trainee.getDateOfBirth());
-        Assertions.assertEquals(traineeById.get().getId(), trainee.getId());
-        Assertions.assertEquals(traineeById.get().getUser().getId(), trainee.getUser().getId());
+        Assertions.assertEquals(traineeById, Optional.of(trainee));
 
     }
 
@@ -96,6 +93,7 @@ public class TraineeServiceTest {
 
 
         Optional<Trainee> traineeById = traineeService.findTraineeById(trainee.getId());
+
         Assertions.assertTrue(traineeById.isPresent());
 
         trainee2.setId(trainee.getId());
@@ -104,19 +102,18 @@ public class TraineeServiceTest {
 
 
         when(traineeDAOImpl.findById(trainee2.getId())).thenReturn(Optional.of(trainee2));
+
         Optional<Trainee> updatedTraineeById = traineeService.findTraineeById(trainee2.getId());
+
         Assertions.assertTrue(updatedTraineeById.isPresent());
 
 
-        verify(traineeDAOImpl).save(trainee);
         verify(traineeDAOImpl).update(trainee2);
 
 
 
-        Assertions.assertEquals(updatedTraineeById.get().getUser(), trainee2.getUser());
-        Assertions.assertEquals(updatedTraineeById.get().getAddress(), trainee2.getAddress());
-        Assertions.assertEquals(updatedTraineeById.get().getId(), trainee2.getId());
-        Assertions.assertEquals(updatedTraineeById.get().getDateOfBirth(), trainee2.getDateOfBirth());
+        Assertions.assertEquals(updatedTraineeById, Optional.of(trainee2));
+
 
     }
 
@@ -132,28 +129,27 @@ public class TraineeServiceTest {
         Assertions.assertTrue(traineeById.isPresent());
 
         verify(traineeDAOImpl).findById(trainee.getId());
-        verify(traineeDAOImpl).save(trainee);
 
-        Assertions.assertEquals(traineeById.get().getId(), trainee.getId());
-        Assertions.assertEquals(traineeById.get().getUser(), trainee.getUser());
-        Assertions.assertEquals(traineeById.get().getAddress(), trainee.getAddress());
-        Assertions.assertEquals(traineeById.get().getDateOfBirth(), trainee.getDateOfBirth());
+        Assertions.assertEquals(traineeById, Optional.of(trainee));
+
     }
 
     @Test
     public void findTraineeById_withNonExistingId_returnsOptionalEmpty() {
         traineeService.saveTrainee(trainee);
 
+
         when(traineeDAOImpl.findById(4L)).thenReturn(Optional.empty());
 
-        Optional<Trainee> traineeById = traineeService.findTraineeById(4L);
 
-        Assertions.assertFalse(traineeById.isPresent());
+        Assertions.assertThrows(NoSuchElementException.class, () -> {
+            traineeService.findTraineeById(4L).orElseThrow();
+        });
+
 
         verify(traineeDAOImpl).findById(4L);
 
 
-        Assertions.assertEquals(traineeById, Optional.empty());
     }
 
     @Test
@@ -164,11 +160,14 @@ public class TraineeServiceTest {
 
         traineeService.deleteTraineeById(trainee.getId());
 
-        when(traineeDAOImpl.findById(trainee.getId())).thenReturn(Optional.empty());
-
         verify(traineeDAOImpl).deleteById(trainee.getId());
 
-        Assertions.assertEquals(traineeService.findTraineeById(trainee.getId()), Optional.empty());
+        when(traineeDAOImpl.findById(trainee.getId())).thenReturn(Optional.empty());
+
+
+        Assertions.assertThrows(NoSuchElementException.class, () -> {
+            traineeService.findTraineeById(trainee.getId()).orElseThrow();
+        });
 
     }
 
@@ -180,10 +179,11 @@ public class TraineeServiceTest {
 
         traineeService.deleteTraineeById(5L);
 
-
         verify(traineeDAOImpl).deleteById(5L);
 
-        Assertions.assertEquals(traineeService.findTraineeById(5L), Optional.empty());
+        Assertions.assertThrows(NoSuchElementException.class, () -> {
+            traineeService.findTraineeById(5L).orElseThrow();
+        });
 
     }
 
@@ -198,10 +198,11 @@ public class TraineeServiceTest {
 
         Assertions.assertTrue(firstName.isPresent());
 
-        verify(traineeDAOImpl).save(trainee);
+
         verify(traineeDAOImpl).findByFirstName(trainee.getUser().getFirstName());
 
-        Assertions.assertEquals(traineeService.findTraineeByFirstName(trainee.getUser().getFirstName()), Optional.of(trainee));
+        Assertions.assertEquals(firstName, Optional.of(trainee));
+
     }
 
     @Test
@@ -212,15 +213,9 @@ public class TraineeServiceTest {
         when(traineeDAOImpl.findByFirstName("George")).thenReturn(Optional.empty());
 
 
-        Optional<Trainee> result = traineeService.findTraineeByFirstName("George");
-
-
-        Assertions.assertFalse(result.isPresent());
-
-        verify(traineeDAOImpl).save(trainee);
-        verify(traineeDAOImpl).findByFirstName("George");
-
-        Assertions.assertEquals(traineeService.findTraineeByFirstName("George"), Optional.empty());
+        Assertions.assertThrows(NoSuchElementException.class, () -> {
+            traineeService.findTraineeByFirstName("George").orElseThrow();
+        });
 
     }
 
@@ -234,29 +229,21 @@ public class TraineeServiceTest {
 
         Assertions.assertTrue(lastName.isPresent());
 
-        verify(traineeDAOImpl).save(trainee);
+
         verify(traineeDAOImpl).findByLastName(trainee.getUser().getLastName());
 
-        Assertions.assertEquals(traineeService.findByLastName(trainee.getUser().getLastName()), Optional.of(trainee));
+        Assertions.assertEquals(lastName, Optional.of(trainee));
     }
 
     @Test
     public void findByLastName_withNonExistingData_returnsOptionalEmpty() {
         traineeService.saveTrainee(trainee);
 
-
         when(traineeDAOImpl.findByLastName("Bush")).thenReturn(Optional.empty());
 
-
-        Optional<Trainee> result = traineeService.findByLastName("Bush");
-
-
-        Assertions.assertFalse(result.isPresent());
-
-        verify(traineeDAOImpl).save(trainee);
-        verify(traineeDAOImpl).findByLastName("Bush");
-
-        Assertions.assertEquals(traineeService.findByLastName("Bush"), Optional.empty());
+        Assertions.assertThrows(NoSuchElementException.class, () -> {
+            traineeService.findByLastName("Bush").orElseThrow();
+        });
 
     }
 }

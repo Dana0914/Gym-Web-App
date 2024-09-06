@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 public class Trainee extends UserBase {
+
     private Long id;
     private Long userId;
     @JsonSerialize(using = LocalDateSerializer.class)

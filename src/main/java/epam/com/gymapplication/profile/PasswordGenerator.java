@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+
+
 public class PasswordGenerator {
+
     private static final String LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static final String DIGITS = "0123456789";
     private static final String SPECIAL_CHARACTERS = "!@#$%^&*()-_=+<>?";
@@ -17,6 +20,7 @@ public class PasswordGenerator {
         for (int i = 0; i < passwordLength; i++) {
             password.append(ALL_CHARACTERS.charAt(new SecureRandom().nextInt(ALL_CHARACTERS.length())));
         }
+
         return shufflePassword(String.valueOf(password));
     }
 
@@ -27,6 +31,7 @@ public class PasswordGenerator {
         for (String s : shuffledPassword) {
             shuffledPassToStringBuilder.append(s);
         }
+
         return String.valueOf(shuffledPassToStringBuilder);
 
     }

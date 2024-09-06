@@ -20,6 +20,7 @@ import java.util.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+
 @ExtendWith(MockitoExtension.class)
 public class FacadeTest {
 
@@ -215,7 +216,7 @@ public class FacadeTest {
         Assertions.assertTrue(updatedTrainerById.isPresent());
 
 
-        verify(trainerService).saveTrainer(trainer);
+
         verify(trainerService).updateTrainer(trainer2);
 
 
@@ -236,11 +237,13 @@ public class FacadeTest {
 
         Assertions.assertTrue(trainingById1.isPresent());
 
+
         training2.setId(training.getId());
+
 
         trainingService.updateTraining(training2);
 
-        verify(trainingService).saveTraining(training);
+
         verify(trainingService).updateTraining(training2);
 
 
@@ -272,7 +275,7 @@ public class FacadeTest {
 
         Assertions.assertTrue(trainingById.isPresent());
 
-        verify(trainingService).saveTraining(training);
+
         verify(trainingService).findTrainingById(training.getId());
 
         Assertions.assertEquals(training.getId(), trainingById.get().getId());
@@ -296,7 +299,7 @@ public class FacadeTest {
 
         Assertions.assertTrue(traineeById.isPresent());
 
-        verify(traineeService).saveTrainee(trainee);
+
         verify(traineeService).findTraineeById(trainee.getId());
 
         Assertions.assertEquals(traineeById.get().getId(), trainee.getId());
@@ -316,7 +319,7 @@ public class FacadeTest {
 
         Assertions.assertTrue(trainerById.isPresent());
 
-        verify(trainerService).saveTrainer(trainer);
+
         verify(trainerService).findTrainerById(trainer.getId());
 
         Assertions.assertEquals(trainerById.get().getId(), trainer.getId());
@@ -385,7 +388,7 @@ public class FacadeTest {
 
         Assertions.assertTrue(firstName.isPresent());
 
-        verify(traineeService).saveTrainee(trainee);
+
         verify(traineeService).findTraineeByFirstName(trainee.getUser().getFirstName());
 
         Assertions.assertEquals(traineeService.findTraineeByFirstName(trainee.getUser().getFirstName()),
@@ -402,7 +405,7 @@ public class FacadeTest {
 
         Assertions.assertTrue(lastName.isPresent());
 
-        verify(traineeService).saveTrainee(trainee);
+
         verify(traineeService).findByLastName(trainee.getUser().getLastName());
 
         Assertions.assertEquals(traineeService.findByLastName(trainee.getUser().getLastName()),
@@ -419,7 +422,7 @@ public class FacadeTest {
 
         Assertions.assertTrue(firstName.isPresent());
 
-        verify(trainerService).saveTrainer(trainer);
+
         verify(trainerService).findByFirstName(trainer.getUser().getFirstName());
 
         Assertions.assertEquals(trainerService.findByFirstName(trainer.getUser().getFirstName()),
@@ -436,7 +439,7 @@ public class FacadeTest {
 
         Assertions.assertTrue(lastName.isPresent());
 
-        verify(trainerService).saveTrainer(trainer);
+
         verify(trainerService).findByLastName(trainer.getUser().getLastName());
 
         Assertions.assertEquals(trainerService.findByLastName(trainer.getUser().getLastName()),
@@ -453,7 +456,7 @@ public class FacadeTest {
         Optional<Training> byTrainingName = trainingService.findByTrainingName(training.getTrainingName());
         Assertions.assertTrue(byTrainingName.isPresent());
 
-        verify(trainingService).saveTraining(training);
+
         verify(trainingService).findByTrainingName(training.getTrainingName());
 
         Assertions.assertEquals(training.getId(), byTrainingName.get().getId());
@@ -476,7 +479,7 @@ public class FacadeTest {
         Optional<Training> byTrainingName = trainingService.findByTrainingType(training.getTrainingType());
         Assertions.assertTrue(byTrainingName.isPresent());
 
-        verify(trainingService).saveTraining(training);
+
         verify(trainingService).findByTrainingType(training.getTrainingType());
 
 

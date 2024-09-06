@@ -1,6 +1,5 @@
 package epam.com.gymapplication.service;
 
-import epam.com.gymapplication.customexception.DaoException;
 import epam.com.gymapplication.customexception.ServiceException;
 import epam.com.gymapplication.dao.impl.TrainingDAOImpl;
 import epam.com.gymapplication.model.Training;
@@ -23,35 +22,59 @@ public class TrainingService {
 
 
     public void saveTraining(Training training) throws ServiceException {
-        try {
-            trainingDAOImpl.save(training);
-            logger.info("Training saved successfully {} ", training);
-        } catch (DaoException e) {
-            throw new ServiceException("There was a problem saving the Training");
+        if (training.getId() == null || training.getId() <= 0
+                || training.getTrainingName() == null || training.getTrainingName().isEmpty()
+                || training.getTrainingType() == null || training.getTrainingType().name().isEmpty()
+                || training.getTrainingDate() == null || training.getTrainingDate().toString().isEmpty()
+                || training.getTrainingDuration() == null || training.getTrainingDuration().toString().isEmpty()
+                || training.getTrainerID() == null || training.getTrainerID() <= 0
+                || training.getTraineeID() == null || training.getTraineeID() <= 0) {
+
+            logger.warn("Training save failed");
+            throw new ServiceException("Training save failed, training is invalid");
         }
+        trainingDAOImpl.save(training);
+        logger.info("Training saved {} ", training);
+
     }
 
     public void updateTraining(Training training) throws ServiceException {
-        try {
-            trainingDAOImpl.update(training);
-            logger.info("Training updated successfully {} ", training);
-        } catch (DaoException e) {
-            throw new ServiceException("There was a problem updating the Training");
+        if (training.getId() == null || training.getId() <= 0
+                || training.getTrainingName() == null || training.getTrainingName().isEmpty()
+                || training.getTrainingType() == null || training.getTrainingType().name().isEmpty()
+                || training.getTrainingDate() == null || training.getTrainingDate().toString().isEmpty()
+                || training.getTrainingDuration() == null || training.getTrainingDuration().toString().isEmpty()
+                || training.getTrainerID() == null || training.getTrainerID() <= 0
+                || training.getTraineeID() == null || training.getTraineeID() <= 0) {
+
+            logger.warn("Training update failed");
+            throw new ServiceException("Training update failed, training is invalid");
         }
+
+        trainingDAOImpl.update(training);
+        logger.info("Training updated {} ", training);
+
     }
 
     public void deleteTrainingById(Long id) throws ServiceException {
-        try {
-            trainingDAOImpl.deleteById(id);
-            logger.info("Training deleted successfully {} ", id);
-        } catch (DaoException e) {
-            throw new ServiceException("There was a problem deleting the Training by its id");
+        if (id == null || id <= 0) {
+            logger.warn("Training delete by id failed");
+            throw new ServiceException("Removing training by id failed, training id is invalid");
         }
+
+        trainingDAOImpl.deleteById(id);
+        logger.info("Training deleted {} ", id);
+
     }
 
     public Optional<Training> findTrainingById(Long id) {
-        logger.info("Training id found successfully {} ", id);
-        return trainingDAOImpl.findById(id);
+        if (id == null || id <= 0) {
+            logger.warn("Training find by id failed");
+            throw new ServiceException("Training find by id failed, id is invalid");
+        }
+        logger.info("Found training by id {} ", id);
+        Optional<Training> byId = trainingDAOImpl.findById(id);
+        return Optional.of(byId.orElseThrow());
     }
 
     public Set<Map.Entry<Long, Training>> getAllTrainings() {
@@ -59,12 +82,20 @@ public class TrainingService {
     }
 
     public Optional<Training> findByTrainingName(String trainingName) {
-        logger.info("Training name found successfully {} ", trainingName);
+        if (trainingName == null || trainingName.isEmpty()) {
+            logger.warn("Training finding by name failed");
+            throw new ServiceException("Finding training by name failed, training name is invalid");
+        }
+        logger.info("Training name found {} ", trainingName);
         return trainingDAOImpl.findByTrainingName(trainingName);
     }
 
     public Optional<Training> findByTrainingType(TrainingType trainingType) {
-        logger.info("Training type found successfully {} ", trainingType);
+        if (trainingType == null || trainingType.name().isEmpty()) {
+            logger.warn("Training finding by type failed");
+            throw new ServiceException("Finding training by type failed, training type is invalid");
+        }
+        logger.info("Training type found {} ", trainingType);
         return trainingDAOImpl.findByTrainingType(trainingType);
     }
 }

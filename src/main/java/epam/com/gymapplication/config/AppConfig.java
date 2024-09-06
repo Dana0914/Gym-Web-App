@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.HashMap;
 import java.util.Map;
 
+
 @Configuration
 public class AppConfig {
 
@@ -79,18 +80,22 @@ public class AppConfig {
     public TrainerService trainerService() {
         return new TrainerService();
     }
+
     @Bean
     public TrainingService trainingService() {
         return new TrainingService();
     }
+
     @Bean
     public TraineeDAOImpl traineeDAO() {
         return new TraineeDAOImpl();
     }
+
     @Bean
     public TrainingDAOImpl trainingDAO() {
         return new TrainingDAOImpl();
     }
+
     @Bean
     public TrainerDAOImpl trainerDAO() {
         return new TrainerDAOImpl();
