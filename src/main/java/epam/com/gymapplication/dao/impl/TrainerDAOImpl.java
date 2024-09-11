@@ -2,78 +2,83 @@ package epam.com.gymapplication.dao.impl;
 
 import epam.com.gymapplication.dao.TrainerDAO;
 import epam.com.gymapplication.model.Trainer;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
+
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+
 
 
 @Repository
 public class TrainerDAOImpl implements TrainerDAO {
-    private Map<Long, Trainer> trainerStorage;
 
-    @Autowired
-    public void setTrainerStorage(Map<Long, Trainer> trainerStorage) {
-        this.trainerStorage = trainerStorage;
-    }
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
+    @Transactional
     public void save(Trainer trainer)  {
-        trainerStorage.put(trainer.getId(), trainer);
+        em.persist(trainer);
 
     }
 
     @Override
+    @Transactional
     public void update(Trainer trainer)  {
         Optional<Trainer> trainerById = findById(trainer.getId());
-        trainerById.ifPresent(value -> trainerStorage.put(value.getId(), trainer));
+        trainerById.ifPresent(value -> em.merge(value));
 
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
         Optional<Trainer> trainerToRemove = findById(id);
-        trainerToRemove.ifPresent(trainer -> trainerStorage.remove(trainer.getId(), trainer));
+        trainerToRemove.ifPresent(trainer -> em.remove(trainer));
 
     }
 
     @Override
     public Optional<Trainer> findById(Long id) {
-        if (trainerStorage.containsKey(id)) {
-            Trainer trainer = trainerStorage.get(id);
-            return Optional.of(trainer);
-        }
-        return Optional.empty();
+        Query query = em.createQuery("SELECT t FROM Trainer t WHERE t.id = :id");
+        query.setParameter("id", id);
+        Trainer trainer = (Trainer) query.getSingleResult();
+        return Optional.of(trainer);
+    }
+
+
+
+    @Override
+    public  Optional<Trainer> findByFirstName(String firstname) {
+        Query query = em.createQuery("select t from Trainer t where t.user.firstname = :firstname");
+        query.setParameter("firstname", firstname);
+        Trainer trainers = (Trainer) query.getSingleResult();
+        return Optional.of(trainers);
     }
 
     @Override
-    public Set<Map.Entry<Long, Trainer>> findAll()  {
-        return trainerStorage.entrySet();
-    }
+    public Optional<Trainer> findByLastName(String lastname) {
+        Query query = em.createQuery("select t from Trainer t where t.user.lastname = :lastname");
+        query.setParameter("lastname", lastname);
+        Trainer trainer = (Trainer) query.getSingleResult();
+        return Optional.of(trainer);
 
-    @Override
-    public  Optional<Trainer> findByFirstName(String firstName) {
-        return trainerStorage.values()
-                .stream()
-                .filter(trainer -> trainer.getUser().getFirstName().equals(firstName))
-                .findFirst();
-    }
-
-    @Override
-    public Optional<Trainer> findByLastName(String lastName) {
-        return trainerStorage.values()
-                .stream()
-                .filter(trainer -> trainer.getUser().getLastName().equals(lastName)).
-                findFirst();
     }
 
     @Override
     public Optional<Trainer> findBySpecialization(String specialization) {
-        return trainerStorage.values()
-                .stream()
-                .filter(trainer -> trainer.getSpecialization().equals(specialization))
-                .findFirst();
+        Query findBySpecialization = em.createQuery("select t from Trainer t where t.specialization = :specialization");
+        Trainer trainer = (Trainer) findBySpecialization.setParameter("specialization", specialization).getSingleResult();
+        return Optional.of(trainer);
+    }
+
+    @Override
+    public List<Trainer> findAll() {
+        return em.createQuery("SELECT t FROM Trainer t", Trainer.class).getResultList();
     }
 }

@@ -1,18 +1,23 @@
 package epam.com.gymapplication.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
 
 import java.util.Objects;
 
 
-
+@Entity
+@Table(name = "users")
 public class User {
 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private Long id;
-    private String firstName;
-    private String lastName;
+    private String firstname;
+    private String lastname;
     private String username;
     private String password;
+    @Column(name = "is_active")
     @JsonProperty(value = "isActive")
     private Boolean isActive;
 
@@ -20,15 +25,34 @@ public class User {
 
     }
 
-    public User(String firstName, String lastName,
+    public User(String firstname, String lastname,
                 String username, String password,
                 boolean isActive) {
 
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.firstname = firstname;
+        this.lastname = lastname;
         this.username = username;
         this.password = password;
         this.isActive = isActive;
+    }
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Trainee trainee;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Trainer trainer;
+
+    public Trainee getTrainee() {
+        return trainee;
+    }
+    public void setTrainee(Trainee trainee) {
+        this.trainee = trainee;
+    }
+    public Trainer getTrainer() {
+        return trainer;
+    }
+    public void setTrainer(Trainer trainer) {
+        this.trainer = trainer;
     }
 
     public Long getId() {
@@ -40,20 +64,21 @@ public class User {
     }
 
     public String getFirstName() {
-        return firstName;
+        return firstname;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setFirstName(String firstname) {
+        this.firstname = firstname;
     }
 
     public String getLastName() {
-        return lastName;
+        return lastname;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setLastName(String lastname) {
+        this.lastname = lastname;
     }
+
 
     public String getUsername() {
         return username;
@@ -85,8 +110,8 @@ public class User {
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
         return Objects.equals(id, user.id)
-                && Objects.equals(firstName, user.firstName)
-                && Objects.equals(lastName, user.lastName)
+                && Objects.equals(firstname, user.firstname)
+                && Objects.equals(lastname, user.lastname)
                 && Objects.equals(username, user.username)
                 && Objects.equals(password, user.password)
                 && Objects.equals(isActive, user.isActive);
@@ -94,15 +119,15 @@ public class User {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, username, password, isActive);
+        return Objects.hash(id, firstname, lastname, username, password, isActive);
     }
 
     @Override
     public String toString() {
         return "User{" +
                 "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
+                ", firstname='" + firstname + '\'' +
+                ", lastname='" + lastname + '\'' +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", isActive=" + isActive +

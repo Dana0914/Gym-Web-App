@@ -3,74 +3,75 @@ package epam.com.gymapplication.dao.impl;
 
 import epam.com.gymapplication.dao.TrainingDAO;
 import epam.com.gymapplication.model.Training;
-import epam.com.gymapplication.model.TrainingType;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+
 
 
 @Repository
 public class TrainingDAOImpl implements TrainingDAO {
-    private Map<Long, Training> trainingStorage;
 
-
-    @Autowired
-    public void setTrainingStorage(Map<Long, Training> trainingStorage) {
-        this.trainingStorage = trainingStorage;
-    }
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
+    @Transactional
     public void save(Training training) {
-        trainingStorage.put(training.getId(), training);
+        em.persist(training);
 
     }
 
     @Override
+    @Transactional
     public void update(Training training)  {
         Optional<Training> trainingById = findById(training.getId());
-        trainingById.ifPresent(value -> trainingStorage.put(value.getId(), training));
+        trainingById.ifPresent(value -> em.persist(value));
 
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id)  {
         Optional<Training> trainingToRemove = findById(id);
-        trainingToRemove.ifPresent(training -> trainingStorage.remove(training.getId(), training));
+        trainingToRemove.ifPresent(training -> em.remove(training));
 
+    }
+
+    @Override
+    public List<Training> findAll() {
+        return em.createQuery("SELECT t FROM Training t", Training.class).getResultList();
     }
 
     @Override
     public Optional<Training> findById(Long id) {
-        if (trainingStorage.containsKey(id)) {
-            Training training = trainingStorage.get(id);
-            return Optional.of(training);
+        if (em.contains(id)) {
+            return Optional.of(em.find(Training.class, id));
+        }
+
+        return Optional.empty();
+    }
+
+
+
+    @Override
+    public Optional<Training> findByTrainingName(String trainingName) {
+        if (em.contains(trainingName)) {
+            return Optional.of(em.find(Training.class, trainingName));
         }
         return Optional.empty();
     }
 
     @Override
-    public Set<Map.Entry<Long, Training>> findAll()  {
-        return trainingStorage.entrySet();
-
-    }
-
-    @Override
-    public Optional<Training> findByTrainingName(String trainingName) {
-        return trainingStorage.values()
-                .stream()
-                .filter(existingtraining -> existingtraining.getTrainingName().equals(trainingName))
-                .findFirst();
-    }
-
-    @Override
-    public Optional<Training> findByTrainingType(TrainingType trainingType) {
-        return trainingStorage.values()
-                .stream()
-                .filter(training -> training.getTrainingType().equals(trainingType))
-                .findFirst();
+    public Optional<Training> findByTrainingType(String trainingType) {
+        if (em.contains(trainingType)) {
+            return Optional.of(em.find(Training.class, trainingType));
+        }
+        return Optional.empty();
 
     }
 }

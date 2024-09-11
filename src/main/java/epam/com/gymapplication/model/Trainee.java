@@ -5,32 +5,77 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
+
+@Entity
+@Table(name = "trainee")
 public class Trainee extends UserBase {
 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private Long id;
-    private Long userId;
+
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonFormat(pattern="yyyy-MM-dd")
+    @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
     private String address;
-    private User user;
+
+    @Column(name = "users_id", insertable = false, updatable = false)
+    private Long userId;
+
+
 
     public Trainee() {
 
     }
 
-    public Trainee(Long id, Long userId, LocalDate dateOfBirth, String address, User user) {
+    public Trainee(Long id, Long userId, LocalDate dateOfBirth, String address) {
         this.id = id;
         this.userId = userId;
         this.dateOfBirth = dateOfBirth;
         this.address = address;
-        this.user = user;
 
+    }
+
+    @OneToOne
+    @JoinColumn(name = "users_id", unique = true, nullable = false)
+    private User user;
+
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+    public User getUser() {
+        return user;
+    }
+
+    @ManyToMany
+    @JoinTable(name="trainer_trainee",
+            joinColumns=@JoinColumn(name="trainer_id"),
+            inverseJoinColumns=@JoinColumn(name="trainee_id"))
+    private Set<Trainer> trainers = new HashSet<>();
+
+    public Set<Trainer> getTrainers() {
+        return trainers;
+    }
+    public void setTrainers(Set<Trainer> trainers) {
+        this.trainers = trainers;
     }
 
     public Long getId() {
@@ -41,13 +86,6 @@ public class Trainee extends UserBase {
         this.id = id;
     }
 
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
 
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
@@ -65,22 +103,16 @@ public class Trainee extends UserBase {
         this.address = address;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
 
     @Override
     public String toString() {
         return "Trainee{" +
                 "id=" + id +
-                ", userId=" + userId +
                 ", dateOfBirth=" + dateOfBirth +
                 ", address='" + address + '\'' +
+                ", userId=" + userId +
                 ", user=" + user +
+                ", trainers=" + trainers +
                 '}';
     }
 
@@ -90,14 +122,15 @@ public class Trainee extends UserBase {
         if (o == null || getClass() != o.getClass()) return false;
         Trainee trainee = (Trainee) o;
         return Objects.equals(id, trainee.id)
-                && Objects.equals(userId, trainee.userId)
                 && Objects.equals(dateOfBirth, trainee.dateOfBirth)
                 && Objects.equals(address, trainee.address)
-                && Objects.equals(user, trainee.user);
+                && Objects.equals(userId, trainee.userId)
+                && Objects.equals(user, trainee.user)
+                && Objects.equals(trainers, trainee.trainers);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, dateOfBirth, address, user);
+        return Objects.hash(id, dateOfBirth, address, userId, user, trainers);
     }
 }

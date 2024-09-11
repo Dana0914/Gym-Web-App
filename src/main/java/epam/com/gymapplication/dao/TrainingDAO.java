@@ -1,11 +1,10 @@
 package epam.com.gymapplication.dao;
 
-import epam.com.gymapplication.model.Training;
-import epam.com.gymapplication.model.TrainingType;
 
-import java.util.Map;
+import epam.com.gymapplication.model.Training;
+
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 
 
@@ -14,9 +13,9 @@ public interface TrainingDAO {
     void save(Training training);
     void update(Training training);
     void deleteById(Long id);
+    List<Training> findAll();
     Optional<Training> findById(Long id);
-    Set<Map.Entry<Long, Training>> findAll();
     Optional<Training> findByTrainingName(String trainingName);
-    Optional<Training> findByTrainingType(TrainingType trainingType);
+    Optional<Training> findByTrainingType(String trainingType);
 
 }

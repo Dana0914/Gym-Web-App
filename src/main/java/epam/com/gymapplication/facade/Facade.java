@@ -3,7 +3,6 @@ package epam.com.gymapplication.facade;
 import epam.com.gymapplication.model.Trainee;
 import epam.com.gymapplication.model.Trainer;
 import epam.com.gymapplication.model.Training;
-import epam.com.gymapplication.model.TrainingType;
 import epam.com.gymapplication.service.TraineeService;
 import epam.com.gymapplication.service.TrainerService;
 import epam.com.gymapplication.service.TrainingService;
@@ -12,9 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
+
 import java.util.Optional;
-import java.util.Set;
+
 
 
 @Component
@@ -89,16 +88,16 @@ public class Facade {
         }
     }
 
-    public void deleteTraineeById(Long id) {
+    public void deleteTrainee(Trainee trainee) {
         try {
-            traineeService.deleteTraineeById(id);
-            logger.info("Trainee deleted by its id {}", id);
+            traineeService.deleteTrainee(trainee);
+            logger.info("Trainee deleted {}", trainee);
         } catch (Exception e) {
-            logger.error("Exception in deleting trainee by id", e);
+            logger.error("Exception in deleting trainee", e);
         }
     }
 
-    public void deleteTrainerById(Long id) {
+    public void deleteTrainer(Long id) {
         try {
             trainerService.deleteTrainerById(id);
             logger.info("Trainer deleted by its id {}", id);
@@ -137,17 +136,7 @@ public class Facade {
         return Optional.of(trainingById).orElseThrow();
     }
 
-    public Set<Map.Entry<Long, Trainee>> getAllTrainees() {
-        return traineeService.getAllTrainees();
-    }
 
-    public Set<Map.Entry<Long, Trainer>> getAllTrainers() {
-        return trainerService.getAllTrainers();
-    }
-
-    public Set<Map.Entry<Long, Training>> getAllTrainings() {
-        return trainingService.getAllTrainings();
-    }
 
     public Optional<Trainee> findTraineeByFirstName(String firstName) {
         try {
@@ -203,7 +192,7 @@ public class Facade {
         return Optional.empty();
     }
 
-    public Optional<Training> findTrainingByTrainingType(TrainingType trainingType) {
+    public Optional<Training> findTrainingByTrainingType(String trainingType) {
         try {
             return trainingService.findByTrainingType(trainingType);
         } catch (Exception e) {

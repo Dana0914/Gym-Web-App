@@ -1,12 +1,10 @@
 [
   {
     "type": "trainee",
-    "id": 1,
     "userId": 1,
     "dateOfBirth": "2001-02-10",
     "address": "Edinburgh street 14",
     "user": {
-      "id" : 1,
       "firstName": "John",
       "lastName": "Doe",
       "username": "John.Doe",
@@ -16,12 +14,10 @@
   },
   {
     "type": "trainee",
-    "id": 2,
     "userId": 2,
     "dateOfBirth": "2001-02-05",
     "address": "Edinburgh street 5",
     "user": {
-      "id": 2,
       "firstName": "John",
       "lastName": "Doe",
       "username": "John.Doe",
@@ -32,11 +28,9 @@
 
   {
     "type": "trainer",
-    "id": 3,
     "userId": 3,
-    "specialization": "aerobics",
+    "specialization": 1,
     "user": {
-      "id": 3,
       "firstName": "Ash",
       "lastName": "Simon",
       "username" : "Ash.Simon",
@@ -47,11 +41,10 @@
 
   {
     "type": "training",
-    "id" : 5,
-    "trainerID" : 3,
-    "traineeID" : 1,
+    "trainerID" : 1,
+    "traineeID" : 2,
     "trainingName" : "yoga",
-    "trainingType" : "STRETCHING",
+    "trainingTypeId" : 1,
     "trainingDate" : "2024-09-09",
     "trainingDuration" : 60
   }
