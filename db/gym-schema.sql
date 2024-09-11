@@ -3,7 +3,7 @@ CREATE TABLE users (
     firstname VARCHAR (50) NOT NULL,
     lastname VARCHAR (80) NOT NULL,
     username VARCHAR (100) NOT NULL,
-    password VARCHAR (10) UNIQUE NOT NULL,
+    password VARCHAR (10) NOT NULL,
     is_active BOOLEAN NOT NULL,
     PRIMARY KEY (id)
 
@@ -21,7 +21,7 @@ CREATE TABLE trainee (
 
 CREATE TABLE training_type (
     id SERIAL4 NOT NULL,
-    training_type_name VARCHAR (50) UNIQUE NOT NULL,
+    training_type_name VARCHAR (50)  NOT NULL,
     PRIMARY KEY (id)
 
 );
