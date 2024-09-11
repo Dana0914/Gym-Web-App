@@ -1,10 +1,9 @@
 package epam.com.gymapplication.profile;
 
 
-import epam.com.gymapplication.dao.TraineeDAO;
-import epam.com.gymapplication.dao.TrainerDAO;
-import epam.com.gymapplication.model.Trainee;
-import epam.com.gymapplication.model.Trainer;
+
+import epam.com.gymapplication.dao.UserDAO;
+import epam.com.gymapplication.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,10 +15,7 @@ public class UserProfileService {
     private static int serialNumber;
 
     @Autowired
-    private TraineeDAO traineeDAO;
-
-    @Autowired
-    private TrainerDAO trainerDAO;
+    private UserDAO userDAO;
 
 
 
@@ -33,16 +29,8 @@ public class UserProfileService {
     }
 
     private String handleDuplicateUsername(String username) {
-        for (Trainee trainee : traineeDAO.findAll()) {
-            if (trainee.getUser().getUsername().equals(username)) {
-                username += serialNumber;
-                counter++;
-            }
-        }
-
-        serialNumber = counter;
-        for (Trainer trainer : trainerDAO.findAll()) {
-            if (trainer.getUser().getUsername().equals(username)) {
+        for (User user : userDAO.findAll()) {
+            if (user.getUsername().equals(username)) {
                 username += serialNumber;
                 counter++;
             }

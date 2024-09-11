@@ -1,7 +1,8 @@
 package epam.com.gymapplication.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.Objects;
 
@@ -13,13 +14,18 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
+    @NotNull(message = "firstname can not be null")
     private String firstname;
+    @NotNull(message = "lastname can not be null")
     private String lastname;
+    @NotNull(message = "username can not be null")
     private String username;
+    @NotNull(message = "password can not be null")
     private String password;
     @Column(name = "is_active")
-    @JsonProperty(value = "isActive")
-    private Boolean isActive;
+
+    @NotNull(message = "isActive switch can not be null")
+    private boolean isActive;
 
     public User() {
 
@@ -109,12 +115,12 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(id, user.id)
+        return isActive == user.isActive
+                && Objects.equals(id, user.id)
                 && Objects.equals(firstname, user.firstname)
                 && Objects.equals(lastname, user.lastname)
                 && Objects.equals(username, user.username)
-                && Objects.equals(password, user.password)
-                && Objects.equals(isActive, user.isActive);
+                && Objects.equals(password, user.password);
     }
 
     @Override

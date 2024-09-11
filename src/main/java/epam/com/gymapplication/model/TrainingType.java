@@ -1,17 +1,21 @@
 package epam.com.gymapplication.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
-import java.util.HashSet;
+
 import java.util.Objects;
-import java.util.Set;
+
 
 @Entity
 @Table(name = "training_type")
 public class TrainingType {
+
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
+    @Column(name = "training_type_name", nullable = false)
+    @NotNull(message = "training type name can not be null")
     private String trainingTypeName;
 
     public TrainingType() {

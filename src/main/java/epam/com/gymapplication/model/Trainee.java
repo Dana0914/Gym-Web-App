@@ -1,11 +1,8 @@
 package epam.com.gymapplication.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -15,17 +12,18 @@ import java.util.Set;
 
 @Entity
 @Table(name = "trainee")
-public class Trainee extends UserBase {
+public class Trainee {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
 
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonDeserialize(using = LocalDateDeserializer.class)
-    @JsonFormat(pattern="yyyy-MM-dd")
-    @Column(name = "date_of_birth")
+
+    @Column(name = "date_of_birth", nullable = false)
+    @NotNull(message = "date of birth can not be null")
     private LocalDate dateOfBirth;
+
+    @NotNull(message = "Address can not be null")
     private String address;
 
     @Column(name = "users_id", insertable = false, updatable = false)
@@ -45,7 +43,7 @@ public class Trainee extends UserBase {
 
     }
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "users_id", unique = true, nullable = false)
     private User user;
 
@@ -65,7 +63,7 @@ public class Trainee extends UserBase {
         return user;
     }
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name="trainer_trainee",
             joinColumns=@JoinColumn(name="trainer_id"),
             inverseJoinColumns=@JoinColumn(name="trainee_id"))
@@ -76,6 +74,16 @@ public class Trainee extends UserBase {
     }
     public void setTrainers(Set<Trainer> trainers) {
         this.trainers = trainers;
+    }
+
+    @OneToMany(mappedBy = "trainee")
+    private Set<Training> trainings = new HashSet<>();
+
+    public Set<Training> getTrainings() {
+        return trainings;
+    }
+    public void setTrainings(Set<Training> trainings) {
+        this.trainings = trainings;
     }
 
     public Long getId() {
@@ -105,18 +113,6 @@ public class Trainee extends UserBase {
 
 
     @Override
-    public String toString() {
-        return "Trainee{" +
-                "id=" + id +
-                ", dateOfBirth=" + dateOfBirth +
-                ", address='" + address + '\'' +
-                ", userId=" + userId +
-                ", user=" + user +
-                ", trainers=" + trainers +
-                '}';
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -125,12 +121,22 @@ public class Trainee extends UserBase {
                 && Objects.equals(dateOfBirth, trainee.dateOfBirth)
                 && Objects.equals(address, trainee.address)
                 && Objects.equals(userId, trainee.userId)
-                && Objects.equals(user, trainee.user)
-                && Objects.equals(trainers, trainee.trainers);
+                && Objects.equals(user, trainee.user);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, dateOfBirth, address, userId, user, trainers);
+        return Objects.hash(id, dateOfBirth, address, userId, user);
+    }
+
+    @Override
+    public String toString() {
+        return "Trainee{" +
+                "id=" + id +
+                ", dateOfBirth=" + dateOfBirth +
+                ", address='" + address + '\'' +
+                ", userId=" + userId +
+                ", user=" + user +
+                '}';
     }
 }

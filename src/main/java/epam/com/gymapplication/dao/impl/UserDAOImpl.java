@@ -3,16 +3,14 @@ package epam.com.gymapplication.dao.impl;
 
 import epam.com.gymapplication.customexception.DaoException;
 import epam.com.gymapplication.dao.UserDAO;
-import epam.com.gymapplication.model.Trainee;
 import epam.com.gymapplication.model.User;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+import jakarta.persistence.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+
 
 @Service
 public class UserDAOImpl implements UserDAO {
@@ -28,27 +26,35 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public User findById(Long id) throws DaoException {
+    public Optional<User> findById(Long id) throws DaoException {
         Query findById = entityManager.createQuery("select u from User u where u.id = :id");
         findById.setParameter("id", id);
 
-        return (User) findById.getSingleResult();
+        User user = (User) findById.getSingleResult();
+        return Optional.of(user);
     }
 
     @Override
     @Transactional
     public void update(User user) throws DaoException {
-        User byId = findById(user.getId());
-        if (byId != null) {
+        Optional<User> userById = findById(user.getId());
+        if (userById.isPresent()) {
+            user.setId(userById.get().getId());
             entityManager.merge(user);
         }
-        throw new DaoException("Entity already exists");
+
+
+
 
     }
 
     @Override
     public void delete(User user) throws DaoException {
-        entityManager.remove(user);
+        try {
+            entityManager.remove(entityManager.merge(user));
+        } catch (PersistenceException e) {
+            throw new DaoException(e.getMessage());
+        }
 
 
 

@@ -2,6 +2,7 @@ package epam.com.gymapplication.service;
 
 import epam.com.gymapplication.customexception.ServiceException;
 import epam.com.gymapplication.dao.TrainingDAO;
+import epam.com.gymapplication.dao.impl.TrainingDAOImpl;
 import epam.com.gymapplication.model.Training;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -18,6 +20,33 @@ public class TrainingService {
 
     @Autowired
     private TrainingDAO trainingDAO;
+
+    @Autowired
+    private TrainingDAOImpl trainingDAOImpl;
+
+    public Training findTrainingListByTraineeCriteria(String username, LocalDate from,
+                                                      LocalDate to, String trainingTypeName) throws ServiceException {
+
+        if (username.isEmpty() || username == null || trainingTypeName.isEmpty() || trainingTypeName == null
+        || from.toString().isEmpty() || to.toString().isEmpty()) {
+            logger.warn("Entity find by Training list failed");
+            throw new ServiceException("Entity find training list failed, username, trainingTypeName and date are invalid");
+        }
+        logger.info("Find training list by trainee criteria");
+        return trainingDAOImpl.findTrainingListByTraineeCriteria(username, from, to, trainingTypeName);
+    }
+
+    public Training findTrainingListByTrainerCriteria(String username, LocalDate from,
+                                                      LocalDate to, String trainingTypeName) {
+        if (username.isEmpty() || username == null || trainingTypeName.isEmpty() || trainingTypeName == null
+                || from.toString().isEmpty() || to.toString().isEmpty()) {
+            logger.warn("Entity find by Training list failed");
+            throw new ServiceException("Entity find training list failed, username, trainingTypeName and date are invalid");
+        }
+        logger.info("Find training list by trainee criteria");
+        return trainingDAOImpl.findTrainingListByTraineeCriteria(username, from, to, trainingTypeName);
+    }
+
 
     @Transactional
     public void saveTraining(Training training) throws ServiceException {
@@ -53,14 +82,20 @@ public class TrainingService {
 
     }
 
-    public void deleteTrainingById(Long id) throws ServiceException {
-        if (id == null || id <= 0) {
-            logger.warn("Training delete by id failed");
-            throw new ServiceException("Removing training by id failed, training id is invalid");
+    public void deleteTraining(Training training) throws ServiceException {
+        if (training.getTrainingName() == null || training.getTrainingName().isEmpty()
+                || training.getTrainingType() == null || training.getTrainingType().toString().isEmpty()
+                || training.getTrainingDate() == null || training.getTrainingDate().toString().isEmpty()
+                || training.getTrainingDuration() == null || training.getTrainingDuration().toString().isEmpty()
+                || training.getTrainerID() == null || training.getTrainerID() <= 0
+                || training.getTraineeID() == null || training.getTraineeID() <= 0) {
+
+            logger.warn("Training delete failed");
+            throw new ServiceException("Training delete failed, training is invalid");
         }
 
-        trainingDAO.deleteById(id);
-        logger.info("Training deleted {} ", id);
+        trainingDAO.delete(training);
+        logger.info("Training deleted");
 
     }
 

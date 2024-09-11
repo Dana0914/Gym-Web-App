@@ -1,13 +1,13 @@
 package epam.com.gymapplication.dao;
 
-import epam.com.gymapplication.model.Trainee;
 import epam.com.gymapplication.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserDAO {
     void save(User user);
-    User findById(Long id);
+    Optional<User> findById(Long id);
     void update(User user);
     void delete(User user);
     List<User> findAll();

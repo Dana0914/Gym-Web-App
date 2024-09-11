@@ -9,7 +9,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "trainer")
-public class Trainer extends UserBase {
+public class Trainer {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -33,7 +33,7 @@ public class Trainer extends UserBase {
         this.userId = userId;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "specialization", nullable = false, unique = true)
     private TrainingType trainingType;
 
@@ -45,7 +45,7 @@ public class Trainer extends UserBase {
         this.trainingType = trainingType;
     }
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "users_id", unique = true, nullable = false)
     private User user;
 
@@ -75,6 +75,16 @@ public class Trainer extends UserBase {
         this.trainees = trainees;
     }
 
+    @OneToMany(mappedBy = "trainer")
+    private Set<Training> trainings = new HashSet<>();
+
+    public Set<Training> getTrainings() {
+        return trainings;
+    }
+    public void setTrainings(Set<Training> trainings) {
+        this.trainings = trainings;
+    }
+
     public Long getId() {
         return id;
     }
@@ -102,13 +112,12 @@ public class Trainer extends UserBase {
                 && Objects.equals(specialization, trainer.specialization)
                 && Objects.equals(userId, trainer.userId)
                 && Objects.equals(trainingType, trainer.trainingType)
-                && Objects.equals(user, trainer.user)
-                && Objects.equals(trainees, trainer.trainees);
+                && Objects.equals(user, trainer.user);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, specialization, userId, trainingType, user, trainees);
+        return Objects.hash(id, specialization, userId, trainingType, user);
     }
 
     @Override
@@ -119,7 +128,6 @@ public class Trainer extends UserBase {
                 ", userId=" + userId +
                 ", trainingType=" + trainingType +
                 ", user=" + user +
-                ", trainees=" + trainees +
                 '}';
     }
 }

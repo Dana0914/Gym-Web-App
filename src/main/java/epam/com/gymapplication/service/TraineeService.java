@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
-import java.util.Optional;
 
 
 
@@ -39,103 +38,117 @@ public class TraineeService {
 
 
     @Transactional
-    public Trainee createTraineeProfile(String firstname, String lastname, boolean isActive) throws ServiceException {
-        if (firstname == null || firstname.isEmpty() || lastname == null || lastname.isEmpty()) {
-            logger.warn("Trainee profile save failed");
-            throw new ServiceException("Create Trainee Profile Failed, firstname or lastname is empty or invalid");
-        }
+    public Trainee createTraineeProfile(Trainee trainee, User user) throws ServiceException {
 
-        Trainee trainee = new Trainee();
-        User user = new User();
 
-        String username = userProfileService.concatenateUsername(firstname, lastname);
+        String username = userProfileService.concatenateUsername(user.getFirstName(), user.getLastName());
         String password = passwordGenerator.generatePassword();
 
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setActive(isActive);
 
-        trainee.setUser(user);
-
-        userDAO.save(user);
-
-        traineeDAO.save(trainee);
+        User user1 = new User();
+        user1.setFirstName(user.getFirstName());
+        user1.setLastName(user.getLastName());
+        user1.setUsername(username);
+        user1.setPassword(password);
+        user1.setActive(user.isActive());
 
 
-        return trainee;
+        userDAO.save(user1);
+
+
+        Trainee trainee1 = new Trainee();
+        trainee1.setAddress(trainee.getAddress());
+        trainee1.setDateOfBirth(trainee.getDateOfBirth());
+        trainee1.setUserId(user1.getId());
+        trainee1.setUser(user1);
+
+
+        traineeDAO.save(trainee1);
+
+        return trainee1;
     }
 
-    public Optional<Trainee> findTraineeProfileByUsername(String username) {
-        if (username == null || username.isEmpty()) {
-            return Optional.empty();
+    public Trainee findTraineeProfileByUsername(Trainee trainee) throws ServiceException {
+        if (trainee.getUser().getUsername() == null || trainee.getUser().getUsername().isEmpty()) {
+            logger.warn("Entity find by username failed");
+            throw new ServiceException("Entity find by username failed");
         }
-        Optional<Trainee> byUsername = traineeDAO.findByUsername(username);
-        return Optional.of(byUsername.orElseThrow());
+        return traineeDAO.findByUsername(trainee.getUser().getUsername());
+
 
     }
 
-    public boolean authenticateTraineeProfile(String username, String password) {
-        Optional<Trainee> traineeProfileByUsername = findTraineeProfileByUsername(username);
-        return traineeProfileByUsername.get().getUser().getUsername().equals(username)
-                && traineeProfileByUsername.get().getUser().getPassword().equals(password);
+    public boolean authenticateTraineeProfile(Trainee trainee) throws ServiceException {
+        if (trainee.getUser().getUsername() == null || trainee.getUser().getUsername().isEmpty()
+        || trainee.getUser().getPassword() == null || trainee.getUser().getPassword().isEmpty()) {
+            logger.warn("Entity authentication failed");
+            throw new ServiceException("Entity authentication failed, username and password are invalid");
+
+        }
+        Trainee traineeProfileByUsername = findTraineeProfileByUsername(trainee);
+        return traineeProfileByUsername.getUser().getUsername().equals(trainee.getUser().getUsername())
+                && traineeProfileByUsername.getUser().getPassword().equals(trainee.getUser().getPassword());
+
     }
 
-    public Optional<Trainee> passwordChange(String username, String password) {
-        Optional<Trainee> traineeProfileByUsername = findTraineeProfileByUsername(username);
-        if (traineeProfileByUsername.get().getUser().getPassword().equals(password)) {
-            traineeProfileByUsername.get().getUser().setPassword(passwordGenerator.generatePassword());
+    public Trainee passwordChange(Trainee trainee) {
+        Trainee traineeProfileByUsername = findTraineeProfileByUsername(trainee);
+        if (traineeProfileByUsername.getUser().getPassword().equals(trainee.getUser().getPassword())) {
+            traineeProfileByUsername.getUser().setPassword(passwordGenerator.generatePassword());
         }
         return traineeProfileByUsername;
     }
 
     @Transactional
-    public void activateTrainee(Trainee trainee) throws ProfileIsActiveException {
-        Optional<Trainee> traineeById = findTraineeById(trainee.getId());
-        if (traineeById.isPresent()) {
-            if (traineeById.get().getUser().isActive()) {
-                throw new ProfileIsActiveException("Trainee Profile is already activated");
-            }
-            traineeById.get().getUser().setActive(true);
-            traineeDAO.save(traineeById.get());
+    public void activateTrainee(Long id) throws ProfileIsActiveException {
+        Trainee traineeById = traineeDAO.findById(id);
+        if (traineeById.getUser().isActive()) {
+            throw new ProfileIsActiveException("Trainee Profile is already activated");
         }
-    }
-
-    @Transactional
-    public void deactivateTrainee(Trainee trainee) throws ProfileIsInActiveException {
-        Optional<Trainee> traineeById = findTraineeById(trainee.getId());
-        if (traineeById.isPresent()) {
-            if (!traineeById.get().getUser().isActive()) {
-                throw new ProfileIsInActiveException("Trainee Profile is already inactive");
-            }
-            traineeById.get().getUser().setActive(false);
-            traineeDAO.save(traineeById.get());
-        }
+        traineeById.getUser().setActive(true);
+        traineeDAO.save(traineeById);
 
     }
 
     @Transactional
-    public boolean updateTraineeProfile(Long id, String name, String surname) {
-        Optional<Trainee> traineeById = findTraineeById(id);
-        if (traineeById.isPresent()) {
-            traineeById.get().getUser().setFirstName(name);
-            traineeById.get().getUser().setLastName(surname);
+    public void deactivateTrainee(Long id) throws ProfileIsInActiveException {
+        Trainee traineeById = traineeDAO.findById(id);
+        if (!traineeById.getUser().isActive()) {
+            throw new ProfileIsInActiveException("Trainee Profile is already inactive");
         }
-        return false;
+        traineeById.getUser().setActive(false);
+        traineeDAO.save(traineeById);
+
+
     }
 
     @Transactional
-    public void deleteTraineeProfileByUsername(String username) throws ServiceException {
-        if (username == null || username.isEmpty()) {
+    public void updateTraineeProfile(Trainee trainee) {
+        if (trainee.getUser().getUsername() == null || trainee.getUser().getUsername().isEmpty()
+        || trainee.getUser().getPassword() == null || trainee.getUser().getPassword().isEmpty()
+        || trainee.getUser().getFirstName() == null || trainee.getUser().getFirstName().isEmpty()
+        || trainee.getUser().getLastName() == null || trainee.getUser().getLastName().isEmpty()) {
+            logger.warn("Entity update profile failed");
+            throw new ServiceException("Entity update profile failed, username and password are invalid");
+        }
+        Trainee traineeById = traineeDAO.findById(trainee.getId());
+        traineeById.getUser().setFirstName(trainee.getUser().getFirstName());
+        traineeById.getUser().setLastName(trainee.getUser().getLastName());
+
+    }
+
+    @Transactional
+    public void deleteTraineeProfileByUsername(Trainee trainee) throws ServiceException {
+        if (trainee.getUser().getUsername() == null || trainee.getUser().getUsername().isEmpty()) {
             logger.warn("Trainee profile delete failed");
             throw new ServiceException("Delete Trainee Profile Failed, username is empty or null");
         }
-
-        logger.info("Trainee profile delete successful {} ", username);
-        Optional<Trainee> traineeProfileByUsername = findTraineeProfileByUsername(username);
-        traineeProfileByUsername.ifPresent(trainee -> traineeDAO.delete(trainee));
-
-
+        logger.info("Trainee profile delete successful {} ", trainee);
+        Trainee traineeProfileByUsername = traineeDAO.findByUsername(trainee.getUser().getUsername());
+        traineeDAO.delete(traineeProfileByUsername);
     }
+
+
 
     public List<Trainee> findAll() {
         return traineeDAO.findAll();
@@ -210,34 +223,36 @@ public class TraineeService {
             throw new ServiceException("Trainee delete failed, trainee is invalid");
         }
         traineeDAO.delete(trainee);
-        logger.info("Trainee deleted {}", trainee);
+        logger.info("Trainee deleted");
 
     }
 
-    public Optional<Trainee> findTraineeById(Long id)  {
+    public Trainee findTraineeById(Long id) throws ServiceException {
         if (id == null || id <= 0) {
-            return Optional.empty();
+            logger.warn("Entity find by id failed");
+            throw new ServiceException("Entity find by id failed, id is invalid");
         }
         logger.info("Found trainee by id {} ", id);
-        Optional<Trainee> byId = traineeDAO.findById(id);
-        return Optional.of(byId.orElseThrow());
+        return traineeDAO.findById(id);
     }
 
 
 
-    public Optional<Trainee> findTraineeByFirstName(String firstName) {
+    public Trainee findTraineeByFirstName(String firstName) throws ServiceException {
         if (firstName == null || firstName.isEmpty()) {
-            return Optional.empty();
+            logger.warn("Entity find by firstname failed");
+            throw new ServiceException("Entity find by firstname failed, firstname is invalid");
         }
         logger.info("Trainee found by name {}", firstName);
-        return Optional.of(traineeDAO.findByFirstName(firstName).orElseThrow());
+        return traineeDAO.findByFirstName(firstName);
     }
 
-    public Optional<Trainee> findByLastName(String lastName) {
+    public Trainee findByLastName(String lastName) throws ServiceException {
         if (lastName == null || lastName.isEmpty()) {
-            return Optional.empty();
+            logger.warn("Entity find by lastname failed");
+            throw new ServiceException("Entity find by lastname failed, lastname is invalid");
         }
         logger.info("Trainee found by lastName {}", lastName);
-        return Optional.of(traineeDAO.findByLastName(lastName).orElseThrow());
+        return traineeDAO.findByLastName(lastName);
     }
 }

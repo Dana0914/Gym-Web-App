@@ -12,7 +12,7 @@ public interface TrainingDAO {
 
     void save(Training training);
     void update(Training training);
-    void deleteById(Long id);
+    void delete(Training training);
     List<Training> findAll();
     Optional<Training> findById(Long id);
     Optional<Training> findByTrainingName(String trainingName);

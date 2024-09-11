@@ -12,11 +12,11 @@ public interface TrainerDAO {
 
     void save(Trainer trainer);
     void update(Trainer trainer);
-    void deleteById(Long id);
+    void delete(Trainer trainer);
     List<Trainer> findAll();
-    Optional<Trainer> findById(Long id);
+    Trainer findById(Long id);
     Optional<Trainer> findByFirstName(String trainerName);
     Optional<Trainer> findByLastName(String trainerName);
-    Optional<Trainer> findBySpecialization(String specialization);
-
+    Optional<Trainer> findBySpecialization(Long specialization);
+    Trainer findByUsername(String username);
 }

@@ -1,13 +1,20 @@
 package epam.com.gymapplication.dao.impl;
 
 
+import epam.com.gymapplication.customexception.DaoException;
 import epam.com.gymapplication.dao.TrainingDAO;
+import epam.com.gymapplication.model.Trainee;
+import epam.com.gymapplication.model.Trainer;
 import epam.com.gymapplication.model.Training;
+import epam.com.gymapplication.model.TrainingType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,10 +26,64 @@ public class TrainingDAOImpl implements TrainingDAO {
     @PersistenceContext
     private EntityManager em;
 
+
+    public Training findTrainingListByTraineeCriteria(String username, LocalDate from,
+                                                      LocalDate to, String trainingTypeName) {
+        Query findTrainingListQuery = em.createQuery(
+                "select t FROM Training t " +
+                        "where t.trainee.user.username =:username " +
+                        "AND t.trainingDate =: from " +
+                        "AND t.trainingDate =:to " +
+                        "AND t.trainingType.trainingTypeName =: trainingType");
+
+        findTrainingListQuery
+                .setParameter("username", username)
+                .setParameter("from", from)
+                .setParameter("to", to)
+                .setParameter("trainingType", trainingTypeName);
+
+        return (Training) findTrainingListQuery.getResultList();
+
+    }
+
+
+    public Training findTrainingListByTrainerCriteria(String username, LocalDate from,
+                                                      LocalDate to, String trainingTypeName) {
+        Query findTrainingListQuery = em.createQuery(
+                "select t FROM Training t " +
+                        "where t.trainer.user.username =:username " +
+                        "AND t.trainingDate =: from " +
+                        "AND t.trainingDate =:to " +
+                        "AND t.trainingType.trainingTypeName =: trainingType");
+
+        findTrainingListQuery
+                .setParameter("username", username)
+                .setParameter("from", from)
+                .setParameter("to", to)
+                .setParameter("trainingType", trainingTypeName);
+
+        return (Training) findTrainingListQuery.getResultList();
+
+    }
+
+    public void addTraining(Trainee trainee, Trainer trainer, TrainingType trainingType) {
+        Training training = new Training();
+        training.setTrainee(trainee);
+        training.setTrainer(trainer);
+        training.setTrainingType(trainingType);
+        training.setTraineeID(trainee.getId());
+        training.setTrainerID(trainer.getId());
+
+        em.persist(training);
+    }
+
     @Override
     @Transactional
-    public void save(Training training) {
-        em.persist(training);
+    public void save(Training training) throws DaoException {
+        if (!em.contains(training)) {
+            em.persist(training);
+        }
+        throw new DaoException("Training already exists");
 
     }
 
@@ -30,15 +91,21 @@ public class TrainingDAOImpl implements TrainingDAO {
     @Transactional
     public void update(Training training)  {
         Optional<Training> trainingById = findById(training.getId());
-        trainingById.ifPresent(value -> em.persist(value));
+        if (trainingById.isPresent()) {
+            trainingById.get().setId(trainingById.get().getId());
+            em.persist(trainingById);
+        }
 
     }
 
     @Override
     @Transactional
-    public void deleteById(Long id)  {
-        Optional<Training> trainingToRemove = findById(id);
-        trainingToRemove.ifPresent(training -> em.remove(training));
+    public void delete(Training training) throws DaoException  {
+        try {
+            em.remove(em.merge(training));
+        } catch (PersistenceException e) {
+            throw new DaoException(e.getMessage());
+        }
 
     }
 

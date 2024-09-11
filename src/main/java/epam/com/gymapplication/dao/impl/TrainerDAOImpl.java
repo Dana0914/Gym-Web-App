@@ -1,9 +1,12 @@
 package epam.com.gymapplication.dao.impl;
 
+import epam.com.gymapplication.customexception.DaoException;
 import epam.com.gymapplication.dao.TrainerDAO;
+import epam.com.gymapplication.model.Trainee;
 import epam.com.gymapplication.model.Trainer;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceException;
 import jakarta.persistence.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,26 +32,34 @@ public class TrainerDAOImpl implements TrainerDAO {
 
     @Override
     @Transactional
-    public void update(Trainer trainer)  {
-        Optional<Trainer> trainerById = findById(trainer.getId());
-        trainerById.ifPresent(value -> em.merge(value));
+    public void update(Trainer trainer) throws DaoException {
+        Trainer trainerById = findById(trainer.getId());
+        if (trainerById != null) {
+            trainer.setId(trainerById.getId());
+            em.merge(trainer);
+        }
+
+
 
     }
 
     @Override
     @Transactional
-    public void deleteById(Long id) {
-        Optional<Trainer> trainerToRemove = findById(id);
-        trainerToRemove.ifPresent(trainer -> em.remove(trainer));
+    public void delete(Trainer trainer) {
+        try {
+            em.remove(em.merge(trainer));
+        } catch (PersistenceException e) {
+            throw new DaoException(e.getMessage());
+        }
 
     }
 
     @Override
-    public Optional<Trainer> findById(Long id) {
+    public Trainer findById(Long id) throws DaoException {
         Query query = em.createQuery("SELECT t FROM Trainer t WHERE t.id = :id");
         query.setParameter("id", id);
         Trainer trainer = (Trainer) query.getSingleResult();
-        return Optional.of(trainer);
+        return trainer;
     }
 
 
@@ -71,10 +82,17 @@ public class TrainerDAOImpl implements TrainerDAO {
     }
 
     @Override
-    public Optional<Trainer> findBySpecialization(String specialization) {
+    public Optional<Trainer> findBySpecialization(Long specialization) {
         Query findBySpecialization = em.createQuery("select t from Trainer t where t.specialization = :specialization");
         Trainer trainer = (Trainer) findBySpecialization.setParameter("specialization", specialization).getSingleResult();
         return Optional.of(trainer);
+    }
+
+    @Override
+    public Trainer findByUsername(String username) {
+        Query findByUsernameQuery = em.createQuery("select t from Trainer t where t.user.username = :username");
+        findByUsernameQuery.setParameter("username", username);
+        return (Trainer) findByUsernameQuery.getSingleResult();
     }
 
     @Override

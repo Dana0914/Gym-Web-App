@@ -2,7 +2,6 @@ package epam.com.gymapplication.service;
 
 import epam.com.gymapplication.customexception.ServiceException;
 import epam.com.gymapplication.dao.UserDAO;
-import epam.com.gymapplication.model.Trainee;
 import epam.com.gymapplication.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -33,13 +33,15 @@ public class UserService {
         userDAO.save(user);
     }
 
-    public User findById(Long id) throws ServiceException {
+    public Optional<User> findById(Long id) {
         if (id == null || id <= 0) {
-            logger.warn("User find id failed");
-            throw new ServiceException("User find id failed, id is invalid");
+            return Optional.empty();
         }
         logger.info("Found user by id {} ", id);
-        return userDAO.findById(id);
+        Optional<User> byId = userDAO.findById(id);
+        return Optional.of(byId.orElseThrow());
+
+
     }
 
     public List<User> findAll() {
