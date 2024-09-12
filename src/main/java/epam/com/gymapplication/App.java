@@ -8,7 +8,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 public class App {
@@ -20,7 +22,100 @@ public class App {
         TrainerService trainerService = context.getBean(TrainerService.class);
         TrainingTypeService trainingTypeService = context.getBean(TrainingTypeService.class);
 
+        // update trainees trainers list by username
+//        Trainee traineeById = traineeService.findTraineeById(1L);
+//        Set<Trainer> trainers = traineeById.getTrainers();
+//        Trainee traineeByIdToUpdate = traineeService.findTraineeById(2L);
+//        trainerService.updateTraineesTrainerList(trainers, traineeByIdToUpdate.getUser().getUsername());
 
+        // find trainer list not assigned to trainee by trainee username
+//        Trainee traineeById = traineeService.findTraineeById(2L);
+//        List<Trainer> trainerNotAssignedToTrainee = trainerService.findTrainerNotAssignedToTrainee(traineeById.getUser().getUsername());
+//        System.out.println(trainerNotAssignedToTrainee);
+
+
+        // Assigned trainees to trainer and viceversa
+//        Trainee traineeById = traineeService.findTraineeById(1L);
+//        Trainer trainerById = trainerService.findTrainerById(1L);
+//        Set<Trainee> trainees = trainerById.getTrainees();
+//        System.out.println(trainees);
+
+//        trainerService.assignTraineeToTrainer(traineeById.getId(), trainerById.getId());
+
+
+
+
+        // find training list by trainee criteria
+//        Trainee traineeById = traineeService.findTraineeById(1L);
+//        Training trainingById = trainingService.findTrainingById(1L);
+//        TrainingType trainingTypeServiceById = trainingTypeService.findById(1L);
+//        Training trainingListByTraineeCriteria = trainingService.findTrainingListByTraineeCriteria(traineeById.getUser().getUsername(),
+//                trainingById.getTrainingDate(), trainingById.getTrainingDate(),
+//                trainingTypeServiceById.getTrainingTypeName());
+//        System.out.println(trainingListByTraineeCriteria);
+
+//        User byId = userService.findById(1L);
+//        TrainingType trainingTypeServiceById = trainingTypeService.findById(1L);
+//
+//        Trainer trainer = new Trainer();
+//        trainer.setUser(byId);
+//        trainer.setUserId(byId.getId());
+//        trainer.setTrainingType(trainingTypeServiceById);
+//        trainer.setSpecialization(trainingTypeServiceById.getId());
+//
+//        trainerService.saveTrainer(trainer);
+
+         //saving training type
+
+//        TrainingType trainingType = new TrainingType();
+//        trainingType.setTrainingTypeName("stretch");
+//        trainingTypeService.save(trainingType);
+
+        // find training type by id
+//        TrainingType trainingTypeServiceById = trainingTypeService.findById(1L);
+//
+//         //find trainee by id
+//        Trainee traineeById = traineeService.findTraineeById(1L);
+//
+//         //find trainer by id
+//        Trainer trainerById = trainerService.findTrainerById(1L);
+
+         //save training
+//        Training training = new Training();
+//        training.setTrainingName("aerobics");
+//        training.setTrainingDate(LocalDate.of(2024, 9, 20));
+//        training.setTrainingDuration(45);
+//        training.setTrainee(traineeById);
+//        training.setTrainingType(trainingTypeServiceById);
+//        training.setTrainer(trainerById);
+//        trainingService.saveTraining(training);
+//        trainingService.addTraining(traineeById, trainerById, trainingTypeServiceById);
+
+
+        // generate new password
+
+//        Trainee traineeById = traineeService.findTraineeById(2L);
+//        String password = traineeById.getUser().getPassword();
+//        Trainee trainee = traineeService.passwordChange(traineeById.getId(), password);
+//        System.out.println(trainee);
+
+
+        // update trainee profile by id, firstname, lastname
+//        traineeService.updateTraineeProfile(2L, "Derek", "Cassini");
+
+        // deleting trainee profile by username
+//        traineeService.deleteTraineeProfileByUsername("Ben.Thompson");
+
+
+        // authenticate trainee profile
+//        Trainee byUsername = traineeService.findByUsername("Ben.Thompson");
+//        String password = byUsername.getUser().getPassword();
+//        boolean authenticatedTraineeProfile = traineeService.authenticateTraineeProfile(byUsername.getUser().getUsername(), password);
+//        System.out.println(authenticatedTraineeProfile);
+
+        // find trainee profile by username
+//        Trainee traineeProfileByUsername = traineeService.findTraineeProfileByUsername("Ben.Thompson");
+//        System.out.println(traineeProfileByUsername);
 
 
         // create trainee profile
@@ -38,10 +133,10 @@ public class App {
         // deactivate trainee
 //        traineeService.deactivateTrainee(7L);
 //
-//        // Create Trainee Profile
+        // Create Trainee Profile
 //        Trainee traineeProfile = traineeService.createTraineeProfile(trainee, user);
-//
-//        traineeService.saveTrainee(traineeProfile);
+
+
 
 
 
@@ -55,12 +150,12 @@ public class App {
 //        System.out.println(trainingTypeServiceById);
 
 
-//        // persist new entity
+        // persist new entity
 //        User user = new User();
-//        user.setUsername("Ash.Moss");
-//        user.setFirstName("Ash");
-//        user.setLastName("Moss");
-//        user.setPassword("5gjf9-6hc");
+//        user.setUsername("Sara.Johnson");
+//        user.setFirstName("Sara");
+//        user.setLastName("Johnson");
+//        user.setPassword("hj7-86^&");
 //        user.setActive(true);
 //
 //
@@ -69,30 +164,27 @@ public class App {
 //
 //        Trainee trainee = new Trainee();
 //        trainee.setUser(user);
-//        trainee.setUserId(user.getId());
-//        trainee.setAddress("street 6");
-//        trainee.setDateOfBirth(LocalDate.of(2000, 5, 15));
+//        trainee.setAddress("street 10");
+//        trainee.setDateOfBirth(LocalDate.of(2000, 4, 4));
 //
-//
-//        //traineeService.saveTrainee(trainee);
-//
-//        Set<Trainee> trainees = new HashSet<>();
-//        trainees.add(trainee);
-//
-//        //training type persist
-//
+//        traineeService.saveTrainee(trainee);
+
+
+
+        //training type persist
+
 //        TrainingType trainingType = new TrainingType();
 //        trainingType.setTrainingTypeName("stretch");
 //
 //        trainingTypeService.save(trainingType);
-//
-//        // trainer entity persist
+
+        // trainer entity persist
+
+//        Training trainingById = trainingService.findTrainingById(1L);
+//        User userServiceById = userService.findById(2L);
 //        Trainer trainer = new Trainer();
-//        trainer.setUser(user);
-//        trainer.setSpecialization(1L);
-//        trainer.setUserId(1L);
-//        trainer.setTrainingType(trainingType);
-//
+//        trainer.setUser(userServiceById);
+//        trainer.setTrainingType(trainingById.getTrainingType());
 //
 //        trainerService.saveTrainer(trainer);
 

@@ -28,7 +28,11 @@ public class TraineeDAOImpl implements TraineeDAO {
     @Override
     @Transactional
     public void save(Trainee trainee)  throws DaoException {
-        em.persist(trainee);
+        if (trainee.getId() != null) {
+            em.merge(trainee);
+        } else {
+            em.persist(trainee);
+        }
     }
 
     @Override

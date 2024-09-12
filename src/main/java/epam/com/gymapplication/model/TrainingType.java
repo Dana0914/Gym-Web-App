@@ -14,9 +14,11 @@ public class TrainingType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
+
     @Column(name = "training_type_name", nullable = false)
     @NotNull(message = "training type name can not be null")
     private String trainingTypeName;
+
 
     public TrainingType() {
 

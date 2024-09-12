@@ -3,6 +3,7 @@ package epam.com.gymapplication.service;
 import epam.com.gymapplication.customexception.ProfileIsActiveException;
 import epam.com.gymapplication.customexception.ProfileIsInActiveException;
 import epam.com.gymapplication.customexception.ServiceException;
+import epam.com.gymapplication.dao.TraineeDAO;
 import epam.com.gymapplication.dao.TrainerDAO;
 import epam.com.gymapplication.dao.TrainingTypeDAO;
 import epam.com.gymapplication.dao.UserDAO;
@@ -20,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 
 
 @Service
@@ -38,12 +39,60 @@ public class TrainerService {
 
     @Autowired
     private UserProfileService userProfileService;
+
     @Autowired
     private PasswordGenerator passwordGenerator;
 
+    @Autowired
+    private TraineeDAO traineeDAO;
+
+
+    @Transactional
+    public void updateTraineesTrainerList(Set<Trainer> trainers, String username) throws ServiceException {
+        Trainee byUsername = traineeDAO.findByUsername(username);
+        if (byUsername != null) {
+            byUsername.setTrainers(trainers);
+            logger.info("Trainee updated {} ", byUsername);
+            traineeDAO.update(byUsername);
+        } else {
+            logger.warn("Trainee {} not found", username);
+            throw new ServiceException("Trainee not found to be updated");
+        }
+    }
+
+    @Transactional
+    public void assignTraineeToTrainer(Long traineeId, Long trainerId) {
+        Trainee trainee = traineeDAO.findById(traineeId);
+        Trainer trainer = trainerDAO.findById(trainerId);
+
+
+        trainee.getTrainers().add(trainer);
+        trainer.getTrainees().add(trainee);
+
+        trainerDAO.save(trainer);
+        traineeDAO.save(trainee);
+    }
+
+
+    public List<Trainer> findTrainerNotAssignedToTrainee(String username) throws ServiceException {
+        if (username == null || username.isEmpty()) {
+            logger.error("Finding trainer list by username failed");
+            throw new ServiceException("Finding trainer list by username failed, username is invalid");
+
+        }
+        logger.info("Finding trainer list by username: " + username);
+        return trainerDAO.findTrainerNotAssignedToTrainee(username);
+
+    }
+
+
+
+
+
     @Transactional
     public Trainer createTrainerProfile(Trainer trainer, User user, TrainingType trainingType) throws ServiceException {
-        if (trainer == null || user == null || trainingType == null) {
+        if (user.getFirstName() == null || user.getLastName() == null
+        || user.getUsername() == null || user.getPassword() == null || trainingType.getTrainingTypeName() == null) {
             logger.warn("Trainer save failed");
             throw new ServiceException("Trainer save failed, trainer is invalid");
         }
@@ -61,16 +110,14 @@ public class TrainerService {
         userDAO.save(user1);
 
         TrainingType trainingType1 = new TrainingType();
-        trainingType1.setTrainingTypeName("aerobics");
+        trainingType1.setTrainingTypeName(trainingType.getTrainingTypeName());
 
         trainingTypeDAO.save(trainingType1);
 
 
         Trainer trainer1 = new Trainer();
-        trainer1.setUserId(user1.getId());
         trainer1.setUser(user1);
         trainer1.setTrainingType(trainingType1);
-        trainer1.setSpecialization(trainingType1.getId());
 
         trainerDAO.save(trainer1);
 
@@ -87,78 +134,75 @@ public class TrainerService {
 
     }
 
-    public boolean authenticateTrainerProfile(Trainer trainer) throws ServiceException {
-        if (trainer.getUser().getUsername() == null || trainer.getUser().getUsername().isEmpty()
-        || trainer.getUser().getPassword() == null || trainer.getUser().getPassword().isEmpty()) {
+    public boolean authenticateTraineeProfile(String username, String password) throws ServiceException {
+        if (username == null || username.isEmpty()
+                || password == null || password.isEmpty()) {
             logger.warn("Entity authentication failed");
             throw new ServiceException("Entity authentication failed, username and password are invalid");
 
         }
-        Trainer trainerProfileByUsername = trainerDAO.findByUsername(trainer.getUser().getUsername());
-        return trainerProfileByUsername.getUser().getUsername().equals(trainer.getUser().getUsername())
-                && trainerProfileByUsername.getUser().getPassword().equals(trainer.getUser().getPassword());
+        Trainer trainerProfileByUsername = trainerDAO.findByUsername(username);
+        return trainerProfileByUsername.getUser().getUsername().equals(username)
+                && trainerProfileByUsername.getUser().getPassword().equals(password);
 
     }
 
-    public Trainer passwordChange(Trainer trainer) throws ServiceException {
-        if (trainer.getUser().getUsername() == null || trainer.getUser().getUsername().isEmpty()
-        || trainer.getUser().getPassword() == null || trainer.getUser().getPassword().isEmpty()) {
-            logger.warn("Entity password change failed");
-            throw new ServiceException("Entity password change failed, username and password are invalid");
-        }
 
-        Trainer trainerProfileByUsername = trainerDAO.findByUsername(trainer.getUser().getUsername());
-        if (trainerProfileByUsername.getUser().getPassword().equals(trainer.getUser().getPassword())) {
-            trainerProfileByUsername.getUser().setPassword(passwordGenerator.generatePassword());
+    public Trainer passwordChange(Long id, String password) {
+        Trainer trainerProfileById = findTrainerById(id);
+        if (trainerProfileById.getUser().getPassword().equals(password)) {
+            trainerProfileById.getUser().setPassword(passwordGenerator.generatePassword());
         }
-        return trainerProfileByUsername;
+        return trainerProfileById;
     }
 
     @Transactional
-    public void activateTrainee(Trainer trainer) throws ProfileIsActiveException {
-        if (trainer.getUser().isActive()) {
-            throw new ProfileIsActiveException("Trainer Profile is already activated");
+    public void activateTrainer(Long id) throws ProfileIsActiveException {
+        Trainer trainerById = trainerDAO.findById(id);
+        if (trainerById.getUser().isActive()) {
+            throw new ProfileIsActiveException("Trainee Profile is already activated");
         }
-        trainer.getUser().setActive(true);
-        trainerDAO.save(trainer);
+        trainerById.getUser().setActive(true);
+        trainerDAO.save(trainerById);
 
     }
 
     @Transactional
-    public void deactivateTrainer(Trainer trainer) throws ProfileIsInActiveException {
-        if (!trainer.getUser().isActive()) {
-            throw new ProfileIsInActiveException("Trainer Profile is already inactive");
+    public void deactivateTrainer(Long id) throws ProfileIsInActiveException {
+        Trainer trainerById = trainerDAO.findById(id);
+        if (!trainerById.getUser().isActive()) {
+            throw new ProfileIsInActiveException("Trainee Profile is already inactive");
         }
-        trainer.getUser().setActive(false);
-        trainerDAO.save(trainer);
+        trainerById.getUser().setActive(false);
+        trainerDAO.save(trainerById);
 
 
     }
 
     @Transactional
-    public void updateTrainerProfile(Trainer trainer) {
-        if (trainer.getUser().getFirstName() == null || trainer.getUser().getFirstName().isEmpty()
-        || trainer.getUser().getLastName() == null || trainer.getUser().getLastName().isEmpty()) {
-            logger.warn("Entity update failed");
-            throw new ServiceException("Entity update failed, username and password are invalid");
+    public void updateTrainerProfile(Long id, String firstname, String lastname) {
+        if (firstname == null || firstname.isEmpty() || lastname == null || lastname.isEmpty()) {
+            logger.warn("Entity update profile failed");
+            throw new ServiceException("Entity update profile failed, username and password are invalid");
         }
-        Trainer trainerById = trainerDAO.findById(trainer.getUser().getId());
-        trainerById.getUser().setFirstName(trainer.getUser().getFirstName());
-        trainerById.getUser().setLastName(trainer.getUser().getLastName());
+        logger.info("Entity update profile successfully");
+        Trainer trainerById = trainerDAO.findById(id);
+        trainerById.getUser().setFirstName(firstname);
+        trainerById.getUser().setLastName(lastname);
+        trainerById.getUser().setUsername(userProfileService.concatenateUsername(firstname, lastname));
 
     }
 
     @Transactional
-    public void deleteTrainerProfileByUsername(Trainer trainer) throws ServiceException {
-        if (trainer.getUser().getUsername() == null || trainer.getUser().getUsername().isEmpty()) {
+    public void deleteTrainerProfileByUsername(String username) throws ServiceException {
+        if (username == null || username.isEmpty()) {
             logger.warn("Trainer profile delete failed");
             throw new ServiceException("Delete Trainer Profile Failed, username is empty or null");
         }
-        logger.info("Trainer profile delete successful {} ", trainer);
-        Trainer trainerProfileByUsername = trainerDAO.findByUsername(trainer.getUser().getUsername());
+        logger.info("Trainer profile deleted by username");
+        Trainer trainerProfileByUsername = trainerDAO.findByUsername(username);
         trainerDAO.delete(trainerProfileByUsername);
     }
-
 
 
     @Transactional
@@ -170,9 +214,7 @@ public class TrainerService {
                 || trainer.getUser().getPassword() == null
                 || trainer.getUser().getPassword().isEmpty()
                 || trainer.getUser().getUsername() == null
-                || trainer.getUser().getUsername().isEmpty()
-                || trainer.getSpecialization() == null
-                || trainer.getSpecialization() <= 0) {
+                || trainer.getUser().getUsername().isEmpty()) {
             logger.warn("Trainer save failed");
             throw new ServiceException("Trainer save failed, trainer is invalid");
         }
@@ -189,9 +231,8 @@ public class TrainerService {
                 || trainer.getUser().getPassword() == null
                 || trainer.getUser().getPassword().isEmpty()
                 || trainer.getUser().getUsername() == null
-                || trainer.getUser().getUsername().isEmpty()
-                || trainer.getSpecialization() == null
-                || trainer.getSpecialization() <= 0) {
+                || trainer.getUser().getUsername().isEmpty()) {
+
             logger.warn("Trainer update failed");
             throw new ServiceException("Trainer update failed, trainer is invalid");
         }
@@ -209,9 +250,8 @@ public class TrainerService {
                 || trainer.getUser().getPassword() == null
                 || trainer.getUser().getPassword().isEmpty()
                 || trainer.getUser().getUsername() == null
-                || trainer.getUser().getUsername().isEmpty()
-                || trainer.getSpecialization() == null
-                || trainer.getSpecialization() <= 0) {
+                || trainer.getUser().getUsername().isEmpty()) {
+
             logger.warn("Trainer delete failed");
             throw new ServiceException("Trainer delete failed, trainer does not exist");
         }
@@ -226,39 +266,36 @@ public class TrainerService {
             throw new ServiceException("Entity find by id failed, id is invalid");
         }
         logger.info("Found entity by id {} ", id);
-        Trainer byId = trainerDAO.findById(id);
-        return byId;
+        return trainerDAO.findById(id);
     }
 
 
-    public  Optional<Trainer> findByFirstName(String firstName) throws ServiceException {
+    public  Trainer findByFirstName(String firstName) throws ServiceException {
         if (firstName == null || firstName.isEmpty()) {
             logger.warn("Trainer findByFirstName failed");
             throw new ServiceException("Trainee find by firstName failed, firstName is invalid");
         }
         logger.info("Found trainer by name {} ", firstName);
-        Optional<Trainer> byFirstName = trainerDAO.findByFirstName(firstName);
-        return Optional.of(byFirstName.orElseThrow());
+        return trainerDAO.findByFirstName(firstName);
     }
 
-    public Optional<Trainer> findByLastName(String lastName) throws ServiceException {
+    public Trainer findByLastName(String lastName) throws ServiceException {
         if (lastName == null || lastName.isEmpty()) {
             logger.warn("Trainer findByLastName failed");
             throw new ServiceException("Trainee findByLastName failed, lastName is invalid");
         }
         logger.info("Found trainer by lastName {} ", lastName);
-        Optional<Trainer> byLastName = trainerDAO.findByLastName(lastName);
-        return Optional.of(byLastName.orElseThrow());
+        return trainerDAO.findByLastName(lastName);
     }
 
-    public Optional<Trainer> findBySpecialization(Long specialization) throws ServiceException {
-        if (specialization == null || specialization <= 0) {
+    public Trainer findBySpecialization(Long specialization) throws ServiceException {
+        if (specialization == null) {
             logger.warn("Trainer findBySpecialization failed");
             throw new ServiceException("Trainee findBySpecialization id failed, specialization id is invalid");
         }
         logger.info("Found trainer by specialization id {} ", specialization);
-        Optional<Trainer> bySpecialization = trainerDAO.findBySpecialization(specialization);
-        return Optional.of(bySpecialization.orElseThrow());
+        return trainerDAO.findBySpecialization(specialization);
+
     }
 
     public List<Trainer> findAll() {

@@ -2,17 +2,18 @@ package epam.com.gymapplication.service;
 
 import epam.com.gymapplication.customexception.ServiceException;
 import epam.com.gymapplication.dao.TrainingDAO;
-import epam.com.gymapplication.dao.impl.TrainingDAOImpl;
+import epam.com.gymapplication.model.Trainee;
+import epam.com.gymapplication.model.Trainer;
 import epam.com.gymapplication.model.Training;
+import epam.com.gymapplication.model.TrainingType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.time.LocalDate;
-import java.util.Optional;
+
 
 @Service
 public class TrainingService {
@@ -21,74 +22,73 @@ public class TrainingService {
     @Autowired
     private TrainingDAO trainingDAO;
 
-    @Autowired
-    private TrainingDAOImpl trainingDAOImpl;
 
-    public Training findTrainingListByTraineeCriteria(String username, LocalDate from,
-                                                      LocalDate to, String trainingTypeName) throws ServiceException {
 
-        if (username.isEmpty() || username == null || trainingTypeName.isEmpty() || trainingTypeName == null
-        || from.toString().isEmpty() || to.toString().isEmpty()) {
+    public Training findTrainingListByTraineeCriteria(String username, LocalDate from, LocalDate to, String trainingTypeName) throws ServiceException {
+        if (username.isEmpty() || trainingTypeName.isEmpty()) {
             logger.warn("Entity find by Training list failed");
             throw new ServiceException("Entity find training list failed, username, trainingTypeName and date are invalid");
         }
         logger.info("Find training list by trainee criteria");
-        return trainingDAOImpl.findTrainingListByTraineeCriteria(username, from, to, trainingTypeName);
+        return trainingDAO.findTrainingListByTraineeCriteria(username, from, to, trainingTypeName);
     }
 
-    public Training findTrainingListByTrainerCriteria(String username, LocalDate from,
-                                                      LocalDate to, String trainingTypeName) {
-        if (username.isEmpty() || username == null || trainingTypeName.isEmpty() || trainingTypeName == null
-                || from.toString().isEmpty() || to.toString().isEmpty()) {
+    public Training findTrainingListByTrainerCriteria(String username, LocalDate from, LocalDate to, String trainingTypeName) throws  ServiceException {
+        if (username.isEmpty() || trainingTypeName.isEmpty()) {
             logger.warn("Entity find by Training list failed");
             throw new ServiceException("Entity find training list failed, username, trainingTypeName and date are invalid");
         }
-        logger.info("Find training list by trainee criteria");
-        return trainingDAOImpl.findTrainingListByTraineeCriteria(username, from, to, trainingTypeName);
+        logger.info("Find training list by trainer criteria");
+        return trainingDAO.findTrainingListByTraineeCriteria(username, from, to, trainingTypeName);
+    }
+
+    public void addTraining(Trainee trainee, Trainer trainer, TrainingType trainingType) {
+        if (trainee.getAddress() == null || trainee.getAddress().isEmpty()
+                || trainee.getDateOfBirth() == null || trainee.getUser() == null
+                || trainer.getUser() == null || trainer.getTrainingType() == null
+                || trainingType.getTrainingTypeName() == null || trainingType.getTrainingTypeName().isEmpty()) {
+
+            logger.warn("Entity add training failed");
+            throw new ServiceException("Entity add training failed, trainee and trainer are invalid");
+        }
+
+        logger.info("Add training list");
+        trainingDAO.addTraining(trainee, trainer, trainingType);
     }
 
 
     @Transactional
     public void saveTraining(Training training) throws ServiceException {
         if (training.getTrainingName() == null || training.getTrainingName().isEmpty()
-                || training.getTrainingType() == null || training.getTrainingType().toString().isEmpty()
                 || training.getTrainingDate() == null || training.getTrainingDate().toString().isEmpty()
-                || training.getTrainingDuration() == null || training.getTrainingDuration().toString().isEmpty()
-                || training.getTrainerID() == null || training.getTrainerID() <= 0
-                || training.getTraineeID() == null || training.getTraineeID() <= 0) {
+                || training.getTrainingDuration() == null || training.getTrainingDuration().toString().isEmpty()) {
 
             logger.warn("Training save failed");
             throw new ServiceException("Training save failed, training is invalid");
         }
         trainingDAO.save(training);
-        logger.info("Training saved {} ", training);
+        logger.info("Training saved");
 
     }
 
     public void updateTraining(Training training) throws ServiceException {
         if (training.getTrainingName() == null || training.getTrainingName().isEmpty()
-                || training.getTrainingType() == null || training.getTrainingType().toString().isEmpty()
                 || training.getTrainingDate() == null || training.getTrainingDate().toString().isEmpty()
-                || training.getTrainingDuration() == null || training.getTrainingDuration().toString().isEmpty()
-                || training.getTrainerID() == null || training.getTrainerID() <= 0
-                || training.getTraineeID() == null || training.getTraineeID() <= 0) {
+                || training.getTrainingDuration() == null || training.getTrainingDuration().toString().isEmpty()) {
 
             logger.warn("Training update failed");
             throw new ServiceException("Training update failed, training is invalid");
         }
 
         trainingDAO.update(training);
-        logger.info("Training updated {} ", training);
+        logger.info("Training updated");
 
     }
 
     public void deleteTraining(Training training) throws ServiceException {
         if (training.getTrainingName() == null || training.getTrainingName().isEmpty()
-                || training.getTrainingType() == null || training.getTrainingType().toString().isEmpty()
                 || training.getTrainingDate() == null || training.getTrainingDate().toString().isEmpty()
-                || training.getTrainingDuration() == null || training.getTrainingDuration().toString().isEmpty()
-                || training.getTrainerID() == null || training.getTrainerID() <= 0
-                || training.getTraineeID() == null || training.getTraineeID() <= 0) {
+                || training.getTrainingDuration() == null || training.getTrainingDuration().toString().isEmpty()) {
 
             logger.warn("Training delete failed");
             throw new ServiceException("Training delete failed, training is invalid");
@@ -99,18 +99,17 @@ public class TrainingService {
 
     }
 
-    public Optional<Training> findTrainingById(Long id) {
+    public Training findTrainingById(Long id) {
         if (id == null || id <= 0) {
             logger.warn("Training find by id failed");
             throw new ServiceException("Training find by id failed, id is invalid");
         }
         logger.info("Found training by id {} ", id);
-        Optional<Training> byId = trainingDAO.findById(id);
-        return Optional.of(byId.orElseThrow());
+        return trainingDAO.findById(id);
     }
 
 
-    public Optional<Training> findByTrainingName(String trainingName) {
+    public Training findByTrainingName(String trainingName) {
         if (trainingName == null || trainingName.isEmpty()) {
             logger.warn("Training finding by name failed");
             throw new ServiceException("Finding training by name failed, training name is invalid");
@@ -119,7 +118,7 @@ public class TrainingService {
         return trainingDAO.findByTrainingName(trainingName);
     }
 
-    public Optional<Training> findByTrainingType(String trainingType) {
+    public Training findByTrainingType(String trainingType) {
         if (trainingType == null || trainingType.isEmpty()) {
             logger.warn("Training finding by type failed");
             throw new ServiceException("Finding training by type failed, training type is invalid");

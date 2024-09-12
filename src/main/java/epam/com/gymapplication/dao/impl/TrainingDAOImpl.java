@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+
 
 
 
@@ -26,7 +26,7 @@ public class TrainingDAOImpl implements TrainingDAO {
     @PersistenceContext
     private EntityManager em;
 
-
+    @Override
     public Training findTrainingListByTraineeCriteria(String username, LocalDate from,
                                                       LocalDate to, String trainingTypeName) {
         Query findTrainingListQuery = em.createQuery(
@@ -42,11 +42,11 @@ public class TrainingDAOImpl implements TrainingDAO {
                 .setParameter("to", to)
                 .setParameter("trainingType", trainingTypeName);
 
-        return (Training) findTrainingListQuery.getResultList();
+        return (Training) findTrainingListQuery.getSingleResult();
 
     }
 
-
+    @Override
     public Training findTrainingListByTrainerCriteria(String username, LocalDate from,
                                                       LocalDate to, String trainingTypeName) {
         Query findTrainingListQuery = em.createQuery(
@@ -62,40 +62,40 @@ public class TrainingDAOImpl implements TrainingDAO {
                 .setParameter("to", to)
                 .setParameter("trainingType", trainingTypeName);
 
-        return (Training) findTrainingListQuery.getResultList();
+        return (Training) findTrainingListQuery.getSingleResult();
 
     }
 
+    @Override
+    @Transactional
     public void addTraining(Trainee trainee, Trainer trainer, TrainingType trainingType) {
         Training training = new Training();
-        training.setTrainee(trainee);
         training.setTrainer(trainer);
         training.setTrainingType(trainingType);
-        training.setTraineeID(trainee.getId());
-        training.setTrainerID(trainer.getId());
+        training.setTrainee(trainee);
 
-        em.persist(training);
+        em.merge(training);
     }
 
     @Override
     @Transactional
     public void save(Training training) throws DaoException {
-        if (!em.contains(training)) {
+        if (training.getId() != null) {
+            em.merge(training);
+        } else {
             em.persist(training);
         }
-        throw new DaoException("Training already exists");
 
     }
 
     @Override
     @Transactional
     public void update(Training training)  {
-        Optional<Training> trainingById = findById(training.getId());
-        if (trainingById.isPresent()) {
-            trainingById.get().setId(trainingById.get().getId());
-            em.persist(trainingById);
+        Training trainingById = findById(training.getId());
+        if (trainingById != null) {
+            trainingById.setId(trainingById.getId());
+            em.merge(trainingById);
         }
-
     }
 
     @Override
@@ -115,30 +115,26 @@ public class TrainingDAOImpl implements TrainingDAO {
     }
 
     @Override
-    public Optional<Training> findById(Long id) {
-        if (em.contains(id)) {
-            return Optional.of(em.find(Training.class, id));
-        }
-
-        return Optional.empty();
+    public Training findById(Long id) {
+        Query findIdQuery = em.createQuery("SELECT t FROM Training t WHERE t.id = :id");
+        findIdQuery.setParameter("id", id);
+        return (Training) findIdQuery.getSingleResult();
     }
 
 
 
     @Override
-    public Optional<Training> findByTrainingName(String trainingName) {
-        if (em.contains(trainingName)) {
-            return Optional.of(em.find(Training.class, trainingName));
-        }
-        return Optional.empty();
+    public Training findByTrainingName(String trainingName) {
+        Query findByNameQuery = em.createQuery("SELECT t FROM Training t WHERE t.trainingName = :trainingName");
+        findByNameQuery.setParameter("trainingName", trainingName);
+        return (Training) findByNameQuery.getSingleResult();
     }
 
     @Override
-    public Optional<Training> findByTrainingType(String trainingType) {
-        if (em.contains(trainingType)) {
-            return Optional.of(em.find(Training.class, trainingType));
-        }
-        return Optional.empty();
+    public Training findByTrainingType(String trainingType) {
+        Query findByTrainingTypeQuery = em.createQuery("SELECT t FROM Training t WHERE t.trainingType = :trainingType");
+        findByTrainingTypeQuery.setParameter("trainingType", trainingType);
+        return (Training) findByTrainingTypeQuery.getSingleResult();
 
     }
 }

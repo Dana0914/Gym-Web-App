@@ -11,6 +11,7 @@ import epam.com.gymapplication.dao.impl.TrainingTypeDAOImpl;
 import epam.com.gymapplication.dao.impl.UserDAOImpl;
 import epam.com.gymapplication.profile.PasswordGenerator;
 import epam.com.gymapplication.profile.UserProfileService;
+import epam.com.gymapplication.service.*;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -31,7 +32,6 @@ import java.util.Properties;
 @Configuration
 @EnableTransactionManagement
 @ComponentScan(basePackages = "epam.com.gymapplication")
-
 public class AppConfig {
 
     @Bean
@@ -116,6 +116,31 @@ public class AppConfig {
     @Bean
     public TrainingTypeDAO trainingTypeDAO() {
         return new TrainingTypeDAOImpl();
+    }
+
+    @Bean
+    public TraineeService traineeService() {
+        return new TraineeService();
+    }
+
+    @Bean
+    public TrainerService trainerService() {
+        return new TrainerService();
+    }
+
+    @Bean
+    public TrainingService trainingService() {
+        return new TrainingService();
+    }
+
+    @Bean
+    public TrainingTypeService trainingTypeService() {
+        return new TrainingTypeService();
+    }
+
+    @Bean
+    public UserService userService() {
+        return new UserService();
     }
 
 

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
+
 
 
 @Service
@@ -21,29 +21,30 @@ public class UserDAOImpl implements UserDAO {
     @Override
     @Transactional
     public void save(User user) throws DaoException {
-        entityManager.persist(user);
+        if (user.getId() != null) {
+            entityManager.merge(user);
+        } else {
+            entityManager.persist(user);
+        }
 
     }
 
     @Override
-    public Optional<User> findById(Long id) throws DaoException {
+    public User findById(Long id) throws DaoException {
         Query findById = entityManager.createQuery("select u from User u where u.id = :id");
         findById.setParameter("id", id);
+        return (User) findById.getSingleResult();
 
-        User user = (User) findById.getSingleResult();
-        return Optional.of(user);
     }
 
     @Override
     @Transactional
     public void update(User user) throws DaoException {
-        Optional<User> userById = findById(user.getId());
-        if (userById.isPresent()) {
-            user.setId(userById.get().getId());
+        User userById = findById(user.getId());
+        if (userById != null) {
+            user.setId(userById.getId());
             entityManager.merge(user);
         }
-
-
 
 
     }

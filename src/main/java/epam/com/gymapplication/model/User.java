@@ -16,14 +16,17 @@ public class User {
     private Long id;
     @NotNull(message = "firstname can not be null")
     private String firstname;
+
     @NotNull(message = "lastname can not be null")
     private String lastname;
+
     @NotNull(message = "username can not be null")
     private String username;
+
     @NotNull(message = "password can not be null")
     private String password;
-    @Column(name = "is_active")
 
+    @Column(name = "is_active")
     @NotNull(message = "isActive switch can not be null")
     private boolean isActive;
 

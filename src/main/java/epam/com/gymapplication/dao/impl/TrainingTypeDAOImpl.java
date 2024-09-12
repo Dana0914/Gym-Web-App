@@ -24,14 +24,17 @@ public class TrainingTypeDAOImpl implements TrainingTypeDAO {
     public TrainingType findById(Long id) throws DaoException {
         Query findByIdQuery = em.createQuery("SELECT t FROM TrainingType t WHERE t.id = :id");
         findByIdQuery.setParameter("id", id);
-        TrainingType trainingType = (TrainingType) findByIdQuery.getSingleResult();
-        return trainingType;
+        return (TrainingType) findByIdQuery.getSingleResult();
     }
 
     @Override
     @Transactional
     public void save(TrainingType trainingType) throws DaoException {
-        em.persist(trainingType);
+        if (trainingType.getId() != null) {
+            em.merge(trainingType);
+        } else {
+            em.persist(trainingType);
+        }
 
     }
 
@@ -50,7 +53,6 @@ public class TrainingTypeDAOImpl implements TrainingTypeDAO {
     public void update(TrainingType trainingType) throws DaoException {
         TrainingType trainingTypeById = findById(trainingType.getId());
         if (trainingTypeById != null) {
-
             trainingType.setId(trainingTypeById.getId());
             em.merge(trainingType);
         }
@@ -65,8 +67,7 @@ public class TrainingTypeDAOImpl implements TrainingTypeDAO {
     @Override
     public TrainingType findByTrainingTypeName(String trainingTypeName) {
         Query findTrainingTypeNameQuery = em.createQuery("select t from TrainingType t where t.trainingTypeName =: name");
-        TrainingType trainingType = (TrainingType) findTrainingTypeNameQuery.setParameter("name", trainingTypeName);
-        return trainingType;
+        return (TrainingType) findTrainingTypeNameQuery.setParameter("name", trainingTypeName);
 
     }
 }

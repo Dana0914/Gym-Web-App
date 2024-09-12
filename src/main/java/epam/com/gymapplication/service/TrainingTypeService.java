@@ -54,8 +54,7 @@ public class TrainingTypeService {
             throw new ServiceException("Entity find by id failed, id is invalid");
         }
         logger.info("Entity id found {} ", id);
-        TrainingType byId = trainingTypeDAO.findById(id);
-        return byId;
+        return trainingTypeDAO.findById(id);
     }
 
     public TrainingType findByTrainingTypeName(String trainingType) throws ServiceException{
@@ -64,8 +63,7 @@ public class TrainingTypeService {
             throw new ServiceException("Entity find by name failed, name is invalid");
         }
         logger.info("Entity found by name {} ", trainingType);
-        TrainingType byTrainingTypeName = trainingTypeDAO.findByTrainingTypeName(trainingType);
-        return byTrainingTypeName;
+        return trainingTypeDAO.findByTrainingTypeName(trainingType);
     }
 
 

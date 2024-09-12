@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -30,16 +29,18 @@ public class UserService {
             throw new ServiceException("User save failed, user is invalid");
 
         }
+        logger.info("User saved {}", user);
         userDAO.save(user);
     }
 
-    public Optional<User> findById(Long id) {
+    public User findById(Long id) throws ServiceException {
         if (id == null || id <= 0) {
-            return Optional.empty();
+            logger.warn("User by id not found");
+            throw new ServiceException("User finding failed, id is invalid");
         }
         logger.info("Found user by id {} ", id);
-        Optional<User> byId = userDAO.findById(id);
-        return Optional.of(byId.orElseThrow());
+        return userDAO.findById(id);
+
 
 
     }

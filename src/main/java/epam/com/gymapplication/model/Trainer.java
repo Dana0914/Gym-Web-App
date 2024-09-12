@@ -15,25 +15,15 @@ public class Trainer {
     @Id
     private Long id;
 
-    @Column(insertable=false, updatable=false)
-    private Long specialization;
-
-    @Column(name = "users_id", insertable = false, updatable = false)
-    private Long userId;
-
-
-
     public Trainer() {
 
     }
 
-    public Trainer(Long id, Long specialization, Long userId) {
+    public Trainer(Long id) {
         this.id = id;
-        this.specialization = specialization;
-        this.userId = userId;
     }
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "specialization", nullable = false, unique = true)
     private TrainingType trainingType;
 
@@ -45,7 +35,7 @@ public class Trainer {
         this.trainingType = trainingType;
     }
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
     @JoinColumn(name = "users_id", unique = true, nullable = false)
     private User user;
 
@@ -57,15 +47,7 @@ public class Trainer {
     }
 
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    @ManyToMany(mappedBy = "trainers")
+    @ManyToMany(mappedBy = "trainers", fetch = FetchType.EAGER)
     private Set<Trainee> trainees = new HashSet<>();
 
     public Set<Trainee> getTrainees() {
@@ -75,12 +57,13 @@ public class Trainer {
         this.trainees = trainees;
     }
 
-    @OneToMany(mappedBy = "trainer")
+    @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<Training> trainings = new HashSet<>();
 
     public Set<Training> getTrainings() {
         return trainings;
     }
+
     public void setTrainings(Set<Training> trainings) {
         this.trainings = trainings;
     }
@@ -94,40 +77,18 @@ public class Trainer {
     }
 
 
-    public Long getSpecialization() {
-        return specialization;
-    }
-
-    public void setSpecialization(Long specialization) {
-        this.specialization = specialization;
-    }
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Trainer trainer = (Trainer) o;
         return Objects.equals(id, trainer.id)
-                && Objects.equals(specialization, trainer.specialization)
-                && Objects.equals(userId, trainer.userId)
                 && Objects.equals(trainingType, trainer.trainingType)
                 && Objects.equals(user, trainer.user);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, specialization, userId, trainingType, user);
-    }
-
-    @Override
-    public String toString() {
-        return "Trainer{" +
-                "id=" + id +
-                ", specialization=" + specialization +
-                ", userId=" + userId +
-                ", trainingType=" + trainingType +
-                ", user=" + user +
-                '}';
+        return Objects.hash(id, trainingType, user);
     }
 }

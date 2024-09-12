@@ -26,8 +26,6 @@ public class Trainee {
     @NotNull(message = "Address can not be null")
     private String address;
 
-    @Column(name = "users_id", insertable = false, updatable = false)
-    private Long userId;
 
 
 
@@ -35,26 +33,16 @@ public class Trainee {
 
     }
 
-    public Trainee(Long id, Long userId, LocalDate dateOfBirth, String address) {
+    public Trainee(Long id, LocalDate dateOfBirth, String address) {
         this.id = id;
-        this.userId = userId;
         this.dateOfBirth = dateOfBirth;
         this.address = address;
 
     }
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
     @JoinColumn(name = "users_id", unique = true, nullable = false)
     private User user;
-
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
 
     public void setUser(User user) {
         this.user = user;
@@ -63,7 +51,7 @@ public class Trainee {
         return user;
     }
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name="trainer_trainee",
             joinColumns=@JoinColumn(name="trainer_id"),
             inverseJoinColumns=@JoinColumn(name="trainee_id"))
@@ -76,12 +64,13 @@ public class Trainee {
         this.trainers = trainers;
     }
 
-    @OneToMany(mappedBy = "trainee")
+    @OneToMany(mappedBy = "trainee", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<Training> trainings = new HashSet<>();
 
     public Set<Training> getTrainings() {
         return trainings;
     }
+
     public void setTrainings(Set<Training> trainings) {
         this.trainings = trainings;
     }
@@ -120,23 +109,11 @@ public class Trainee {
         return Objects.equals(id, trainee.id)
                 && Objects.equals(dateOfBirth, trainee.dateOfBirth)
                 && Objects.equals(address, trainee.address)
-                && Objects.equals(userId, trainee.userId)
                 && Objects.equals(user, trainee.user);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, dateOfBirth, address, userId, user);
-    }
-
-    @Override
-    public String toString() {
-        return "Trainee{" +
-                "id=" + id +
-                ", dateOfBirth=" + dateOfBirth +
-                ", address='" + address + '\'' +
-                ", userId=" + userId +
-                ", user=" + user +
-                '}';
+        return Objects.hash(id, dateOfBirth, address, user);
     }
 }
