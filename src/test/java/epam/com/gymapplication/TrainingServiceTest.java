@@ -1,6 +1,6 @@
 package epam.com.gymapplication;
 
-import epam.com.gymapplication.dao.impl.TrainingDAOImpl;
+import epam.com.gymapplication.dao.TrainingDAO;
 import epam.com.gymapplication.model.*;
 import epam.com.gymapplication.service.TrainingService;
 import org.junit.jupiter.api.Assertions;
@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.*;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,8 +20,9 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainingServiceTest {
+
     @Mock
-    private TrainingDAOImpl trainingDAOImpl;
+    private TrainingDAO trainingDAO;
 
     @InjectMocks
     private TrainingService trainingService;
@@ -35,11 +35,11 @@ public class TrainingServiceTest {
 
 
         TrainingType trainingType = new TrainingType();
+        trainingType.setId(1L);
         trainingType.setTrainingTypeName("stretch");
 
         training = new Training();
-        training.setTraineeID(1L);
-        training.setTrainerID(3L);
+        training.setId(1L);
         training.setTrainingName("stretching");
         training.setTrainingDate(LocalDate.now());
         training.setTrainingType(trainingType);
@@ -47,8 +47,7 @@ public class TrainingServiceTest {
 
 
         training2 = new Training();
-        training2.setTraineeID(1L);
-        training2.setTrainerID(4L);
+        training2.setId(2L);
         training2.setTrainingName("strength");
         training2.setTrainingDate(LocalDate.now());
         training2.setTrainingType(trainingType);
@@ -58,167 +57,161 @@ public class TrainingServiceTest {
 
     @Test
     public void save_withValidData_returnsValidEntity() {
+        when(trainingDAO.findById(training.getId())).thenReturn(training);
+
         trainingService.saveTraining(training);
 
+        Training trainingById = trainingService.findTrainingById(training.getId());
 
-        when(trainingDAOImpl.findById(training.getId())).thenReturn(Optional.of(training));
 
-        Optional<Training> trainingById = trainingService.findTrainingById(training.getId());
+        verify(trainingDAO).save(training);
 
-        Assertions.assertTrue(trainingById.isPresent());
-
-        verify(trainingDAOImpl).save(training);
-
-        Assertions.assertEquals(training, trainingById.get());
+        Assertions.assertEquals(training, trainingById);
 
 
     }
 
     @Test
     public void update_withExistingEntity_updatesEntityDetails() {
+        when(trainingDAO.findById(training.getId())).thenReturn(training);
+
         trainingService.saveTraining(training);
 
-        when(trainingDAOImpl.findById(training.getId())).thenReturn(Optional.of(training));
-
-        Optional<Training> trainingById = trainingService.findTrainingById(training.getId());
-
-        Assertions.assertTrue(trainingById.isPresent());
+        Training trainingById = trainingService.findTrainingById(training.getId());
 
         training2.setId(training.getId());
 
         trainingService.updateTraining(training2);
 
-        verify(trainingDAOImpl).update(training2);
 
+        when(trainingDAO.findById(training2.getId())).thenReturn(training2);
 
-        when(trainingDAOImpl.findById(training2.getId())).thenReturn(Optional.of(training2));
+        Training updateTrainingById = trainingService.findTrainingById(training2.getId());
 
-        Optional<Training> updateTrainingById = trainingService.findTrainingById(training2.getId());
+        verify(trainingDAO).update(training2);
+        verify(trainingDAO).save(training);
 
-        Assertions.assertTrue(updateTrainingById.isPresent());
-        Assertions.assertEquals(training2, updateTrainingById.get());
+        Assertions.assertEquals(training, trainingById);
+        Assertions.assertEquals(training2, updateTrainingById);
 
     }
 
     @Test
     public void findTrainingById_withExistingId_returnsEntity() {
+        when(trainingDAO.findById(training.getId())).thenReturn(training);
+
         trainingService.saveTraining(training);
 
 
-        when(trainingDAOImpl.findById(training.getId())).thenReturn(Optional.of(training));
+        Training trainingById = trainingService.findTrainingById(training.getId());
 
-        Optional<Training> trainingById = trainingService.findTrainingById(training.getId());
 
-        Assertions.assertTrue(trainingById.isPresent());
+        verify(trainingDAO).findById(training.getId());
+        verify(trainingDAO).save(training);
 
-        verify(trainingDAOImpl).findById(training.getId());
-
-        Assertions.assertEquals(training, trainingById.get());
+        Assertions.assertEquals(training, trainingById);
 
     }
 
     @Test
-    public void findTrainingById_withNonExistingId_returnsOptionalEmpty() {
+    public void findTrainingById_withNonExistingId_returnsNull() {
+        when(trainingDAO.findById(4L)).thenReturn(null);
+
         trainingService.saveTraining(training);
 
-        when(trainingDAOImpl.findById(4L)).thenReturn(Optional.empty());
+        Training trainingServiceTrainingById = trainingService.findTrainingById(4L);
 
-        Assertions.assertThrows(NoSuchElementException.class, () -> {
-            trainingService.findTrainingById(4L).orElseThrow();
-        });
+        verify(trainingDAO).findById(4L);
+        verify(trainingDAO).save(training);
 
-        verify(trainingDAOImpl).findById(4L);
+        Assertions.assertNull(trainingServiceTrainingById);
+
     }
 
     @Test
-    public void deleteTrainingById_withValidId_returnsValidEntity() {
+    public void deleteTraining_withValidId_returnsValidEntity() {
+        when(trainingDAO.findById(training.getId())).thenReturn(training);
+
         trainingService.saveTraining(training);
-
-
-        when(trainingDAOImpl.findById(training.getId())).thenReturn(Optional.of(training));
 
         trainingService.deleteTraining(training);
 
-        when(trainingDAOImpl.findById(training.getId())).thenReturn(Optional.empty());
+        when(trainingDAO.findById(training.getId())).thenReturn(null);
 
-        verify(trainingDAOImpl).delete(training);
+        Training trainingServiceTrainingById = trainingService.findTrainingById(training.getId());
 
-        Assertions.assertThrows(NoSuchElementException.class, () -> {
-            trainingService.findTrainingById(training.getId()).orElseThrow();
-        });
+        verify(trainingDAO).delete(training);
+        verify(trainingDAO).save(training);
 
+        Assertions.assertNull(trainingServiceTrainingById);
     }
 
     @Test
-    public void deleteTrainingById_withInvalidId_returnsOptionalEmpty() {
-        trainingService.saveTraining(training);
+    public void deleteTraining_withInvalidId_returnsNull() {
+        when(trainingDAO.findById(5L)).thenReturn(null);
 
-        when(trainingDAOImpl.findById(5L)).thenReturn(Optional.empty());
+        trainingService.saveTraining(training);
 
         trainingService.deleteTraining(training);
 
-        verify(trainingDAOImpl).delete(training);
+        Training trainingServiceTrainingById = trainingService.findTrainingById(5L);
 
-        Assertions.assertThrows(NoSuchElementException.class, () -> {
-            trainingService.findTrainingById(5L).orElseThrow();
-        });
+        verify(trainingDAO).delete(training);
+        verify(trainingDAO).save(training);
+
+
+        Assertions.assertNull(trainingServiceTrainingById);
 
     }
 
 
     @Test
     public void findByTrainingName_withExistingData_returnsValidEntity() {
+        when(trainingDAO.findByTrainingName(training.getTrainingName())).thenReturn(training);
+
         trainingService.saveTraining(training);
 
+        Training byTrainingName = trainingService.findByTrainingName(training.getTrainingName());
 
-        when(trainingDAOImpl.findByTrainingName(training.getTrainingName())).thenReturn(Optional.of(training));
 
-        Optional<Training> byTrainingName = trainingService.findByTrainingName(training.getTrainingName());
-        Assertions.assertTrue(byTrainingName.isPresent());
+        verify(trainingDAO).findByTrainingName(training.getTrainingName());
+        verify(trainingDAO).save(training);
 
-        verify(trainingDAOImpl).findByTrainingName(training.getTrainingName());
-
-        Assertions.assertEquals(training, byTrainingName.get());
+        Assertions.assertEquals(training, byTrainingName);
 
     }
 
     @Test
     public void findByTrainingType_withExistingData_returnsValidEntity() {
+        when(trainingDAO.findByTrainingType(training.getTrainingType().toString())).thenReturn(training);
+
         trainingService.saveTraining(training);
 
-        verify(trainingDAOImpl).save(training);
+        Training byTrainingName = trainingService.findByTrainingType(training.getTrainingType().toString());
 
-        when(trainingDAOImpl.findByTrainingType(training.getTrainingType().toString())).thenReturn(Optional.of(training));
 
-        Optional<Training> byTrainingName = trainingService.findByTrainingType(training.getTrainingType().toString());
+        verify(trainingDAO).save(training);
+        verify(trainingDAO).findByTrainingType(training.getTrainingType().toString());
 
-        Assertions.assertTrue(byTrainingName.isPresent());
-
-        verify(trainingDAOImpl).findByTrainingType(training.getTrainingType().toString());
-
-        Assertions.assertEquals(training, byTrainingName.get());
+        Assertions.assertEquals(training, byTrainingName);
 
 
     }
 
 
     @Test
-    public void findByTrainingName_withNonExistingData_returnsOptionalEmpty() {
+    public void findByTrainingName_withNonExistingData_returnsNull() {
+        when(trainingDAO.findByTrainingName("null")).thenReturn(null);
+
         trainingService.saveTraining(training);
 
-
-        when(trainingDAOImpl.findByTrainingName("null")).thenReturn(Optional.empty());
-
-
-        Optional<Training> result = trainingService.findByTrainingName("null");
+        Training result = trainingService.findByTrainingName("null");
 
 
-        Assertions.assertFalse(result.isPresent());
+        verify(trainingDAO).findByTrainingName("null");
+        verify(trainingDAO).save(training);
 
-
-        verify(trainingDAOImpl).findByTrainingName("null");
-
-        Assertions.assertEquals(result, Optional.empty());
+        Assertions.assertNull(result);
 
     }
 }
