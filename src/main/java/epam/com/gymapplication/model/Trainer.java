@@ -91,4 +91,13 @@ public class Trainer {
     public int hashCode() {
         return Objects.hash(id, trainingType, user);
     }
+
+    @Override
+    public String toString() {
+        return "Trainer{" +
+                "id=" + id +
+                ", trainingType=" + trainingType +
+                ", user=" + user +
+                '}';
+    }
 }
