@@ -1,36 +1,78 @@
 package epam.com.gymapplication.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
-public class Trainee extends UserBase {
 
+@Entity
+@Table(name = "trainee")
+public class Trainee {
+
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private Long id;
-    private Long userId;
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonDeserialize(using = LocalDateDeserializer.class)
-    @JsonFormat(pattern="yyyy-MM-dd")
+
+
+    @Column(name = "date_of_birth", nullable = false)
+    @NotNull(message = "date of birth can not be null")
     private LocalDate dateOfBirth;
+
+    @NotNull(message = "Address can not be null")
     private String address;
-    private User user;
+
+
+
 
     public Trainee() {
 
     }
 
-    public Trainee(Long id, Long userId, LocalDate dateOfBirth, String address, User user) {
+    public Trainee(Long id, LocalDate dateOfBirth, String address) {
         this.id = id;
-        this.userId = userId;
         this.dateOfBirth = dateOfBirth;
         this.address = address;
-        this.user = user;
 
+    }
+
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
+    @JoinColumn(name = "users_id", unique = true, nullable = false)
+    private User user;
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+    public User getUser() {
+        return user;
+    }
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name="trainer_trainee",
+            joinColumns=@JoinColumn(name="trainer_id"),
+            inverseJoinColumns=@JoinColumn(name="trainee_id"))
+    private Set<Trainer> trainers = new HashSet<>();
+
+    public Set<Trainer> getTrainers() {
+        return trainers;
+    }
+    public void setTrainers(Set<Trainer> trainers) {
+        this.trainers = trainers;
+    }
+
+    @OneToMany(mappedBy = "trainee", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<Training> trainings = new HashSet<>();
+
+    public Set<Training> getTrainings() {
+        return trainings;
+    }
+
+    public void setTrainings(Set<Training> trainings) {
+        this.trainings = trainings;
     }
 
     public Long getId() {
@@ -41,13 +83,6 @@ public class Trainee extends UserBase {
         this.id = id;
     }
 
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
 
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
@@ -65,24 +100,6 @@ public class Trainee extends UserBase {
         this.address = address;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    @Override
-    public String toString() {
-        return "Trainee{" +
-                "id=" + id +
-                ", userId=" + userId +
-                ", dateOfBirth=" + dateOfBirth +
-                ", address='" + address + '\'' +
-                ", user=" + user +
-                '}';
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -90,7 +107,6 @@ public class Trainee extends UserBase {
         if (o == null || getClass() != o.getClass()) return false;
         Trainee trainee = (Trainee) o;
         return Objects.equals(id, trainee.id)
-                && Objects.equals(userId, trainee.userId)
                 && Objects.equals(dateOfBirth, trainee.dateOfBirth)
                 && Objects.equals(address, trainee.address)
                 && Objects.equals(user, trainee.user);
@@ -98,6 +114,16 @@ public class Trainee extends UserBase {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, dateOfBirth, address, user);
+        return Objects.hash(id, dateOfBirth, address, user);
+    }
+
+    @Override
+    public String toString() {
+        return "Trainee{" +
+                "id=" + id +
+                ", dateOfBirth=" + dateOfBirth +
+                ", address='" + address + '\'' +
+                ", user=" + user +
+                '}';
     }
 }

@@ -1,43 +1,83 @@
 package epam.com.gymapplication.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
 
+@Entity
+@Table(name = "training")
+public class Training {
 
-public class Training extends UserBase {
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    private Long id;
 
-    Long id;
-    Long trainerID;
-    Long traineeID;
-    String trainingName;
-    TrainingType trainingType;
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonDeserialize(using = LocalDateDeserializer.class)
-    @JsonFormat(pattern="yyyy-MM-dd")
-    LocalDate trainingDate;
-    Integer trainingDuration;
+    @Column(name = "training_name", nullable = false)
+    @NotNull(message = "training name can not be null")
+    private String trainingName;
+
+    @Column(name = "training_date", nullable = false)
+    @NotNull(message = "training date can not be null")
+    private LocalDate trainingDate;
+
+    @Column(name = "training_duration", nullable = false)
+    @NotNull(message = "training duration can not be null")
+    private Integer trainingDuration;
 
     public Training() {
 
     }
 
-    public Training(Long id, Long trainerID, Long traineeID,
-                    TrainingType trainingType, String trainingName,
-                    LocalDate trainingDate, Integer trainingDuration) {
+    public Training(Long id,
+                    String trainingName,
+                    LocalDate trainingDate,
+                    Integer trainingDuration) {
+
         this.id = id;
-        this.trainerID = trainerID;
-        this.traineeID = traineeID;
-        this.trainingType = trainingType;
         this.trainingName = trainingName;
         this.trainingDate = trainingDate;
         this.trainingDuration = trainingDuration;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
+    @JoinColumn(name="training_type_id", nullable = false)
+    private TrainingType trainingType;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
+    @JoinColumn(name = "trainee_ID", nullable = false, unique = true)
+    private Trainee trainee;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
+    @JoinColumn(name = "trainer_ID", nullable = false, unique = true)
+    private Trainer trainer;
+
+    public Trainee getTrainee() {
+        return trainee;
+    }
+
+    public void setTrainee(Trainee trainee) {
+        this.trainee = trainee;
+    }
+
+    public Trainer getTrainer() {
+        return trainer;
+    }
+
+    public void setTrainer(Trainer trainer) {
+        this.trainer = trainer;
+    }
+
+    public TrainingType getTrainingType() {
+        return trainingType;
+    }
+
+    public void setTrainingType(TrainingType trainingType) {
+        this.trainingType = trainingType;
     }
 
     public Long getId() {
@@ -48,21 +88,6 @@ public class Training extends UserBase {
         this.id = id;
     }
 
-    public Long getTrainerID() {
-        return trainerID;
-    }
-
-    public void setTrainerID(Long trainerID) {
-        this.trainerID = trainerID;
-    }
-
-    public Long getTraineeID() {
-        return traineeID;
-    }
-
-    public void setTraineeID(Long traineeID) {
-        this.traineeID = traineeID;
-    }
 
     public String getTrainingName() {
         return trainingName;
@@ -72,13 +97,6 @@ public class Training extends UserBase {
         this.trainingName = trainingName;
     }
 
-    public TrainingType getTrainingType() {
-        return trainingType;
-    }
-
-    public void setTrainingType(TrainingType trainingType) {
-        this.trainingType = trainingType;
-    }
 
     public LocalDate getTrainingDate() {
         return trainingDate;
@@ -97,38 +115,29 @@ public class Training extends UserBase {
     }
 
     @Override
-    public String toString() {
-        return "Training{" +
-                "id=" + id +
-                ", trainerID=" + trainerID +
-                ", traineeID=" + traineeID +
-                ", trainingName='" + trainingName + '\'' +
-                ", trainingType=" + trainingType +
-                ", trainingDate=" + trainingDate +
-                ", trainingDuration=" + trainingDuration +
-                '}';
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Training training = (Training) o;
         return Objects.equals(id, training.id)
-                && Objects.equals(trainerID, training.trainerID)
-                && Objects.equals(traineeID, training.traineeID)
                 && Objects.equals(trainingName, training.trainingName)
-                && trainingType == training.trainingType
                 && Objects.equals(trainingDate, training.trainingDate)
                 && Objects.equals(trainingDuration, training.trainingDuration);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(
-                id,
-                trainerID, traineeID,
-                trainingName, trainingType,
-                trainingDate, trainingDuration);
+        return Objects.hash(id, trainingName, trainingDate,
+                trainingDuration);
+    }
+
+    @Override
+    public String toString() {
+        return "Training{" +
+                "id=" + id +
+                ", trainingName='" + trainingName + '\'' +
+                ", trainingDate=" + trainingDate +
+                ", trainingDuration=" + trainingDuration +
+                '}';
     }
 }

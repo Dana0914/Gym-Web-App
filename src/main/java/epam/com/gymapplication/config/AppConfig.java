@@ -1,56 +1,26 @@
 package epam.com.gymapplication.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import epam.com.gymapplication.dao.impl.TraineeDAOImpl;
-import epam.com.gymapplication.dao.impl.TrainerDAOImpl;
-import epam.com.gymapplication.dao.impl.TrainingDAOImpl;
-import epam.com.gymapplication.facade.Facade;
-import epam.com.gymapplication.model.Trainee;
-import epam.com.gymapplication.model.Trainer;
-import epam.com.gymapplication.model.Training;
-import epam.com.gymapplication.postprocessor.StorageInitializer;
+
+import epam.com.gymapplication.dao.TraineeRepository;
 import epam.com.gymapplication.profile.PasswordGenerator;
 import epam.com.gymapplication.profile.UserProfileService;
-import epam.com.gymapplication.service.TraineeService;
-import epam.com.gymapplication.service.TrainerService;
-import epam.com.gymapplication.service.TrainingService;
+import epam.com.gymapplication.service.*;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 @Configuration
+@EnableTransactionManagement
+@ComponentScan(basePackages = "epam.com.gymapplication")
 public class AppConfig {
 
     @Bean
-    public Map<Long, Trainee> traineeStorage() {
-        return new HashMap<>();
-    }
-
-
-    @Bean
-    public ObjectMapper getObjectMapper() {
-        return new ObjectMapper();
-
-    }
-
-    @Bean
-    public Map<Long, Trainer> trainerStorage() {
-        return new HashMap<>();
-    }
-
-    @Bean
-    public Map<Long, Training> trainingStorage() {
-        return new HashMap<>();
-    }
-
-
-    @Bean
-    public StorageInitializer storageInit() {
-        return new StorageInitializer();
+    public PersistenceExceptionTranslationPostProcessor exceptionTranslation() {
+        return new PersistenceExceptionTranslationPostProcessor();
     }
 
     @Bean
@@ -59,16 +29,8 @@ public class AppConfig {
     }
 
     @Bean
-    public UserProfileService userProfileUtils(Map<Long, Trainee> traineeStorage,
-                                               Map<Long, Trainer> trainerStorage) {
-        return new UserProfileService(traineeStorage, trainerStorage);
-    }
-
-    @Bean
-    public Facade facade(TraineeService traineeService,
-                         TrainerService trainerService,
-                         TrainingService trainingService) {
-        return new Facade(traineeService, trainerService, trainingService);
+    public UserProfileService userProfileService() {
+        return new UserProfileService();
     }
 
     @Bean
@@ -87,18 +49,17 @@ public class AppConfig {
     }
 
     @Bean
-    public TraineeDAOImpl traineeDAO() {
-        return new TraineeDAOImpl();
+    public TrainingTypeService trainingTypeService() {
+        return new TrainingTypeService();
     }
 
     @Bean
-    public TrainingDAOImpl trainingDAO() {
-        return new TrainingDAOImpl();
+    public UserService userService() {
+        return new UserService();
     }
 
-    @Bean
-    public TrainerDAOImpl trainerDAO() {
-        return new TrainerDAOImpl();
-    }
+
+
+
 
 }

@@ -1,26 +1,22 @@
 package epam.com.gymapplication.profile;
 
-import epam.com.gymapplication.model.Trainee;
-import epam.com.gymapplication.model.Trainer;
-
-import java.util.Map;
 
 
+import epam.com.gymapplication.dao.UserRepository;
+import epam.com.gymapplication.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+
+@Component
 public class UserProfileService {
 
     private static int counter = 1;
     private static int serialNumber;
-    private final Map<Long, Trainee> traineeStorage;
-    private final Map<Long, Trainer> trainerStorage;
 
+    @Autowired
+    private UserRepository userRepository;
 
-    public UserProfileService(Map<Long, Trainee> traineeStorage,
-                            Map<Long, Trainer> trainerStorage) {
-
-        this.traineeStorage = traineeStorage;
-        this.trainerStorage = trainerStorage;
-    }
 
 
     public String concatenateUsername(String firstName, String lastName) {
@@ -33,16 +29,8 @@ public class UserProfileService {
     }
 
     private String handleDuplicateUsername(String username) {
-        for (Trainee trainee : traineeStorage.values()) {
-            if (trainee.getUser().getUsername().equals(username)) {
-                username += serialNumber;
-                counter++;
-            }
-        }
-
-        serialNumber = counter;
-        for (Trainer trainer : trainerStorage.values()) {
-            if (trainer.getUser().getUsername().equals(username)) {
+        for (User user : userRepository.findAll()) {
+            if (user.getUsername().equals(username)) {
                 username += serialNumber;
                 counter++;
             }

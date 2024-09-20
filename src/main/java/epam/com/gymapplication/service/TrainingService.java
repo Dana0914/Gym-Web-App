@@ -1,7 +1,8 @@
 package epam.com.gymapplication.service;
 
-import epam.com.gymapplication.customexception.ServiceException;
-import epam.com.gymapplication.dao.impl.TrainingDAOImpl;
+import epam.com.gymapplication.dao.TrainingRepository;
+import epam.com.gymapplication.model.Trainee;
+import epam.com.gymapplication.model.Trainer;
 import epam.com.gymapplication.model.Training;
 import epam.com.gymapplication.model.TrainingType;
 import org.slf4j.Logger;
@@ -9,93 +10,80 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+
 
 @Service
 public class TrainingService {
     private static final Logger logger = LoggerFactory.getLogger(TrainingService.class);
 
     @Autowired
-    private TrainingDAOImpl trainingDAOImpl;
+    private TrainingRepository trainingRepository;
 
 
-    public void saveTraining(Training training) throws ServiceException {
-        if (training.getId() == null || training.getId() <= 0
-                || training.getTrainingName() == null || training.getTrainingName().isEmpty()
-                || training.getTrainingType() == null || training.getTrainingType().name().isEmpty()
-                || training.getTrainingDate() == null || training.getTrainingDate().toString().isEmpty()
-                || training.getTrainingDuration() == null || training.getTrainingDuration().toString().isEmpty()
-                || training.getTrainerID() == null || training.getTrainerID() <= 0
-                || training.getTraineeID() == null || training.getTraineeID() <= 0) {
 
-            logger.warn("Training save failed");
-            throw new ServiceException("Training save failed, training is invalid");
-        }
-        trainingDAOImpl.save(training);
-        logger.info("Training saved {} ", training);
+    public List<Training> findTrainingListByTraineeCriteria(String username, LocalDate from, LocalDate to, String trainingTypeName)  {
+        logger.info("Find training list by trainee criteria");
+        return trainingRepository.findTrainingListByTraineeCriteria(username, from, to, trainingTypeName);
+    }
+
+    public List<Training> findTrainingListByTrainerCriteria(String username, LocalDate from, LocalDate to, String trainingTypeName)  {
+        logger.info("Find training list by trainer criteria");
+        return trainingRepository.findTrainingListByTraineeCriteria(username, from, to, trainingTypeName);
+    }
+
+    public void addTraining(Trainee trainee, Trainer trainer, TrainingType trainingType) {
+
+        Training training = new Training();
+        training.setTrainer(trainer);
+        training.setTrainingType(trainingType);
+        training.setTrainee(trainee);
+        trainingRepository.save(training);
 
     }
 
-    public void updateTraining(Training training) throws ServiceException {
-        if (training.getId() == null || training.getId() <= 0
-                || training.getTrainingName() == null || training.getTrainingName().isEmpty()
-                || training.getTrainingType() == null || training.getTrainingType().name().isEmpty()
-                || training.getTrainingDate() == null || training.getTrainingDate().toString().isEmpty()
-                || training.getTrainingDuration() == null || training.getTrainingDuration().toString().isEmpty()
-                || training.getTrainerID() == null || training.getTrainerID() <= 0
-                || training.getTraineeID() == null || training.getTraineeID() <= 0) {
 
-            logger.warn("Training update failed");
-            throw new ServiceException("Training update failed, training is invalid");
-        }
-
-        trainingDAOImpl.update(training);
-        logger.info("Training updated {} ", training);
+    public void saveTraining(Training training) {
+        trainingRepository.save(training);
+        logger.info("Training saved");
 
     }
 
-    public void deleteTrainingById(Long id) throws ServiceException {
-        if (id == null || id <= 0) {
-            logger.warn("Training delete by id failed");
-            throw new ServiceException("Removing training by id failed, training id is invalid");
-        }
-
-        trainingDAOImpl.deleteById(id);
-        logger.info("Training deleted {} ", id);
+    public void updateTraining(Training training)  {
+        trainingRepository.update(training);
+        logger.info("Training updated");
 
     }
 
-    public Optional<Training> findTrainingById(Long id) {
-        if (id == null || id <= 0) {
-            logger.warn("Training find by id failed");
-            throw new ServiceException("Training find by id failed, id is invalid");
-        }
+    public void deleteById(Long id)  {
+        trainingRepository.deleteById(id);
+        logger.info("Training deleted");
+
+    }
+
+    public Training findTrainingById(Long id) {
         logger.info("Found training by id {} ", id);
-        Optional<Training> byId = trainingDAOImpl.findById(id);
-        return Optional.of(byId.orElseThrow());
+        return trainingRepository.findById(id).orElseThrow();
     }
 
-    public Set<Map.Entry<Long, Training>> getAllTrainings() {
-        return trainingDAOImpl.findAll();
-    }
 
     public Optional<Training> findByTrainingName(String trainingName) {
-        if (trainingName == null || trainingName.isEmpty()) {
-            logger.warn("Training finding by name failed");
-            throw new ServiceException("Finding training by name failed, training name is invalid");
+        Training byTrainingName = trainingRepository.findByTrainingName(trainingName);
+        if (byTrainingName == null) {
+            return Optional.empty();
         }
         logger.info("Training name found {} ", trainingName);
-        return trainingDAOImpl.findByTrainingName(trainingName);
+        return Optional.of(byTrainingName);
     }
 
-    public Optional<Training> findByTrainingType(TrainingType trainingType) {
-        if (trainingType == null || trainingType.name().isEmpty()) {
-            logger.warn("Training finding by type failed");
-            throw new ServiceException("Finding training by type failed, training type is invalid");
+    public Optional<Training> findByTrainingType(String trainingType) {
+        Training byTrainingType = trainingRepository.findByTrainingType(trainingType);
+        if (byTrainingType == null) {
+            return Optional.empty();
         }
         logger.info("Training type found {} ", trainingType);
-        return trainingDAOImpl.findByTrainingType(trainingType);
+        return Optional.of(byTrainingType);
     }
 }
