@@ -1,6 +1,6 @@
 package epam.com.gymapplication;
 
-import epam.com.gymapplication.dao.TraineeDAO;
+import epam.com.gymapplication.dao.TraineeRepository;
 import epam.com.gymapplication.model.Trainee;
 import epam.com.gymapplication.model.User;
 import epam.com.gymapplication.service.TraineeService;
@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 
 import static org.mockito.Mockito.*;
@@ -24,7 +25,7 @@ public class TraineeServiceTest {
 
 
     @Mock
-    private TraineeDAO traineeDAO;
+    private TraineeRepository traineeRepository;
 
     @InjectMocks
     private TraineeService traineeService;
@@ -70,7 +71,7 @@ public class TraineeServiceTest {
 
     @Test
     public void save_withValidData_returnsValidEntity() {
-        when(traineeDAO.findById(trainee.getId())).thenReturn(trainee);
+        when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.of(trainee));
 
 
         traineeService.saveTrainee(trainee);
@@ -78,21 +79,21 @@ public class TraineeServiceTest {
         Trainee traineeById = traineeService.findTraineeById(trainee.getId());
 
 
-        verify(traineeDAO).save(trainee);
+        verify(traineeRepository).save(trainee);
         Assertions.assertEquals(traineeById, trainee);
 
     }
 
     @Test
     public void save_withInvalidValidData_returnsNull() {
-        when(traineeDAO.findById(trainee.getId())).thenReturn(null);
+        when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.empty());
 
         traineeService.saveTrainee(trainee);
 
         Trainee traineeById = traineeService.findTraineeById(trainee.getId());
 
 
-        verify(traineeDAO).save(trainee);
+        verify(traineeRepository).save(trainee);
 
         Assertions.assertNull(traineeById);
 
@@ -101,7 +102,7 @@ public class TraineeServiceTest {
 
     @Test
     public void update_withExistingEntity_updatesEntityDetails() {
-        when(traineeDAO.findById(trainee.getId())).thenReturn(trainee);
+        when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.ofNullable(trainee));
 
         traineeService.saveTrainee(trainee);
 
@@ -111,12 +112,12 @@ public class TraineeServiceTest {
 
         traineeService.updateTrainee(trainee2);
 
-        when(traineeDAO.findById(trainee2.getId())).thenReturn(trainee2);
+        when(traineeRepository.findById(trainee2.getId())).thenReturn(Optional.ofNullable(trainee2));
 
         Trainee updatedTraineeById = traineeService.findTraineeById(trainee2.getId());
 
-        verify(traineeDAO).update(trainee2);
-        verify(traineeDAO).save(trainee);
+        verify(traineeRepository).updateTrainee(trainee2);
+        verify(traineeRepository).save(trainee);
 
         Assertions.assertEquals(traineeById, trainee);
         Assertions.assertEquals(updatedTraineeById, trainee2);
@@ -124,7 +125,7 @@ public class TraineeServiceTest {
 
     @Test
     public void update_withInvalidData_returnsNull() {
-        when(traineeDAO.findById(trainee.getId())).thenReturn(trainee);
+        when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.ofNullable(trainee));
 
         traineeService.saveTrainee(trainee);
 
@@ -134,12 +135,12 @@ public class TraineeServiceTest {
 
         traineeService.updateTrainee(trainee2);
 
-        when(traineeDAO.findById(15L)).thenReturn(null);
+        when(traineeRepository.findById(15L)).thenReturn(Optional.empty());
 
         Trainee updatedTraineeById = traineeService.findTraineeById(15L);
 
-        verify(traineeDAO).update(trainee2);
-        verify(traineeDAO).save(trainee);
+        verify(traineeRepository).updateTrainee(trainee2);
+        verify(traineeRepository).save(trainee);
 
         Assertions.assertEquals(traineeById, trainee);
         Assertions.assertNull(updatedTraineeById);
@@ -148,15 +149,15 @@ public class TraineeServiceTest {
 
     @Test
     public void findTraineeById_withExistingId_returnsEntity() {
-        when(traineeDAO.findById(trainee.getId())).thenReturn(trainee);
+        when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.ofNullable(trainee));
 
         traineeService.saveTrainee(trainee);
 
         Trainee traineeById = traineeService.findTraineeById(trainee.getId());
 
 
-        verify(traineeDAO).findById(trainee.getId());
-        verify(traineeDAO).save(trainee);
+        verify(traineeRepository).findById(trainee.getId());
+        verify(traineeRepository).save(trainee);
 
         Assertions.assertEquals(traineeById, trainee);
 
@@ -164,14 +165,14 @@ public class TraineeServiceTest {
 
     @Test
     public void findTraineeById_withNonExistingId_returnsNull() {
-        when(traineeDAO.findById(trainee.getId())).thenReturn(null);
+        when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.empty());
 
         traineeService.saveTrainee(trainee);
 
         Trainee traineeById = traineeService.findTraineeById(trainee.getId());
 
-        verify(traineeDAO).findById(trainee.getId());
-        verify(traineeDAO).save(trainee);
+        verify(traineeRepository).findById(trainee.getId());
+        verify(traineeRepository).save(trainee);
 
         Assertions.assertNull(traineeById);
 
@@ -179,18 +180,18 @@ public class TraineeServiceTest {
 
     @Test
     public void deleteTrainee_withValidId_returnsValidEntity() {
-        when(traineeDAO.findById(trainee.getId())).thenReturn(trainee);
+        when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.ofNullable(trainee));
 
         traineeService.saveTrainee(trainee);
 
-        traineeService.deleteTrainee(trainee);
+        traineeService.deleteTraineeById(trainee.getId());
 
-        when(traineeDAO.findById(trainee.getId())).thenReturn(null);
+        when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.empty());
 
         Trainee traineeById = traineeService.findTraineeById(trainee.getId());
 
-        verify(traineeDAO).save(trainee);
-        verify(traineeDAO).delete(trainee);
+        verify(traineeRepository).save(trainee);
+        verify(traineeRepository).delete(trainee);
 
         Assertions.assertNull(traineeById);
 
@@ -198,16 +199,16 @@ public class TraineeServiceTest {
 
     @Test
     public void deleteTrainee_withInvalidId_returnsNull() {
-        when(traineeDAO.findById(5L)).thenReturn(null);
+        when(traineeRepository.findById(5L)).thenReturn(Optional.empty());
 
         traineeService.saveTrainee(trainee);
 
         Trainee traineeById = traineeService.findTraineeById(5L);
 
-        traineeService.deleteTrainee(trainee);
+        traineeService.deleteTraineeById(trainee.getId());
 
-        verify(traineeDAO).delete(trainee);
-        verify(traineeDAO).save(trainee);
+        verify(traineeRepository).delete(trainee);
+        verify(traineeRepository).save(trainee);
 
         Assertions.assertNull(traineeById);
 
@@ -217,30 +218,30 @@ public class TraineeServiceTest {
 
     @Test
     public void findByFirstName_withExistingData_returnsValidEntity() {
-        when(traineeDAO.findByFirstName(trainee.getUser().getFirstName())).thenReturn(trainee);
+        when(traineeRepository.findByFirstName(trainee.getUser().getFirstName())).thenReturn(Optional.of(trainee));
 
         traineeService.saveTrainee(trainee);
 
-        Trainee firstName = traineeService.findTraineeByFirstName(trainee.getUser().getFirstName());
+        Trainee traineeByFirstname = traineeService.findByFirstName(trainee.getUser().getFirstName());
 
 
-        verify(traineeDAO).findByFirstName(trainee.getUser().getFirstName());
-        verify(traineeDAO).save(trainee);
+        verify(traineeRepository).findByFirstName(trainee.getUser().getFirstName());
+        verify(traineeRepository).save(trainee);
 
-        Assertions.assertEquals(firstName, trainee);
+        Assertions.assertEquals(traineeByFirstname, trainee);
 
     }
 
     @Test
     public void findByFirstName_withNonExistingData_returnsNull() {
-        when(traineeDAO.findByFirstName("George")).thenReturn(null);
+        when(traineeRepository.findByFirstName("George")).thenReturn(Optional.empty());
 
         traineeService.saveTrainee(trainee);
 
-        Trainee traineeByFirstName = traineeService.findTraineeByFirstName("George");
+        Trainee traineeByFirstName = traineeService.findByFirstName("George");
 
-        verify(traineeDAO).findByFirstName("George");
-        verify(traineeDAO).save(trainee);
+        verify(traineeRepository).findByFirstName("George");
+        verify(traineeRepository).save(trainee);
 
         Assertions.assertNull(traineeByFirstName);
 
@@ -248,30 +249,29 @@ public class TraineeServiceTest {
 
     @Test
     public void findByLastName_withExistingData_returnsValidEntity() {
-        when(traineeDAO.findByLastName(trainee.getUser().getLastName())).thenReturn(trainee);
+        when(traineeRepository.findByLastName(trainee.getUser().getLastName())).thenReturn(Optional.of(trainee));
 
         traineeService.saveTrainee(trainee);
 
+        Trainee traineeByLastname = traineeService.findByLastName(trainee.getUser().getLastName());
 
-        Trainee lastName = traineeService.findByLastName(trainee.getUser().getLastName());
 
+        verify(traineeRepository).findByLastName(trainee.getUser().getLastName());
+        verify(traineeRepository).save(trainee);
 
-        verify(traineeDAO).findByLastName(trainee.getUser().getLastName());
-        verify(traineeDAO).save(trainee);
-
-        Assertions.assertEquals(lastName, trainee);
+        Assertions.assertEquals(traineeByLastname, trainee);
     }
 
     @Test
     public void findByLastName_withNonExistingData_returnsNull() {
-        when(traineeDAO.findByLastName("Bush")).thenReturn(null);
+        when(traineeRepository.findByLastName("Bush")).thenReturn(Optional.empty());
 
         traineeService.saveTrainee(trainee);
 
         Trainee traineeServiceByLastName = traineeService.findByLastName("Bush");
 
-        verify(traineeDAO).findByLastName("Bush");
-        verify(traineeDAO).save(trainee);
+        verify(traineeRepository).findByLastName("Bush");
+        verify(traineeRepository).save(trainee);
 
         Assertions.assertNull(traineeServiceByLastName);
     }

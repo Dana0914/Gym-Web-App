@@ -2,6 +2,7 @@ package epam.com.gymapplication.model;
 
 import jakarta.persistence.*;
 
+
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;

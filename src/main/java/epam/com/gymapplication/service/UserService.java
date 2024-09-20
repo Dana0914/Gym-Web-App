@@ -1,107 +1,76 @@
 package epam.com.gymapplication.service;
 
-import epam.com.gymapplication.customexception.ServiceException;
-import epam.com.gymapplication.dao.UserDAO;
+import epam.com.gymapplication.dao.UserRepository;
 import epam.com.gymapplication.model.User;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
-    private UserDAO userDAO;
+    private UserRepository userRepository;
 
-    @Transactional
-    public void save(User user) throws ServiceException {
-        if (user.getUsername() == null || user.getUsername().isEmpty()
-        || user.getPassword() == null || user.getPassword().isEmpty()
-        || user.getFirstName() == null || user.getFirstName().isEmpty()
-        || user.getLastName() == null || user.getLastName().isEmpty()) {
 
-            logger.warn("User save failed");
-            throw new ServiceException("User save failed, user is invalid");
-
-        }
+    public void save(User user) {
         logger.info("User saved {}", user);
-        userDAO.save(user);
+        userRepository.save(user);
     }
 
-    public User findById(Long id) throws ServiceException {
-        if (id == null || id <= 0) {
-            logger.warn("User by id not found");
-            throw new ServiceException("User finding failed, id is invalid");
-        }
+    public User findById(Long id) {
         logger.info("Found user by id {} ", id);
-        return userDAO.findById(id);
-
-
+        return userRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException("User with id " + id + " not found"));
 
     }
 
     public List<User> findAll() {
-        return userDAO.findAll();
+        return (List<User>) userRepository.findAll();
     }
 
-    @Transactional
-    public void delete(User user) throws ServiceException {
-        if (user.getUsername() == null || user.getUsername().isEmpty()
-                || user.getPassword() == null || user.getPassword().isEmpty()
-                || user.getFirstName() == null || user.getFirstName().isEmpty()
-                || user.getLastName() == null || user.getLastName().isEmpty()) {
 
-            logger.warn("User delete failed");
-            throw new ServiceException("User delete failed, user does not exist");
-        }
-
-        logger.info("Deleted user {} ", user);
-        userDAO.delete(user);
+    public void deleteById(Long id)  {
+        logger.info("Deleted user {} ", id);
+        userRepository.deleteById(id);
     }
 
-    public void update(User user) throws ServiceException {
-        if (user.getUsername() == null || user.getUsername().isEmpty()
-                || user.getPassword() == null || user.getPassword().isEmpty()
-                || user.getFirstName() == null || user.getFirstName().isEmpty()
-                || user.getLastName() == null || user.getLastName().isEmpty()) {
-
-            logger.warn("User update failed");
-            throw new ServiceException("User update failed, user is invalid");
-
-        }
+    public void update(User user)  {
         logger.info("Updated user by id {} ", user.getId());
-        userDAO.update(user);
+        userRepository.update(user);
     }
 
-    public User findByFirstname(String name) throws ServiceException {
-        if (name == null || name.isEmpty()) {
-            logger.warn("User find by name failed");
-            throw new ServiceException("User find by name failed, name is invalid");
-        }
+    public Optional<User> findByFirstname(String name)  {
         logger.info("Found user by firstname {} ", name);
-        return userDAO.findByFirstName(name);
+        User byFirstName = userRepository.findByFirstName(name);
+        if (byFirstName == null) {
+            return Optional.empty();
+        }
+        return Optional.of(byFirstName);
     }
 
-    public User findByLastname(String name) throws ServiceException {
-        if (name == null || name.isEmpty()) {
-            logger.warn("User find by last name failed");
-            throw new ServiceException("User find by last name failed, lastname is invalid");
-        }
+    public Optional<User> findByLastname(String name) {
         logger.info("Found user by lastname {} ", name);
-        return userDAO.findByLastName(name);
+        User byLastName = userRepository.findByLastName(name);
+        if (byLastName == null) {
+            return Optional.empty();
+        }
+        return Optional.of(byLastName);
     }
 
-    public User findByUsername(String username) throws ServiceException {
-        if (username == null || username.isEmpty()) {
-            logger.warn("User find by username failed");
-            throw new ServiceException("User find by username failed, username is invalid");
-        }
+    public Optional<User> findByUsername(String username)  {
         logger.info("Found user by username {} ", username);
-        return userDAO.findByUsername(username);
+        User byUsername = userRepository.findByUsername(username);
+        if (byUsername == null) {
+            return Optional.empty();
+        }
+        return Optional.of(byUsername);
     }
 }
