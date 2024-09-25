@@ -1,6 +1,6 @@
 package epam.com.gymapplication.dao;
 
-import epam.com.gymapplication.model.Trainer;
+import epam.com.gymapplication.entity.Trainer;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -30,10 +30,10 @@ public interface TrainerRepository extends CrudRepository<Trainer, Long> {
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE Trainer t SET t.user.id = :users_id, t.trainingType.id =: specialization WHERE t.id = :id",
+    @Query(value = "UPDATE Trainer t SET t.user.id = :users_id, t.trainingType.id =: trainingType WHERE t.id = :id",
             nativeQuery = false)
 
-    void updateTrainee(@Param("id") Long id,
-                       @Param("users_id") Long usersId,
-                       @Param("specialization") Long specialization);
+    void updateTrainee(@Param("users_id") Long usersId,
+                       @Param("id") Long trainingType,
+                       @Param("id") Long id);
 }

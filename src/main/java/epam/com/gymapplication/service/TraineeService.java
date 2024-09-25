@@ -1,15 +1,17 @@
 package epam.com.gymapplication.service;
 
-import epam.com.gymapplication.customexception.ProfileIsActiveException;
-import epam.com.gymapplication.customexception.ProfileIsInActiveException;
 import epam.com.gymapplication.dao.TraineeRepository;
 import epam.com.gymapplication.dao.TrainerRepository;
 import epam.com.gymapplication.dao.UserRepository;
-import epam.com.gymapplication.model.Trainee;
-import epam.com.gymapplication.model.Trainer;
-import epam.com.gymapplication.model.User;
+import epam.com.gymapplication.dto.TraineeProfileResponseDTO;
+import epam.com.gymapplication.entity.Trainee;
+import epam.com.gymapplication.entity.Trainer;
+import epam.com.gymapplication.entity.User;
+import epam.com.gymapplication.model.TraineeRequest;
+import epam.com.gymapplication.model.TraineeResponse;
 import epam.com.gymapplication.profile.PasswordGenerator;
 import epam.com.gymapplication.profile.UserProfileService;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 
@@ -39,6 +40,9 @@ public class TraineeService {
 
     @Autowired
     private TrainerRepository trainerRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
 
 
@@ -68,88 +72,92 @@ public class TraineeService {
 
 
 
-    public Trainee createTraineeProfile(Trainee trainee, User user)  {
+    public TraineeResponse createTraineeProfile(TraineeRequest traineeRequest)  {
+        String username = userProfileService.concatenateUsername(
+                traineeRequest.getFirstName(),
+                traineeRequest.getLastName());
 
-        String username = userProfileService.concatenateUsername(user.getFirstName(), user.getLastName());
         String password = passwordGenerator.generatePassword();
 
-
-        User savedUser = new User();
-        savedUser.setFirstName(user.getFirstName());
-        savedUser.setLastName(user.getLastName());
-        savedUser.setUsername(username);
-        savedUser.setPassword(password);
-        savedUser.setActive(user.isActive());
+        User toUserEntity = modelMapper.map(traineeRequest, User.class);
+        Trainee trainee = modelMapper.map(traineeRequest, Trainee.class);
 
 
-        userRepository.save(savedUser);
+        toUserEntity.setUsername(username);
+        toUserEntity.setPassword(password);
 
 
-        Trainee savedTrainee = new Trainee();
-        savedTrainee.setAddress(trainee.getAddress());
-        savedTrainee.setDateOfBirth(trainee.getDateOfBirth());
-        savedTrainee.setUser(savedUser);
+        User savedUser = userRepository.save(toUserEntity);
 
+        trainee.setUser(savedUser);
+        Trainee savedTrainee = traineeRepository.save(trainee);
 
-        traineeRepository.save(savedTrainee);
+        TraineeResponse traineeResponse = modelMapper.map(savedTrainee, TraineeResponse.class);
 
-        return savedTrainee;
+        traineeResponse.setPassword(savedTrainee.getUser().getPassword());
+        traineeResponse.setUsername(savedTrainee.getUser().getUsername());
+
+        return traineeResponse;
+
     }
 
-    public Trainee findTraineeProfileByUsername(String username) {
+    public TraineeProfileResponseDTO findTraineeProfileByUsername(String username) {
         logger.info("Find Trainee Profile by Username");
-        return traineeRepository.findByUsername(username).orElseThrow();
+        Trainee traineeByUsername = traineeRepository.findByUsername(username).orElseThrow();
+        TraineeProfileResponseDTO traineeProfileResponseDTO = new TraineeProfileResponseDTO();
+        traineeProfileResponseDTO.setFirstname(traineeByUsername.getUser().getFirstName());
+        traineeProfileResponseDTO.setLastname(traineeByUsername.getUser().getLastName());
+        traineeProfileResponseDTO.setAddress(traineeByUsername.getAddress());
+        traineeProfileResponseDTO.setDateOfBirth(traineeByUsername.getDateOfBirth());
+        traineeProfileResponseDTO.setTrainers(traineeByUsername.getTrainers());
+        traineeProfileResponseDTO.setActive(traineeByUsername.getUser().isActive());
+
+
+        return traineeProfileResponseDTO;
+
 
     }
 
     public boolean authenticateTraineeProfile(String username, String password) {
         Trainee traineeProfileByUsername = traineeRepository.findByUsername(username).orElseThrow();
-        return traineeProfileByUsername.getUser().getUsername().equals(username)
-                && traineeProfileByUsername.getUser().getPassword().equals(password);
+
+        return traineeProfileByUsername.getUser().getUsername().equals(username) &&
+                traineeProfileByUsername.getUser().getPassword().equals(password);
 
     }
 
-    public Trainee changePassword(Long id, String password) {
-        Trainee traineeProfileById = traineeRepository.findById(id).orElseThrow();
-        if (traineeProfileById.getUser().getPassword().equals(password)) {
-            traineeProfileById.getUser().setPassword(passwordGenerator.generatePassword());
+    public boolean changePassword(String username, String password, String oldPassword) {
+        Trainee traineeProfileByUsername = traineeRepository.findByUsername(username).orElseThrow();
+        if (traineeProfileByUsername.getUser().getPassword().equals(oldPassword)) {
+            traineeProfileByUsername.getUser().setPassword(password);
         }
-        return traineeProfileById;
+        return false;
+
     }
 
 
-    public void activateTrainee(Long id) throws ProfileIsActiveException {
+    public void activateOrDeactivateTraineeStatus(Long id, boolean isActive) {
         Trainee traineeById = traineeRepository.findById(id).orElseThrow();
-        if (traineeById.getUser().isActive()) {
-            throw new ProfileIsActiveException("Trainee Profile is already activated");
+        if (traineeById.getUser().isActive()!= isActive) {
+            traineeById.getUser().setActive(isActive);
+            traineeRepository.save(traineeById);
         }
-        traineeById.getUser().setActive(true);
-        traineeRepository.save(traineeById);
+        System.out.println("Trainee is " + (isActive ? "active" : "inactive"));
+
 
     }
 
-
-    public void deactivateTrainee(Long id) throws ProfileIsInActiveException {
-        Optional<Trainee> traineeById = traineeRepository.findById(id);
-        if (!traineeById.get().getUser().isActive()) {
-            throw new ProfileIsInActiveException("Trainee Profile is already inactive");
-        }
-        traineeById.get().getUser().setActive(false);
-        traineeRepository.save(traineeById.orElseThrow());
-
-
-    }
 
 
     public void updateTraineeProfile(Long id, String firstname, String lastname) {
-        Optional<Trainee> traineeById = traineeRepository.findById(id);
+        Trainee traineeById = traineeRepository.findById(id).orElseThrow();
 
-        traineeById.get().getUser().setFirstName(firstname);
-        traineeById.get().getUser().setLastName(lastname);
-        traineeById.get().getUser().setUsername(userProfileService.concatenateUsername(firstname, lastname));
+        traineeById.getUser().setFirstName(firstname);
+        traineeById.getUser().setLastName(lastname);
+        traineeById.getUser().setUsername(userProfileService.concatenateUsername(firstname, lastname));
 
         logger.info("Entity update profile successfully");
-        traineeRepository.save(traineeById.orElseThrow());
+        traineeRepository.save(traineeById);
 
     }
 
@@ -171,18 +179,20 @@ public class TraineeService {
 
     public void saveTrainee(Trainee trainee) {
         traineeRepository.save(trainee);
-        logger.info("Trainee saved {}", trainee);
+        logger.info("Trainee saved");
 
     }
 
     public void updateTrainee(Trainee trainee)  {
         Trainee findTraineeById = traineeRepository.findById(trainee.getId()).orElseThrow();
+        logger.info("Trainee found by id {}", trainee.getId());
+
         traineeRepository.updateTrainee(findTraineeById.getId(),
                 trainee.getUser().getId(),
                 trainee.getAddress(),
                 trainee.getDateOfBirth());
 
-        logger.info("Trainee updated {}", trainee);
+        logger.info("Trainee updated");
 
     }
 
@@ -219,4 +229,5 @@ public class TraineeService {
         return traineeRepository.findByUsername(username).orElseThrow();
 
     }
+
 }

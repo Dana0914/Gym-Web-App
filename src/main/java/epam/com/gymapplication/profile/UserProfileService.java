@@ -3,7 +3,7 @@ package epam.com.gymapplication.profile;
 
 
 import epam.com.gymapplication.dao.UserRepository;
-import epam.com.gymapplication.model.User;
+import epam.com.gymapplication.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

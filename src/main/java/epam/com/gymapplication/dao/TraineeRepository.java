@@ -1,8 +1,8 @@
 package epam.com.gymapplication.dao;
 
 
-import epam.com.gymapplication.model.Trainee;
-import epam.com.gymapplication.model.Trainer;
+import epam.com.gymapplication.entity.Trainee;
+import epam.com.gymapplication.entity.Trainer;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -32,10 +32,10 @@ public interface TraineeRepository extends CrudRepository<Trainee, Long> {
     @Query(value = "select t from Trainee t where t.user.firstname = :firstname", nativeQuery = false)
     Optional<Trainee> findByFirstName(@Param("firstname") String firstName);
 
-    @Query(value = "select t from Trainee t where t.user.lastname =: lastname", nativeQuery = false)
+    @Query(value = "select t from Trainee t where t.user.lastname = :lastname", nativeQuery = false)
     Optional<Trainee> findByLastName(@Param("lastname") String lastName);
 
-    @Query(value = "select t from Trainee t where t.user.username =: username", nativeQuery = false)
+    @Query(value = "select t from Trainee t where t.user.username = :username", nativeQuery = false)
     Optional<Trainee> findByUsername(@Param("username") String username);
 
     @Modifying

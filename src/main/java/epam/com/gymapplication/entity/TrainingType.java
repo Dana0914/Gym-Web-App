@@ -1,4 +1,4 @@
-package epam.com.gymapplication.model;
+package epam.com.gymapplication.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

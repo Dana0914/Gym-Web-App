@@ -2,14 +2,15 @@ package epam.com.gymapplication.service;
 
 
 import epam.com.gymapplication.dao.TrainingTypeRepository;
-import epam.com.gymapplication.model.TrainingType;
+import epam.com.gymapplication.entity.TrainingType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.NoSuchElementException;
+
 
 
 @Service
@@ -21,33 +22,35 @@ public class TrainingTypeService {
 
 
     public void save(TrainingType trainingType)  {
-        logger.info("Entity saved {} ", trainingType);
+        logger.info("Entity saved");
         trainingTypeRepository.save(trainingType);
     }
 
     public void update(TrainingType trainingType) {
-        logger.info("Entity updated {} ", trainingType);
-        trainingTypeRepository.update(trainingType);
+        TrainingType byId = trainingTypeRepository.findById(trainingType.getId()).orElseThrow(()->
+                new NoSuchElementException("TrainingType not found for ID: " + trainingType.getId()));
+
+        logger.info("Entity found by id {}",trainingType.getId());
+
+        trainingTypeRepository.update(trainingType.getTrainingTypeName(), byId.getId());
+        logger.info("Entity updated with new name {}",trainingType.getTrainingTypeName());
+
 
     }
 
     public void deleteById(Long id)  {
-        logger.info("Entity deleted by id{} ", id);
+        logger.info("Entity deleted by id {} ", id);
         trainingTypeRepository.deleteById(id);
     }
 
     public TrainingType findById(Long id)  {
-        logger.info("Entity id found {} ", id);
+        logger.info("Entity found by id {} ", id);
         return trainingTypeRepository.findById(id).orElseThrow();
     }
 
-    public Optional<TrainingType> findByTrainingTypeName(String trainingType) {
-        TrainingType trainingTypeName = trainingTypeRepository.findByTrainingTypeName(trainingType);
-        if (trainingTypeName == null) {
-            return Optional.empty();
-        }
+    public TrainingType findByTrainingTypeName(String trainingType) {
         logger.info("Entity found by name {} ", trainingType);
-        return Optional.of(trainingTypeName);
+        return trainingTypeRepository.findByTrainingTypeName(trainingType).orElseThrow();
     }
 
     public List<TrainingType> findAll() {

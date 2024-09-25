@@ -1,7 +1,7 @@
 package epam.com.gymapplication.service;
 
 import epam.com.gymapplication.dao.UserRepository;
-import epam.com.gymapplication.model.User;
+import epam.com.gymapplication.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 public class UserService {
@@ -43,34 +43,26 @@ public class UserService {
     }
 
     public void update(User user)  {
-        logger.info("Updated user by id {} ", user.getId());
-        userRepository.update(user);
+        User byId = userRepository.findById(user.getId()).orElseThrow();
+        logger.info("User found by id {}", byId);
+
+        userRepository.update(user.getFirstName(), user.getLastName(), user.getId());
+        logger.info("User updated by firstname and lastname {}", user.getFirstName() + "," + user.getLastName());
     }
 
-    public Optional<User> findByFirstname(String name)  {
+    public User findByFirstname(String name)  {
         logger.info("Found user by firstname {} ", name);
-        User byFirstName = userRepository.findByFirstName(name);
-        if (byFirstName == null) {
-            return Optional.empty();
-        }
-        return Optional.of(byFirstName);
+        return userRepository.findByFirstName(name).orElseThrow();
     }
 
-    public Optional<User> findByLastname(String name) {
+    public User findByLastname(String name) {
         logger.info("Found user by lastname {} ", name);
-        User byLastName = userRepository.findByLastName(name);
-        if (byLastName == null) {
-            return Optional.empty();
-        }
-        return Optional.of(byLastName);
+        return userRepository.findByLastName(name).orElseThrow();
+
     }
 
-    public Optional<User> findByUsername(String username)  {
+    public User findByUsername(String username)  {
         logger.info("Found user by username {} ", username);
-        User byUsername = userRepository.findByUsername(username);
-        if (byUsername == null) {
-            return Optional.empty();
-        }
-        return Optional.of(byUsername);
+        return userRepository.findByUsername(username).orElseThrow();
     }
 }

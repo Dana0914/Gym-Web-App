@@ -1,22 +1,25 @@
 package epam.com.gymapplication.config;
 
-
-import epam.com.gymapplication.dao.TraineeRepository;
 import epam.com.gymapplication.profile.PasswordGenerator;
 import epam.com.gymapplication.profile.UserProfileService;
 import epam.com.gymapplication.service.*;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 
 
 @Configuration
-@EnableTransactionManagement
 @ComponentScan(basePackages = "epam.com.gymapplication")
 public class AppConfig {
+
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
+    }
 
     @Bean
     public PersistenceExceptionTranslationPostProcessor exceptionTranslation() {
@@ -57,6 +60,8 @@ public class AppConfig {
     public UserService userService() {
         return new UserService();
     }
+
+
 
 
 

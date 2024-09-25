@@ -2,25 +2,71 @@ package epam.com.gymapplication;
 
 
 import epam.com.gymapplication.config.AppConfig;
-import epam.com.gymapplication.model.*;
+import epam.com.gymapplication.config.JpaConfig;
+import epam.com.gymapplication.config.MyWebInitializer;
+import epam.com.gymapplication.config.WebConfig;
+import epam.com.gymapplication.controller.TraineeController;
+import epam.com.gymapplication.controller.TrainerController;
 import epam.com.gymapplication.service.*;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletRegistration;
+import org.apache.catalina.LifecycleException;
+import org.apache.catalina.startup.Tomcat;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.web.WebApplicationInitializer;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
+
+import java.io.File;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 
-public class App {
-    public static void main( String[] args )  {
-        ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-        TraineeService traineeService = context.getBean(TraineeService.class);
-        UserService userService = context.getBean(UserService.class);
-        TrainingService trainingService = context.getBean(TrainingService.class);
-        TrainerService trainerService = context.getBean(TrainerService.class);
-        TrainingTypeService trainingTypeService = context.getBean(TrainingTypeService.class);
+public class App  {
+    public static void main( String[] args ) throws LifecycleException {
+        //ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class,
+               // WebConfig.class, MyWebInitializer.class, JpaConfig.class);
+        AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
+        cxt.register(WebConfig.class);
+        cxt.register(JpaConfig.class);
+        cxt.register(TraineeController.class);
+        cxt.register(TrainerController.class);
+
+//        ServletContext servletContext = cxt.getServletContext();
+//        servletContext.setInitParameter("contextClass", "org.apache.catalina.startup.ContextInitializer");
+//        servletContext.setInitParameter("contextConfigLocation", "classpath:applicationContext.xml");
+//        servletContext.setInitParameter("applicationContextConfigLocation", "classpath:application-context.xml");
+//        servletContext.setInitParameter("application", "application");
+//        servletContext.setInitParameter("contextPath", "/");
+//        servletContext.setInitParameter("resourceBase", "./");
+//        servletContext.setInitParameter("webapp", "./webapp");
+//        servletContext.setInitParameter("javax.faces.application.context.path", "./");
+//        servletContext.setInitParameter("javax.faces.resource.path", "./");
+//        servletContext.setInitParameter("javax.faces.resource.packages", "./");
+//
+//        MyWebInitializer webInitializer = new MyWebInitializer();
+//        webInitializer.onStartup(servletContext);
+
+//        TraineeService traineeService = context.getBean(TraineeService.class);
+//        UserService userService = context.getBean(UserService.class);
+//        TrainingService trainingService = context.getBean(TrainingService.class);
+//        TrainerService trainerService = context.getBean(TrainerService.class);
+//        TrainingTypeService trainingTypeService = context.getBean(TrainingTypeService.class);
+
+        Tomcat tomcat = new Tomcat();
+        tomcat.setPort(8080);
+        tomcat.getConnector();
+        tomcat.addWebapp("/", new File("src/main/webapp").getAbsolutePath());
+        tomcat.start();
+        tomcat.getServer().await();
+
+
+
+
 
         // update trainees trainers list by username
 //        Trainee traineeById = traineeService.findTraineeById(1L);

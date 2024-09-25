@@ -1,17 +1,18 @@
 package epam.com.gymapplication.service;
 
-import epam.com.gymapplication.customexception.ProfileIsActiveException;
-import epam.com.gymapplication.customexception.ProfileIsInActiveException;
 import epam.com.gymapplication.dao.TraineeRepository;
 import epam.com.gymapplication.dao.TrainerRepository;
 import epam.com.gymapplication.dao.TrainingTypeRepository;
 import epam.com.gymapplication.dao.UserRepository;
-import epam.com.gymapplication.model.Trainee;
-import epam.com.gymapplication.model.Trainer;
-import epam.com.gymapplication.model.TrainingType;
-import epam.com.gymapplication.model.User;
+import epam.com.gymapplication.dto.TrainerRequestDTO;
+import epam.com.gymapplication.dto.TrainerResponseDTO;
+import epam.com.gymapplication.entity.Trainee;
+import epam.com.gymapplication.entity.Trainer;
+import epam.com.gymapplication.entity.TrainingType;
+import epam.com.gymapplication.entity.User;
 import epam.com.gymapplication.profile.PasswordGenerator;
 import epam.com.gymapplication.profile.UserProfileService;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+
 
 
 @Service
@@ -47,13 +48,17 @@ public class TrainerService {
     @Autowired
     private TrainingTypeRepository trainingTypeRepository;
 
+    @Autowired
+    private ModelMapper modelMapper = new ModelMapper();
+
 
 
 
 
     public List<Trainer> findTrainersNotAssignedToTrainee(String username)  {
         Trainee traineeByUsername = traineeRepository.findByUsername(username).orElseThrow();
-        logger.info("Finding trainer list by username: " + username);
+        logger.info("Found trainer list by username: " + username);
+
         return trainerRepository.findTrainersNotAssignedToTrainee(traineeByUsername.getUser().getUsername());
 
 
@@ -62,32 +67,36 @@ public class TrainerService {
 
 
 
-    public Trainer createTrainerProfile(Trainer trainer, User user, TrainingType trainingType)  {
-        String username = userProfileService.concatenateUsername(user.getFirstName(), user.getLastName());
+    public TrainerResponseDTO createTrainerProfile(TrainerRequestDTO trainerRequestDTO)  {
+        String username = userProfileService.concatenateUsername(trainerRequestDTO.getFirstname(),
+                trainerRequestDTO.getLastname());
         String password = passwordGenerator.generatePassword();
 
 
-
-        user.setFirstName(user.getFirstName());
-        user.setLastName(user.getLastName());
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setActive(user.isActive());
-
-        userRepository.save(user);
+        User toUserEntity = modelMapper.map(trainerRequestDTO, User.class);
+        Trainer trainer = modelMapper.map(trainerRequestDTO, Trainer.class);
 
 
-        trainingType.setTrainingTypeName(trainingType.getTrainingTypeName());
+        toUserEntity.setUsername(username);
+        toUserEntity.setPassword(password);
 
-        trainingTypeRepository.save(trainingType);
+        User savedUser = userRepository.save(toUserEntity);
 
 
-        trainer.setUser(user);
-        trainer.setTrainingType(trainingType);
+        TrainingType trainingTypeRepositoryById = trainingTypeRepository.
+                findById(trainerRequestDTO.getSpecialization()).orElseThrow();
 
-        trainerRepository.save(trainer);
+        trainer.setUser(savedUser);
+        trainer.setTrainingType(trainingTypeRepositoryById);
 
-        return trainer;
+
+        Trainer savedTrainer = trainerRepository.save(trainer);
+        TrainerResponseDTO responseDTO = modelMapper.map(savedTrainer, TrainerResponseDTO.class);
+
+        responseDTO.setUsername(savedTrainer.getUser().getUsername());
+        responseDTO.setPassword(savedTrainer.getUser().getPassword());
+
+        return responseDTO;
     }
 
     public Optional<Trainer> findTrainerProfileByUsername(Trainer trainer) {
@@ -101,7 +110,7 @@ public class TrainerService {
 
     }
 
-    public boolean authenticateTraineeProfile(String username, String password)  {
+    public boolean authenticateTrainerProfile(String username, String password)  {
         Trainer trainerProfileByUsername = trainerRepository.findByUsername(username);
         return trainerProfileByUsername.getUser().getUsername().equals(username)
                 && trainerProfileByUsername.getUser().getPassword().equals(password);
@@ -109,33 +118,23 @@ public class TrainerService {
     }
 
 
-    public Trainer passwordChange(Long id, String password) {
-        Trainer trainerProfileById = trainerRepository.findById(id).orElseThrow();
-        if (trainerProfileById.getUser().getPassword().equals(password)) {
-            trainerProfileById.getUser().setPassword(passwordGenerator.generatePassword());
+    public boolean changePassword(String username, String password, String oldPassword) {
+        Trainer trainerProfileByUsername = trainerRepository.findByUsername(username);
+        if (trainerProfileByUsername.getUser().getPassword().equals(oldPassword)) {
+            trainerProfileByUsername.getUser().setPassword(password);
         }
-        return trainerProfileById;
-    }
-
-
-    public void activateTrainer(Long id) throws ProfileIsActiveException {
-        Trainer trainerById = trainerRepository.findById(id).orElseThrow();
-        if (trainerById.getUser().isActive()) {
-            throw new ProfileIsActiveException("Trainee Profile is already activated");
-        }
-        trainerById.getUser().setActive(true);
-        trainerRepository.save(trainerById);
+        return false;
 
     }
 
 
-    public void deactivateTrainer(Long id) throws ProfileIsInActiveException {
+    public void activateOrDeactivateTrainerStatus(Long id, boolean isActive) {
         Trainer trainerById = trainerRepository.findById(id).orElseThrow();
-        if (!trainerById.getUser().isActive()) {
-            throw new ProfileIsInActiveException("Trainee Profile is already inactive");
+        if (trainerById.getUser().isActive()!= isActive) {
+            trainerById.getUser().setActive(isActive);
+            trainerRepository.save(trainerById);
         }
-        trainerById.getUser().setActive(false);
-        trainerRepository.save(trainerById);
+        System.out.println("Trainer is " + (isActive ? "active" : "inactive"));
 
 
     }
@@ -171,8 +170,8 @@ public class TrainerService {
     public void updateTrainer(Trainer trainer) {
         Optional<Trainer> byId = trainerRepository.findById(trainer.getId());
         trainerRepository.updateTrainee(byId.orElseThrow().getId(),
-                trainer.getUser().getId(),
-                trainer.getTrainingType().getId());
+                trainer.getTrainingType().getId(),
+                trainer.getUser().getId());
 
         logger.info("Trainer updated");
 
