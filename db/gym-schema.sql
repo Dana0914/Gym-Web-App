@@ -4,10 +4,12 @@ CREATE TABLE users (
     lastname VARCHAR (80) NOT NULL,
     username VARCHAR (100) NOT NULL,
     password VARCHAR (10) NOT NULL,
-    is_active BOOLEAN NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (id)
 
 );
+
+
 
 CREATE TABLE trainee (
     id SERIAL4 NOT NULL,
