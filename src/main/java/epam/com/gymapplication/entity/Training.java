@@ -44,15 +44,15 @@ public class Training {
         this.trainingDuration = trainingDuration;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name="training_type_id", nullable = false)
     private TrainingType trainingType;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "trainee_ID", nullable = false, unique = true)
     private Trainee trainee;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "trainer_ID", nullable = false, unique = true)
     private Trainer trainer;
 
@@ -115,6 +115,17 @@ public class Training {
     }
 
     @Override
+    public String toString() {
+        return "Training{" +
+                "id=" + id +
+                ", trainingName='" + trainingName + '\'' +
+                ", trainingDate=" + trainingDate +
+                ", trainingDuration=" + trainingDuration +
+                ", trainingType=" + trainingType +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -122,22 +133,12 @@ public class Training {
         return Objects.equals(id, training.id)
                 && Objects.equals(trainingName, training.trainingName)
                 && Objects.equals(trainingDate, training.trainingDate)
-                && Objects.equals(trainingDuration, training.trainingDuration);
+                && Objects.equals(trainingDuration, training.trainingDuration)
+                && Objects.equals(trainingType, training.trainingType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, trainingName, trainingDate,
-                trainingDuration);
-    }
-
-    @Override
-    public String toString() {
-        return "Training{" +
-                "id=" + id +
-                ", trainingName='" + trainingName + '\'' +
-                ", trainingDate=" + trainingDate +
-                ", trainingDuration=" + trainingDuration +
-                '}';
+        return Objects.hash(id, trainingName, trainingDate, trainingDuration, trainingType, trainee, trainer);
     }
 }
