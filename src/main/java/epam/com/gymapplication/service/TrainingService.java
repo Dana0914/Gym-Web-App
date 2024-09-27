@@ -1,6 +1,14 @@
 package epam.com.gymapplication.service;
 
+import epam.com.gymapplication.dao.TraineeRepository;
+import epam.com.gymapplication.dao.TrainerRepository;
 import epam.com.gymapplication.dao.TrainingRepository;
+
+
+import epam.com.gymapplication.dao.TrainingTypeRepository;
+import epam.com.gymapplication.dto.TraineeDTO;
+import epam.com.gymapplication.dto.TrainerDTO;
+import epam.com.gymapplication.dto.TrainingDTO;
 import epam.com.gymapplication.entity.Trainee;
 import epam.com.gymapplication.entity.Trainer;
 import epam.com.gymapplication.entity.Training;
@@ -12,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -20,26 +29,116 @@ public class TrainingService {
 
     @Autowired
     private TrainingRepository trainingRepository;
+    @Autowired
+    private TraineeRepository traineeRepository;
+    @Autowired
+    private TrainerRepository trainerRepository;
 
 
 
-    public List<Training> findTrainingListByTraineeCriteria(String username, LocalDate from, LocalDate to, String trainingTypeName)  {
-        logger.info("Find training list by trainee criteria");
-        return trainingRepository.findTrainingListByTraineeCriteria(username, from, to, trainingTypeName);
+
+
+    public List<TrainingDTO> getTraineesTrainingList(String username, LocalDate from,
+                                                     LocalDate to, String trainerName,
+                                                     String trainingName) {
+
+        Trainee traineeByUsername = traineeRepository.findByUsername(username).orElseThrow();
+        logger.info("Found trainee by username {}", traineeByUsername);
+
+        Trainer trainerByUsername = trainerRepository.findByFirstName(trainerName).orElseThrow();
+        logger.info("Found trainer by username {}", trainerByUsername);
+
+
+        Training trainingByName = trainingRepository.findByTrainingName(trainingName).orElseThrow();
+        logger.info("Found training by username {}", trainingByName);
+
+        TrainingDTO trainingRequestDTO = new TrainingDTO();
+
+        trainingRequestDTO.setTrainee(traineeByUsername);
+        trainingRequestDTO.setTrainer(trainerByUsername);
+
+
+
+        List<Training> trainingListByTrainee = trainingRepository.findTraineesTrainingList(
+                username, from, to, trainerName, trainingName);
+
+        logger.info("Fetching training list for username: {}", trainingListByTrainee);
+
+        List<TrainingDTO> traineesTrainingList = trainingListByTrainee.stream().map(training -> {
+            TrainingDTO trainingResponseDTO = new TrainingDTO();
+
+            trainingResponseDTO.setFrom(training.getTrainingDate());
+            trainingResponseDTO.setTo(training.getTrainingDate());
+            trainingResponseDTO.setTrainingType(training.getTrainingType());
+            trainingResponseDTO.setTraineeUsername(trainingRequestDTO.getTrainee().getUser().getUsername());
+            trainingResponseDTO.setTrainerName(trainingRequestDTO.getTrainer().getUser().getFirstName());
+            trainingResponseDTO.setTrainingName(trainingByName.getTrainingName());
+
+            return trainingResponseDTO;
+
+        }).toList();
+
+        return traineesTrainingList;
+
+
     }
 
-    public List<Training> findTrainingListByTrainerCriteria(String username, LocalDate from, LocalDate to, String trainingTypeName)  {
-        logger.info("Find training list by trainer criteria");
-        return trainingRepository.findTrainingListByTraineeCriteria(username, from, to, trainingTypeName);
+    public List<TrainingDTO> getTrainersTrainingList(String username, LocalDate from, LocalDate to, String traineeName, String trainingName)  {
+        Trainer trainerByUsername = trainerRepository.findByFirstName(traineeName).orElseThrow();
+        logger.info("Found trainer by username {}", trainerByUsername);
+
+        Trainee traineeByName = traineeRepository.findByFirstName(traineeName).orElseThrow();
+        logger.info("Found trainer by username {}", trainerByUsername);
+
+        Training trainingByName = trainingRepository.findByTrainingName(trainingName).orElseThrow();
+        logger.info("Found training by username {}", trainingByName);
+
+        TrainingDTO trainingRequestDTO = new TrainingDTO();
+        trainingRequestDTO.setTrainer(trainerByUsername);
+        trainingRequestDTO.setTrainee(traineeByName);
+
+
+        List<Training> trainersTrainingList = trainingRepository.findTrainingListByTrainerCriteria(username, from, to, traineeName, trainingName);
+        logger.info("Fetching training list for username: {}", trainerByUsername);
+
+        List<TrainingDTO> trainingDTOS = trainersTrainingList.stream().map(training ->
+        {
+            TrainingDTO trainingResponseDTO = new TrainingDTO();
+            trainingResponseDTO.setTrainerName(trainerByUsername.getUser().getUsername());
+            trainingResponseDTO.setFrom(training.getTrainingDate());
+            trainingResponseDTO.setTo(training.getTrainingDate());
+            trainingResponseDTO.setTrainingType(training.getTrainingType());
+            trainingResponseDTO.setTrainingName(trainingByName.getTrainingName());
+
+            return trainingResponseDTO;
+
+        }).toList();
+
+        return trainingDTOS;
     }
 
-    public void addTraining(Trainee trainee, Trainer trainer, TrainingType trainingType) {
+    public TrainingDTO addTraining(Trainee trainee, Trainer trainer, TrainingDTO trainingDTO) {
 
         Training training = new Training();
-        training.setTrainer(trainer);
-        training.setTrainingType(trainingType);
+        training.setTrainingDate(trainingDTO.getTrainingDate());
+        training.setTrainingDuration(trainingDTO.getTrainingDuration());
+        training.setTrainingName(trainingDTO.getTrainingName());
+        training.setTrainingType(trainingDTO.getTrainingType());
         training.setTrainee(trainee);
+        training.setTrainer(trainer);
+
         trainingRepository.save(training);
+
+
+        TrainingDTO trainingRequestDTO = new TrainingDTO();
+        trainingRequestDTO.setTraineeUsername(training.getTrainee().getUser().getUsername());
+        trainingRequestDTO.setTrainerUsername(training.getTrainer().getUser().getUsername());
+        trainingRequestDTO.setTrainingName(trainingDTO.getTrainingName());
+        trainingRequestDTO.setTrainingDuration(trainingDTO.getTrainingDuration());
+        trainingRequestDTO.setTrainingDate(trainingDTO.getTrainingDate());
+
+
+        return trainingRequestDTO;
 
     }
 

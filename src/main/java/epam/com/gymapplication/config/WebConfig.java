@@ -46,11 +46,6 @@ public class WebConfig implements WebMvcConfigurer {
         return resolver;
     }
 
-//    @Override
-//    public void configureViewResolvers(ViewResolverRegistry registry) {
-//        registry.enableContentNegotiation(new MappingJackson2JsonView());
-//        registry.jsp();
-//    }
 
     @Bean
     public SpringTemplateEngine templateEngine() {
@@ -119,7 +114,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
                 .allowedOrigins("http://localhost:8080")
-                .allowedMethods("GET", "POST", "PUT", "DELETE") // Allowed HTTP methods
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH") // Allowed HTTP methods
                 .allowedHeaders("*") // Allowed request headers
                 .allowCredentials(false)
                 .maxAge(3600);

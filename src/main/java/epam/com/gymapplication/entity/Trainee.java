@@ -1,13 +1,14 @@
 package epam.com.gymapplication.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 
 @Entity
@@ -55,23 +56,23 @@ public class Trainee {
     @JoinTable(name="trainer_trainee",
             joinColumns=@JoinColumn(name="trainer_id"),
             inverseJoinColumns=@JoinColumn(name="trainee_id"))
-    private Set<Trainer> trainers = new HashSet<>();
+    private List<Trainer> trainers = new ArrayList<>();
 
-    public Set<Trainer> getTrainers() {
+
+    public List<Trainer> getTrainers() {
         return trainers;
     }
-    public void setTrainers(Set<Trainer> trainers) {
+    public void setTrainers(List<Trainer> trainers) {
         this.trainers = trainers;
     }
 
     @OneToMany(mappedBy = "trainee", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private Set<Training> trainings = new HashSet<>();
+    private List<Training> trainings = new ArrayList<>();
 
-    public Set<Training> getTrainings() {
+    public List<Training> getTrainings() {
         return trainings;
     }
-
-    public void setTrainings(Set<Training> trainings) {
+    public void setTrainings(List<Training> trainings) {
         this.trainings = trainings;
     }
 

@@ -11,8 +11,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+
 
 
 @Repository
@@ -25,7 +26,7 @@ public interface TraineeRepository extends CrudRepository<Trainee, Long> {
     @Query(value = "update Trainee t set t.trainers =: trainers where t.user.username =: username", nativeQuery = false)
     void updateTraineesTrainerList(
             @Param("trainers")
-            Set<Trainer> trainers,
+            List<Trainer> trainers,
             @Param("username")
             String username);
 

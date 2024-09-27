@@ -10,27 +10,28 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TrainerRepository extends CrudRepository<Trainer, Long> {
 
     @Query("SELECT t FROM Trainer t WHERE t.id NOT IN " +
             "(SELECT tr.id FROM Trainee tn JOIN tn.trainers tr WHERE tn.user.username = :username)")
-    List<Trainer> findTrainersNotAssignedToTrainee(@Param("username") String username);
+    List<Trainer> findTrainersListNotAssignedToTraineeByUsername(@Param("username") String username);
 
 
-    @Query(value = "select t from Trainer t where t.user.username =: username", nativeQuery = false)
-    Trainer findByUsername(@Param("username") String username);
+    @Query(value = "select t from Trainer t where t.user.username =:username", nativeQuery = false)
+    Optional<Trainer> findByUsername(@Param("username") String username);
 
-    @Query(value = "select t from Trainer t where t.user.firstname =: firstname", nativeQuery = false)
-    Trainer findByFirstName(@Param("firstname") String firstName);
+    @Query(value = "select t from Trainer t where t.user.firstname =:firstname", nativeQuery = false)
+    Optional<Trainer> findByFirstName(@Param("firstname") String firstName);
 
-    @Query(value = "select t from Trainer t where t.user.lastname =: lastname", nativeQuery = false)
-    Trainer findByLastName(@Param("lastname") String lastName);
+    @Query(value = "select t from Trainer t where t.user.lastname =:lastname", nativeQuery = false)
+    Optional<Trainer> findByLastName(@Param("lastname") String lastName);
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE Trainer t SET t.user.id = :users_id, t.trainingType.id =: trainingType WHERE t.id = :id",
+    @Query(value = "UPDATE Trainer t SET t.user.id =:users_id, t.trainingType.id =:trainingType WHERE t.id =:id",
             nativeQuery = false)
 
     void updateTrainee(@Param("users_id") Long usersId,

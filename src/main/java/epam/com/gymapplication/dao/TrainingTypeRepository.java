@@ -19,6 +19,6 @@ public interface TrainingTypeRepository extends CrudRepository<TrainingType, Lon
     @Query(value = "update TrainingType t set t.trainingTypeName =:trainingTypeName where t.id =:id", nativeQuery = false)
     void update(@Param("trainingTypeName") String trainingTypeName, @Param("id") Long id);
 
-    @Query(value = "select t from TrainingType t where t.trainingTypeName =: trainingTypeName", nativeQuery = false)
+    @Query(value = "select t from TrainingType t where t.trainingTypeName =:trainingTypeName", nativeQuery = false)
     Optional<TrainingType> findByTrainingTypeName(@Param("trainingTypeName") String trainingTypeName);
 }

@@ -3,15 +3,13 @@ package epam.com.gymapplication.service;
 import epam.com.gymapplication.dao.TraineeRepository;
 import epam.com.gymapplication.dao.TrainerRepository;
 import epam.com.gymapplication.dao.UserRepository;
-import epam.com.gymapplication.dto.TraineeProfileResponseDTO;
+import epam.com.gymapplication.dto.TraineeDTO;
+import epam.com.gymapplication.dto.TrainerDTO;
 import epam.com.gymapplication.entity.Trainee;
 import epam.com.gymapplication.entity.Trainer;
 import epam.com.gymapplication.entity.User;
-import epam.com.gymapplication.model.TraineeRequest;
-import epam.com.gymapplication.model.TraineeResponse;
 import epam.com.gymapplication.profile.PasswordGenerator;
 import epam.com.gymapplication.profile.UserProfileService;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
-import java.util.Set;
+
 
 
 @Service
@@ -41,16 +39,25 @@ public class TraineeService {
     @Autowired
     private TrainerRepository trainerRepository;
 
-    @Autowired
-    private ModelMapper modelMapper;
 
-
-
-    public void updateTraineesTrainerList(Set<Trainer> trainers, String username)  {
+    // correct it problems with deseralizing arraylist into json
+    public List<TrainerDTO> updateTraineesTrainerList(List<Trainer> trainers, String username)  {
         Trainee traineeByUsername = traineeRepository.findByUsername(username).orElseThrow();
 
         logger.info("Updated trainees trainers list");
         traineeRepository.updateTraineesTrainerList(trainers, traineeByUsername.getUser().getUsername());
+
+        List<TrainerDTO> savedTrainersResponseDTO = traineeByUsername.getTrainers().stream().
+                map(trainer -> {
+                    TrainerDTO trainerDTO = new TrainerDTO();
+                    trainerDTO.setUsername(trainer.getUser().getUsername());
+                    trainerDTO.setFirstname(trainer.getUser().getFirstName());
+                    trainerDTO.setLastname(trainer.getUser().getLastName());
+                    trainerDTO.setSpecialization(trainer.getTrainingType().getId());
+                    return trainerDTO;
+                })
+                .toList();
+        return savedTrainersResponseDTO;
 
     }
 
@@ -72,48 +79,85 @@ public class TraineeService {
 
 
 
-    public TraineeResponse createTraineeProfile(TraineeRequest traineeRequest)  {
+    public TraineeDTO createTraineeProfile(TraineeDTO traineeDTO)  {
         String username = userProfileService.concatenateUsername(
-                traineeRequest.getFirstName(),
-                traineeRequest.getLastName());
+                traineeDTO.getFirstname(),
+                traineeDTO.getLastname());
 
         String password = passwordGenerator.generatePassword();
 
-        User toUserEntity = modelMapper.map(traineeRequest, User.class);
-        Trainee trainee = modelMapper.map(traineeRequest, Trainee.class);
-
-
+        User toUserEntity = new User();
         toUserEntity.setUsername(username);
         toUserEntity.setPassword(password);
+        toUserEntity.setFirstName(traineeDTO.getFirstname());
+        toUserEntity.setLastName(traineeDTO.getLastname());
+        toUserEntity.setActive(traineeDTO.getActive());
 
 
-        User savedUser = userRepository.save(toUserEntity);
+        userRepository.save(toUserEntity);
 
-        trainee.setUser(savedUser);
-        Trainee savedTrainee = traineeRepository.save(trainee);
 
-        TraineeResponse traineeResponse = modelMapper.map(savedTrainee, TraineeResponse.class);
+        Trainee trainee = new Trainee();
+        trainee.setUser(toUserEntity);
+        trainee.setAddress(traineeDTO.getAddress());
+        trainee.setDateOfBirth(traineeDTO.getDateOfBirth());
 
-        traineeResponse.setPassword(savedTrainee.getUser().getPassword());
-        traineeResponse.setUsername(savedTrainee.getUser().getUsername());
+
+        traineeRepository.save(trainee);
+
+        TraineeDTO traineeResponse = new TraineeDTO();
+        traineeResponse.setUsername(trainee.getUser().getUsername());
+        traineeResponse.setPassword(trainee.getUser().getPassword());
+
 
         return traineeResponse;
 
     }
 
-    public TraineeProfileResponseDTO findTraineeProfileByUsername(String username) {
-        logger.info("Find Trainee Profile by Username");
+    public TraineeDTO findTraineeProfileByUsername(String username) {
         Trainee traineeByUsername = traineeRepository.findByUsername(username).orElseThrow();
-        TraineeProfileResponseDTO traineeProfileResponseDTO = new TraineeProfileResponseDTO();
+        logger.info("Found Trainee Profile by Username {} ", traineeByUsername);
+
+
+
+        //Map entity fields to DTO
+
+        TraineeDTO traineeProfileResponseDTO = new TraineeDTO();
         traineeProfileResponseDTO.setFirstname(traineeByUsername.getUser().getFirstName());
         traineeProfileResponseDTO.setLastname(traineeByUsername.getUser().getLastName());
         traineeProfileResponseDTO.setAddress(traineeByUsername.getAddress());
         traineeProfileResponseDTO.setDateOfBirth(traineeByUsername.getDateOfBirth());
-        traineeProfileResponseDTO.setTrainers(traineeByUsername.getTrainers());
-        traineeProfileResponseDTO.setActive(traineeByUsername.getUser().isActive());
+
+
+
+
+
+        // Map trainers using the TrainerDTO
+        List<TrainerDTO> trainerDTOs = traineeByUsername.getTrainers().stream()
+                .map(trainer -> {
+                    System.out.println(trainer.getUser());
+
+                    logger.info("trainer info {}", trainer);
+                    TrainerDTO trainerDto = new TrainerDTO();
+
+                    trainerDto.setUsername(trainer.getUser().getUsername());
+                    trainerDto.setFirstname(trainer.getUser().getFirstName());
+                    trainerDto.setLastname(trainer.getUser().getLastName());
+                    trainerDto.setSpecialization(trainer.getTrainingType().getId());
+
+
+                    return trainerDto;
+                })
+                .toList();
+
+
+
+        traineeProfileResponseDTO.setTrainers(trainerDTOs);
 
 
         return traineeProfileResponseDTO;
+
+
 
 
     }
@@ -128,17 +172,20 @@ public class TraineeService {
 
     public boolean changePassword(String username, String password, String oldPassword) {
         Trainee traineeProfileByUsername = traineeRepository.findByUsername(username).orElseThrow();
+
         if (traineeProfileByUsername.getUser().getPassword().equals(oldPassword)) {
             traineeProfileByUsername.getUser().setPassword(password);
+            traineeRepository.save(traineeProfileByUsername);
+            return true;
         }
         return false;
 
     }
 
 
-    public void activateOrDeactivateTraineeStatus(Long id, boolean isActive) {
-        Trainee traineeById = traineeRepository.findById(id).orElseThrow();
-        if (traineeById.getUser().isActive()!= isActive) {
+    public void activateOrDeactivateTraineeStatus(String username, Boolean isActive) {
+        Trainee traineeById = traineeRepository.findByUsername(username).orElseThrow();
+        if (traineeById.getUser().getActive()!= isActive) {
             traineeById.getUser().setActive(isActive);
             traineeRepository.save(traineeById);
         }
@@ -149,15 +196,43 @@ public class TraineeService {
 
 
 
-    public void updateTraineeProfile(Long id, String firstname, String lastname) {
+    public TraineeDTO updateTraineeProfile(Long id, TraineeDTO traineeDTO) {
         Trainee traineeById = traineeRepository.findById(id).orElseThrow();
 
-        traineeById.getUser().setFirstName(firstname);
-        traineeById.getUser().setLastName(lastname);
-        traineeById.getUser().setUsername(userProfileService.concatenateUsername(firstname, lastname));
+
+        traineeById.getUser().setFirstName(traineeDTO.getFirstname());
+        traineeById.getUser().setLastName(traineeDTO.getLastname());
+        traineeById.getUser().setUsername(userProfileService.concatenateUsername(traineeDTO.getFirstname(), traineeDTO.getLastname()));
+        traineeById.setAddress(traineeDTO.getAddress());
+        traineeById.setDateOfBirth(traineeDTO.getDateOfBirth());
+        traineeById.getUser().setActive(traineeDTO.getActive());
 
         logger.info("Entity update profile successfully");
         traineeRepository.save(traineeById);
+
+
+        // Map trainers using the TrainerDTO
+        List<TrainerDTO> trainerDTOs = traineeById.getTrainers().stream()
+                .map(trainer -> {
+                    System.out.println(trainer.getUser());
+
+                    logger.info("trainer info {}", trainer);
+                    TrainerDTO trainerDto = new TrainerDTO();
+
+                    trainerDto.setUsername(trainer.getUser().getUsername());
+                    trainerDto.setFirstname(trainer.getUser().getFirstName());
+                    trainerDto.setLastname(trainer.getUser().getLastName());
+                    trainerDto.setSpecialization(trainer.getTrainingType().getId());
+
+                    return trainerDto;
+                })
+                .toList();
+
+
+        traineeDTO.setTrainers(trainerDTOs);
+
+
+        return traineeDTO;
 
     }
 

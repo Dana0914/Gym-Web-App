@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 
-
 @Service
 public class TrainingTypeService {
     private static final Logger logger = LoggerFactory.getLogger(TrainingType.class);
@@ -53,7 +52,8 @@ public class TrainingTypeService {
         return trainingTypeRepository.findByTrainingTypeName(trainingType).orElseThrow();
     }
 
-    public List<TrainingType> findAll() {
+    public List<TrainingType> getAllTrainingTypes() {
+
         return (List<TrainingType>) trainingTypeRepository.findAll();
     }
 

@@ -15,6 +15,7 @@ import java.util.Optional;
 
 
 @Repository
+
 public interface TrainingRepository extends CrudRepository<Training, Long> {
 
     @Modifying
@@ -29,33 +30,42 @@ public interface TrainingRepository extends CrudRepository<Training, Long> {
             @Param("trainingTypeName") String trainingTypeName,
             @Param("trainingDuration") Integer trainingDuration);
 
-    @Query(value = "select t FROM Training t " +
-            "where t.trainee.user.username =:username " +
-            "AND t.trainingDate BETWEEN :from AND :to " +
-            "AND t.trainingType.trainingTypeName =:trainingTypeName",
+
+    @Query(value = "select t FROM Training t join t.trainee t2 join t.trainer t3 " +
+            "where t2.user.username =:username " +
+            "AND t3.user.firstname =:trainerName " +
+            "AND t.trainingDate BETWEEN :from " +
+            "AND :to " +
+            "AND t.trainingName =:trainingName",
             nativeQuery = false)
 
-    List<Training> findTrainingListByTraineeCriteria(@Param("username") String username,
-                                                     @Param("from") LocalDate from,
-                                                     @Param("to") LocalDate to,
-                                                     @Param("trainingTypeName") String trainingTypeName);
+
+    List<Training> findTraineesTrainingList(@Param("username") String username,
+                                            @Param("from") LocalDate from,
+                                            @Param("to") LocalDate to,
+                                            @Param("trainerName") String trainerName,
+                                            @Param("trainingName") String trainingName);
 
 
-    @Query(value = "select t FROM Training t " +
-            "where t.trainer.user.username =:username " +
-            "AND t.trainingDate BETWEEN :from AND :to " +
-            "AND t.trainingType.trainingTypeName =:trainingTypeName",
+
+    @Query(value = "select t FROM Training t join t.trainer t2 join t.trainee t3 " +
+            "where t2.user.username =:username " +
+            "AND t3.user.firstname =:traineeName " +
+            "AND t.trainingDate BETWEEN :from " +
+            "AND :to " +
+            "AND t.trainingName =:trainingName",
             nativeQuery = false)
 
     List<Training> findTrainingListByTrainerCriteria(@Param("username") String username,
                                                      @Param("from") LocalDate from,
                                                      @Param("to") LocalDate to,
-                                                     @Param("trainingTypeName") String trainingTypeName);
+                                                     @Param("traineeName") String traineeName,
+                                                     @Param("trainingName") String trainingName);
 
 
-    @Query(value = "select t from Training t where t.trainingName =: trainingName", nativeQuery = false)
+    @Query(value = "select t from Training t where t.trainingName =:trainingName", nativeQuery = false)
     Optional<Training> findByTrainingName(@Param("trainingName") String trainingName);
 
-    @Query(value = "select t from Training t where t.trainingType =: trainingType", nativeQuery = false)
+    @Query(value = "select t from Training t where t.trainingType =:trainingType", nativeQuery = false)
     Optional<Training> findByTrainingType(@Param("trainingType") String trainingType);
 }
