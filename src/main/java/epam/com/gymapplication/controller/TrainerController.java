@@ -24,16 +24,11 @@ public class TrainerController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
 
-    @ResponseBody
-    public ResponseEntity<TrainerDTO> registerTrainer(
-            @RequestBody TrainerDTO trainerRequestDTO) {
+    public ResponseEntity<TrainerDTO> registerTrainer(@RequestBody TrainerDTO trainerRequestDTO) {
 
         TrainerDTO registeredTrainerRequest = trainerService.createTrainerProfile(trainerRequestDTO);
-        if (registeredTrainerRequest == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } else {
-            return new ResponseEntity<>(registeredTrainerRequest, HttpStatus.CREATED);
-        }
+        return new ResponseEntity<>(registeredTrainerRequest, HttpStatus.CREATED);
+
 
     }
 
@@ -52,7 +47,6 @@ public class TrainerController {
     public ResponseEntity<String> changeLogin(@RequestParam("username") String username,
                                               @RequestParam("password") String password,
                                               @RequestParam("oldPassword") String oldPassword) {
-
         boolean passwordChange = trainerService.changePassword(username, password, oldPassword);
         if (passwordChange) {
             return ResponseEntity.ok("Password changed successfully");
@@ -63,46 +57,43 @@ public class TrainerController {
     @GetMapping(value = "/trainer-profile")
     public ResponseEntity<TrainerDTO> getTrainerProfile(@RequestParam("username") String username) {
         TrainerDTO trainerProfileByUsername = trainerService.findTrainerProfileByUsername(username);
-        if (trainerProfileByUsername == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            return new ResponseEntity<>(trainerProfileByUsername, HttpStatus.OK);
-        }
-
+        return new ResponseEntity<>(trainerProfileByUsername, HttpStatus.OK);
     }
 
     @PutMapping(value = "/trainer-profile/{id}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
     public ResponseEntity<TrainerDTO> updateTrainerProfile(@PathVariable("id") Long id,
                                                            @RequestBody TrainerDTO trainerDTO)
+    {
 
-            {
         TrainerDTO updateTrainerProfile = trainerService.updateTrainerProfile(id, trainerDTO);
-        if (updateTrainerProfile != null) {
-            return new ResponseEntity<>(updateTrainerProfile, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(updateTrainerProfile, HttpStatus.OK);
+
 
     }
     @GetMapping(value = "not-assigned")
-    public ResponseEntity<List<TrainerDTO>> getUnassignedOnTraineeTrainersList(@RequestParam("username") String username) {
+    public ResponseEntity<List<TrainerDTO>> getUnassignedOnTraineeTrainersList(@RequestParam("username") String username)
+    {
+
         List<TrainerDTO> unassignedTraineesTrainersList = trainerService.findUnassignedTraineesTrainersListByTraineeUsername(username);
-        if (unassignedTraineesTrainersList != null) {
-            return new ResponseEntity<>(unassignedTraineesTrainersList, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(unassignedTraineesTrainersList, HttpStatus.OK);
 
     }
 
     @PatchMapping(value = "/active-inactive")
-    public ResponseEntity<?> activateDeactivateTrainer(@RequestParam("username") String username,
-                                                       @RequestBody TrainerDTO trainerDTO) {
+    public ResponseEntity<Void> activateDeactivateTrainer(@RequestParam("username") String username,
+                                                          @RequestBody TrainerDTO trainerDTO) {
 
         trainerService.activateOrDeactivateTrainerStatus(username, trainerDTO.getActive());
         return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
+    @DeleteMapping(value = "/delete")
+    public ResponseEntity<String> deleteTrainerProfile(@RequestParam("username") String username) {
+        trainerService.deleteTrainerProfileByUsername(username);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
     }
 

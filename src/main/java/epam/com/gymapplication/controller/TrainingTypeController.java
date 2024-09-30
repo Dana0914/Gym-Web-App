@@ -1,7 +1,6 @@
 package epam.com.gymapplication.controller;
 
 
-import epam.com.gymapplication.dto.TrainingTypeDTO;
 import epam.com.gymapplication.entity.TrainingType;
 import epam.com.gymapplication.service.TrainingTypeService;
 import org.springframework.http.HttpStatus;

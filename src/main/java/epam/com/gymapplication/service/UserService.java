@@ -43,7 +43,8 @@ public class UserService {
     }
 
     public void update(User user)  {
-        User byId = userRepository.findById(user.getId()).orElseThrow();
+        User byId = userRepository.findById(user.getId()).orElseThrow(() ->
+                new EntityNotFoundException("User with id " + user.getId() + " not found"));
         logger.info("User found by id {}", byId);
 
         userRepository.update(user.getFirstName(), user.getLastName(), user.getId());
@@ -52,17 +53,20 @@ public class UserService {
 
     public User findByFirstname(String name)  {
         logger.info("Found user by firstname {} ", name);
-        return userRepository.findByFirstName(name).orElseThrow();
+        return userRepository.findByFirstName(name).orElseThrow(() ->
+                new EntityNotFoundException("User with name " + name + " not found"));
     }
 
     public User findByLastname(String name) {
         logger.info("Found user by lastname {} ", name);
-        return userRepository.findByLastName(name).orElseThrow();
+        return userRepository.findByLastName(name).orElseThrow(() ->
+                new EntityNotFoundException("User with name " + name + " not found"));
 
     }
 
     public User findByUsername(String username)  {
         logger.info("Found user by username {} ", username);
-        return userRepository.findByUsername(username).orElseThrow();
+        return userRepository.findByUsername(username).orElseThrow(() ->
+                new EntityNotFoundException("User with username " + username + " not found"));
     }
 }

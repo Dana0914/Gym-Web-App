@@ -2,8 +2,10 @@ package epam.com.gymapplication.dto;
 
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,6 +28,7 @@ public class TraineeDTO {
     private String address;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

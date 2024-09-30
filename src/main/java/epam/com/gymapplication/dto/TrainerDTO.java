@@ -9,6 +9,7 @@ import java.util.List;
 public class TrainerDTO {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+
     private String username;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

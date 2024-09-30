@@ -1,12 +1,8 @@
 package epam.com.gymapplication.controller;
 
-import epam.com.gymapplication.dto.TraineeDTO;
-import epam.com.gymapplication.dto.TrainerDTO;
 import epam.com.gymapplication.dto.TrainingDTO;
-import epam.com.gymapplication.entity.Trainee;
-import epam.com.gymapplication.entity.Trainer;
-import epam.com.gymapplication.entity.Training;
 import epam.com.gymapplication.service.TrainingService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +18,7 @@ public class TrainingController {
         this.trainingService = trainingService;
     }
 
+
     @GetMapping("/trainee/training/list")
     public ResponseEntity<List<TrainingDTO>> getTraineeTrainingList(
             @RequestParam("username") String username,
@@ -30,12 +27,11 @@ public class TrainingController {
             @RequestParam("trainerName") String trainerName,
             @RequestParam("trainingName") String trainingName) {
 
-
-
         List<TrainingDTO> result = trainingService.getTraineesTrainingList(username, from, to,
                 trainerName, trainingName);
 
         return ResponseEntity.ok(result);
+
     }
 
     @GetMapping("/trainer/training/list")
@@ -52,14 +48,15 @@ public class TrainingController {
         return ResponseEntity.ok(result);
     }
 
-//    @PostMapping(value = "/create")
-//    @ResponseBody
-//    public ResponseEntity<?> addTraining(TraineeDTO traineeDTO, TrainerDTO trainerDTO, TrainingDTO trainingDTO) {
-//
-//        trainingService.addTraining(traineeDTO, trainerDTO, trainingDTO);
-//        return ResponseEntity.ok().body("Training added");
-//
-//    }
+    @PostMapping(value = "/add")
+    @ResponseBody
+    public ResponseEntity<Void> addTraining(@RequestBody TrainingDTO trainingDTO) {
+
+        trainingService.addTraining(trainingDTO);
+        return new ResponseEntity<>(HttpStatus.OK);
+
+
+    }
 
 
 

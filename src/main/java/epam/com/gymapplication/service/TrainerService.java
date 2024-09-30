@@ -1,17 +1,16 @@
 package epam.com.gymapplication.service;
 
-import epam.com.gymapplication.dao.TraineeRepository;
 import epam.com.gymapplication.dao.TrainerRepository;
 import epam.com.gymapplication.dao.TrainingTypeRepository;
 import epam.com.gymapplication.dao.UserRepository;
 import epam.com.gymapplication.dto.TraineeDTO;
 import epam.com.gymapplication.dto.TrainerDTO;
-import epam.com.gymapplication.entity.Trainee;
 import epam.com.gymapplication.entity.Trainer;
 import epam.com.gymapplication.entity.TrainingType;
 import epam.com.gymapplication.entity.User;
 import epam.com.gymapplication.profile.PasswordGenerator;
 import epam.com.gymapplication.profile.UserProfileService;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +34,6 @@ public class TrainerService {
     @Autowired
     private PasswordGenerator passwordGenerator;
 
-    @Autowired
-    private TraineeRepository traineeRepository;
 
     @Autowired
     private TrainerRepository trainerRepository;
@@ -81,8 +78,11 @@ public class TrainerService {
         user.setLastName(trainerDTO.getLastname());
 
         userRepository.save(user);
+        logger.info("Persisted user {} in database", username);
 
-        TrainingType trainingType = trainingTypeRepository.findById(trainerDTO.getSpecialization()).orElseThrow();
+        TrainingType trainingType = trainingTypeRepository.findById(trainerDTO.getSpecialization())
+                .orElseThrow(() -> new EntityNotFoundException("Entity not found"));
+        logger.info("Training type found by id {} ", trainingType);
 
 
         Trainer trainer = new Trainer();
@@ -91,10 +91,11 @@ public class TrainerService {
 
 
         trainerRepository.save(trainer);
+        logger.info("Persisted trainer {} in database", trainer);
 
         TrainerDTO trainerResponse = new TrainerDTO();
-        trainerResponse.setUsername(trainer.getUser().getUsername());
-        trainerResponse.setPassword(trainer.getUser().getPassword());
+        trainerResponse.setUsername(username);
+        trainerResponse.setPassword(password);
 
 
         return trainerResponse;
@@ -103,7 +104,9 @@ public class TrainerService {
     }
 
     public TrainerDTO findTrainerProfileByUsername(String username) {
-        Trainer trainerByProfileUsername = trainerRepository.findByUsername(username).orElseThrow();
+        Trainer trainerByProfileUsername = trainerRepository.findByUsername(username).orElseThrow(() ->
+                new EntityNotFoundException("Entity not found"));
+
         logger.info("Found trainer by profile username: " + trainerByProfileUsername);
 
         //map entity to DTO
@@ -130,14 +133,14 @@ public class TrainerService {
 
         trainerResponse.setTrainees(traineeDTOs);
 
-
         return trainerResponse;
 
 
     }
 
     public boolean authenticateTrainerProfile(String username, String password)  {
-        Trainer trainerProfileByUsername = trainerRepository.findByUsername(username).orElseThrow();
+        Trainer trainerProfileByUsername = trainerRepository.findByUsername(username).orElseThrow(() ->
+                new EntityNotFoundException("Entity not found"));
         return trainerProfileByUsername.getUser().getUsername().equals(username)
                 && trainerProfileByUsername.getUser().getPassword().equals(password);
 
@@ -145,7 +148,8 @@ public class TrainerService {
 
 
     public boolean changePassword(String username, String password, String oldPassword) {
-        Trainer trainerProfileByUsername = trainerRepository.findByUsername(username).orElseThrow();
+        Trainer trainerProfileByUsername = trainerRepository.findByUsername(username).orElseThrow(() ->
+                new EntityNotFoundException("Entity not found"));
         if (trainerProfileByUsername.getUser().getPassword().equals(oldPassword)) {
             trainerProfileByUsername.getUser().setPassword(password);
         }
@@ -155,19 +159,24 @@ public class TrainerService {
 
 
     public void activateOrDeactivateTrainerStatus(String username, Boolean isActive) {
-        Trainer trainerById = trainerRepository.findByUsername(username).orElseThrow();
+        Trainer trainerById = trainerRepository.findByUsername(username).orElseThrow(() ->
+                new EntityNotFoundException("Entity not found"));
         if (trainerById.getUser().getActive()!= isActive) {
             trainerById.getUser().setActive(isActive);
             trainerRepository.save(trainerById);
+            logger.info("Persisted trainer by status {}", trainerById);
         }
-        System.out.println("Trainer is " + (isActive ? "active" : "inactive"));
+
+
 
 
     }
 
 
     public TrainerDTO updateTrainerProfile(Long id, TrainerDTO trainerDTO) {
-        Trainer trainerById = trainerRepository.findById(id).orElseThrow();
+        Trainer trainerById = trainerRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException("Entity not found"));
+        logger.info("Found trainer profile by id {}", trainerById);
 
 
         trainerById.getUser().setFirstName(trainerDTO.getFirstname());
@@ -175,13 +184,14 @@ public class TrainerService {
         trainerById.getUser().setUsername(userProfileService.concatenateUsername(trainerDTO.getFirstname(), trainerDTO.getLastname()));
         trainerById.getUser().setActive(trainerDTO.getActive());
 
-        TrainingType trainingType = trainingTypeRepository.findById(trainerDTO.getSpecialization()).orElseThrow();
+        TrainingType trainingType = trainingTypeRepository.findById(trainerDTO.getSpecialization()).orElseThrow(() ->
+                new EntityNotFoundException("Entity not found"));
+        logger.info("Training type found by id {} ", trainingType);
+
         trainerById.setTrainingType(trainingType);
 
-        logger.info("Entity update profile successfully");
         trainerRepository.save(trainerById);
-
-        System.out.println(trainerById.getUser().getFirstName());
+        logger.info("Persisted trainer profile {} in database", trainerById);
 
 
         // Map trainers using the TrainerDTO
@@ -201,13 +211,15 @@ public class TrainerService {
 
         trainerDTO.setTrainees(traineeDTOs);
 
+
         return trainerDTO;
 
     }
 
 
     public void deleteTrainerProfileByUsername(String username)  {
-        Trainer trainerProfileByUsername = trainerRepository.findByUsername(username).orElseThrow();
+        Trainer trainerProfileByUsername = trainerRepository.findByUsername(username).orElseThrow(() ->
+                new EntityNotFoundException("Entity not found"));
         trainerRepository.delete(trainerProfileByUsername);
         logger.info("Trainer profile deleted by username {} ", username);
     }
@@ -216,17 +228,19 @@ public class TrainerService {
 
     public void saveTrainer(Trainer trainer) {
         trainerRepository.save(trainer);
-        logger.info("Trainer saved successfully");
+        logger.info("Persisted trainer {} ", trainer);
 
     }
 
     public void updateTrainer(Trainer trainer) {
-        Optional<Trainer> byId = trainerRepository.findById(trainer.getId());
-        trainerRepository.updateTrainee(byId.orElseThrow().getId(),
+        Trainer byId = trainerRepository.findById(trainer.getId()).orElseThrow(() ->
+                new EntityNotFoundException("Entity not found"));
+
+        trainerRepository.updateTrainee(byId.getId(),
                 trainer.getTrainingType().getId(),
                 trainer.getUser().getId());
 
-        logger.info("Trainer updated");
+        logger.info("Updated trainer by id {}", trainer);
 
     }
 
@@ -238,26 +252,33 @@ public class TrainerService {
 
     public Trainer findTrainerById(Long id)  {
         logger.info("Found entity by id {} ", id);
-        return trainerRepository.findById(id).orElseThrow();
+        return trainerRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException("Entity not found"));
 
     }
 
 
     public Trainer findByFirstName(String firstName) {
-        Trainer trainerByFirstname = trainerRepository.findByFirstName(firstName).orElseThrow();
-        logger.info("Found entity by name {} ", firstName);
+        Trainer trainerByFirstname = trainerRepository.findByFirstName(firstName).orElseThrow(() ->
+                new EntityNotFoundException("Entity not found"));
+
+        logger.info("Found entity by name {} ", trainerByFirstname);
         return trainerByFirstname;
     }
 
     public Trainer findByLastName(String lastName)  {
-        Trainer trainerByLastname = trainerRepository.findByLastName(lastName).orElseThrow();
-        logger.info("Found entity by lastName {} ", lastName);
+        Trainer trainerByLastname = trainerRepository.findByLastName(lastName).orElseThrow(() ->
+                new EntityNotFoundException("Entity not found"));
+
+        logger.info("Found entity by lastName {} ", trainerByLastname);
         return trainerByLastname;
     }
 
     public Trainer findByUsername(String username)  {
-        Trainer trainerByUsername = trainerRepository.findByUsername(username).orElseThrow();
-        logger.info("Found entity by username {} ", username);
+        Trainer trainerByUsername = trainerRepository.findByUsername(username).orElseThrow(() ->
+                new EntityNotFoundException("Entity not found"));
+
+        logger.info("Found entity by username {} ", trainerByUsername);
         return trainerByUsername;
     }
 

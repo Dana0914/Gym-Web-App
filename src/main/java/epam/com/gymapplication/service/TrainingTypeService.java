@@ -3,13 +3,14 @@ package epam.com.gymapplication.service;
 
 import epam.com.gymapplication.dao.TrainingTypeRepository;
 import epam.com.gymapplication.entity.TrainingType;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
+
 
 
 @Service
@@ -27,7 +28,7 @@ public class TrainingTypeService {
 
     public void update(TrainingType trainingType) {
         TrainingType byId = trainingTypeRepository.findById(trainingType.getId()).orElseThrow(()->
-                new NoSuchElementException("TrainingType not found for ID: " + trainingType.getId()));
+                new EntityNotFoundException("TrainingType not found for ID: " + trainingType.getId()));
 
         logger.info("Entity found by id {}",trainingType.getId());
 
@@ -44,12 +45,14 @@ public class TrainingTypeService {
 
     public TrainingType findById(Long id)  {
         logger.info("Entity found by id {} ", id);
-        return trainingTypeRepository.findById(id).orElseThrow();
+        return trainingTypeRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException("TrainingType not found for ID: " + id));
     }
 
     public TrainingType findByTrainingTypeName(String trainingType) {
         logger.info("Entity found by name {} ", trainingType);
-        return trainingTypeRepository.findByTrainingTypeName(trainingType).orElseThrow();
+        return trainingTypeRepository.findByTrainingTypeName(trainingType).orElseThrow(() ->
+                new EntityNotFoundException("TrainingType not found for name: " + trainingType))    ;
     }
 
     public List<TrainingType> getAllTrainingTypes() {
