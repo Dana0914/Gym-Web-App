@@ -60,3 +60,7 @@ CREATE TABLE training (
     FOREIGN KEY (training_type_id) REFERENCES training_type (id)
 
 );
+
+ALTER TABLE training
+    DROP CONSTRAINT training_training_name_key;
+
