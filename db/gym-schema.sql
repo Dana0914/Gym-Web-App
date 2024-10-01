@@ -61,6 +61,5 @@ CREATE TABLE training (
 
 );
 
-ALTER TABLE training
-    DROP CONSTRAINT training_training_name_key;
+
 

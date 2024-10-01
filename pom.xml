@@ -10,6 +10,8 @@
   <name>Gym-CRM-System-Spring</name>
   <url>https://maven.apache.org</url>
 
+
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -142,6 +144,20 @@
       <version>11.0.0-M26</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>tomcat-servlet-api</artifactId>
+      <version>11.0.0-M26</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>tomcat-catalina</artifactId>
+      <version>11.0.0-M26</version>
+    </dependency>
+
+
+
 
 
 
@@ -267,11 +283,8 @@
       <version>2.0.1</version>
     </dependency>
 
-
-
-
-
   </dependencies>
+
 
 
 
