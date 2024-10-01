@@ -3,6 +3,7 @@ package epam.com.gymapplication.controller;
 
 import epam.com.gymapplication.dto.TrainerDTO;
 import epam.com.gymapplication.service.TrainerService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,8 @@ public class TrainerController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
 
-    public ResponseEntity<TrainerDTO> registerTrainer(@RequestBody TrainerDTO trainerRequestDTO) {
+    public ResponseEntity<TrainerDTO> registerTrainer(@Valid
+            @RequestBody TrainerDTO trainerRequestDTO) {
 
         TrainerDTO registeredTrainerRequest = trainerService.createTrainerProfile(trainerRequestDTO);
         return new ResponseEntity<>(registeredTrainerRequest, HttpStatus.CREATED);
@@ -33,7 +35,8 @@ public class TrainerController {
     }
 
     @GetMapping("/login")
-    public ResponseEntity<String> login(@RequestParam("username") String username,
+    public ResponseEntity<String> login(@Valid
+            @RequestParam("username") String username,
                                         @RequestParam("password") String password) {
 
         boolean authenticatedTrainerProfile = trainerService.authenticateTrainerProfile(username, password);
@@ -44,7 +47,8 @@ public class TrainerController {
     }
 
     @PutMapping("/change-login")
-    public ResponseEntity<String> changeLogin(@RequestParam("username") String username,
+    public ResponseEntity<String> changeLogin(@Valid
+            @RequestParam("username") String username,
                                               @RequestParam("password") String password,
                                               @RequestParam("oldPassword") String oldPassword) {
         boolean passwordChange = trainerService.changePassword(username, password, oldPassword);
@@ -55,7 +59,8 @@ public class TrainerController {
     }
 
     @GetMapping(value = "/trainer-profile")
-    public ResponseEntity<TrainerDTO> getTrainerProfile(@RequestParam("username") String username) {
+    public ResponseEntity<TrainerDTO> getTrainerProfile(@Valid
+            @RequestParam("username") String username) {
         TrainerDTO trainerProfileByUsername = trainerService.findTrainerProfileByUsername(username);
         return new ResponseEntity<>(trainerProfileByUsername, HttpStatus.OK);
     }
@@ -63,7 +68,8 @@ public class TrainerController {
     @PutMapping(value = "/trainer-profile/{id}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TrainerDTO> updateTrainerProfile(@PathVariable("id") Long id,
+    public ResponseEntity<TrainerDTO> updateTrainerProfile(@Valid
+            @PathVariable("id") Long id,
                                                            @RequestBody TrainerDTO trainerDTO)
     {
 
@@ -73,7 +79,8 @@ public class TrainerController {
 
     }
     @GetMapping(value = "not-assigned")
-    public ResponseEntity<List<TrainerDTO>> getUnassignedOnTraineeTrainersList(@RequestParam("username") String username)
+    public ResponseEntity<List<TrainerDTO>> getUnassignedOnTraineeTrainersList(@Valid
+            @RequestParam("username") String username)
     {
 
         List<TrainerDTO> unassignedTraineesTrainersList = trainerService.findUnassignedTraineesTrainersListByTraineeUsername(username);
@@ -82,7 +89,8 @@ public class TrainerController {
     }
 
     @PatchMapping(value = "/active-inactive")
-    public ResponseEntity<Void> activateDeactivateTrainer(@RequestParam("username") String username,
+    public ResponseEntity<Void> activateDeactivateTrainer(@Valid
+            @RequestParam("username") String username,
                                                           @RequestBody TrainerDTO trainerDTO) {
 
         trainerService.activateOrDeactivateTrainerStatus(username, trainerDTO.getActive());
@@ -91,7 +99,8 @@ public class TrainerController {
     }
 
     @DeleteMapping(value = "/delete")
-    public ResponseEntity<String> deleteTrainerProfile(@RequestParam("username") String username) {
+    public ResponseEntity<String> deleteTrainerProfile(@Valid
+            @RequestParam("username") String username) {
         trainerService.deleteTrainerProfileByUsername(username);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 

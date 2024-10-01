@@ -39,7 +39,8 @@ public class TraineeController {
     }
 
     @GetMapping("/login")
-    public ResponseEntity<String> login(@RequestParam("username") String username,
+    public ResponseEntity<String> login(@Valid
+            @RequestParam("username") String username,
                                         @RequestParam("password") String password) {
 
         boolean authenticatedTraineeProfile = traineeService.authenticateTraineeProfile(username, password);
@@ -50,7 +51,8 @@ public class TraineeController {
     }
 
     @PutMapping("/change-login")
-    public ResponseEntity<String> changeLogin(@RequestParam("username") String username,
+    public ResponseEntity<String> changeLogin(@Valid
+            @RequestParam("username") String username,
                                               @RequestParam("password") String password,
                                               @RequestParam("oldPassword") String oldPassword) {
         boolean passwordChange = traineeService.changePassword(username, password, oldPassword);
@@ -62,7 +64,8 @@ public class TraineeController {
     }
 
     @GetMapping(value = "/trainee-profile")
-    public ResponseEntity<TraineeDTO> getTraineeProfile(@RequestParam("username") String username) {
+    public ResponseEntity<TraineeDTO> getTraineeProfile(@Valid
+            @RequestParam("username") String username) {
 
         TraineeDTO traineeProfileByUsername = traineeService.findTraineeProfileByUsername(username);
         return new ResponseEntity<>(traineeProfileByUsername, HttpStatus.OK);
@@ -70,7 +73,8 @@ public class TraineeController {
     }
 
     @PutMapping(value = "/trainee-profile/{id}")
-    public ResponseEntity<TraineeDTO> updateTraineeProfile(@PathVariable("id") Long id,
+    public ResponseEntity<TraineeDTO> updateTraineeProfile(@Valid
+            @PathVariable("id") Long id,
                                                            @RequestBody
                                                            TraineeDTO traineeDTO) {
         TraineeDTO updateTraineeProfile = traineeService.updateTraineeProfile(id, traineeDTO);
@@ -80,7 +84,8 @@ public class TraineeController {
     }
 
     @DeleteMapping(value = "/delete")
-    public ResponseEntity<Void> deleteTraineeProfile(@RequestParam("username") String username) {
+    public ResponseEntity<Void> deleteTraineeProfile(@Valid
+            @RequestParam("username") String username) {
         traineeService.deleteTraineeProfileByUsername(username);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
@@ -90,13 +95,15 @@ public class TraineeController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
 
-    public ResponseEntity<List<TrainerDTO>> updateTraineesTrainerList(@RequestBody TraineeDTO traineeDTO) {
+    public ResponseEntity<List<TrainerDTO>> updateTraineesTrainerList(@Valid
+            @RequestBody TraineeDTO traineeDTO) {
         List<TrainerDTO> trainerDTOS = traineeService.updateTraineesTrainerList(traineeDTO);
         return new ResponseEntity<>(trainerDTOS, HttpStatus.OK);
     }
 
     @PatchMapping(value = "/active-inactive")
-    public ResponseEntity<Void> activateDeactivateTrainee(@RequestParam("username") String username,
+    public ResponseEntity<Void> activateDeactivateTrainee(@Valid
+            @RequestParam("username") String username,
             @RequestBody TraineeDTO traineeDTO) {
 
         traineeService.activateOrDeactivateTraineeStatus(username, traineeDTO.getActive());

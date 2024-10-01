@@ -2,6 +2,7 @@ package epam.com.gymapplication.controller;
 
 import epam.com.gymapplication.dto.TrainingDTO;
 import epam.com.gymapplication.service.TrainingService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class TrainingController {
 
 
     @GetMapping("/trainee/training/list")
-    public ResponseEntity<List<TrainingDTO>> getTraineeTrainingList(
+    public ResponseEntity<List<TrainingDTO>> getTraineeTrainingList(@Valid
             @RequestParam("username") String traineeUsername,
             @RequestParam("from") LocalDate from,
             @RequestParam("to") LocalDate to,
@@ -35,7 +36,8 @@ public class TrainingController {
     }
 
     @GetMapping("/trainer/training/list")
-    public ResponseEntity<List<TrainingDTO>> getTrainerTrainingList(@RequestParam("username") String username,
+    public ResponseEntity<List<TrainingDTO>> getTrainerTrainingList(@Valid
+            @RequestParam("username") String username,
                                                                     @RequestParam("from") LocalDate from,
                                                                     @RequestParam("to") LocalDate to,
                                                                     @RequestParam("traineeName") String traineeName,
@@ -50,7 +52,8 @@ public class TrainingController {
 
     @PostMapping(value = "/add")
     @ResponseBody
-    public ResponseEntity<Void> addTraining(@RequestBody TrainingDTO trainingDTO) {
+    public ResponseEntity<Void> addTraining(@Valid
+            @RequestBody TrainingDTO trainingDTO) {
 
         trainingService.addTraining(trainingDTO);
         return new ResponseEntity<>(HttpStatus.OK);
