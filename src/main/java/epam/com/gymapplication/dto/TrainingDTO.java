@@ -1,40 +1,42 @@
 package epam.com.gymapplication.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import epam.com.gymapplication.entity.Trainee;
 import epam.com.gymapplication.entity.Trainer;
-import epam.com.gymapplication.entity.TrainingType;
+
 
 import java.time.LocalDate;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TrainingDTO {
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String trainingName;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
     private LocalDate from;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
     private LocalDate to;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
     private Integer trainingDuration;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private TrainingType trainingType;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
+    private String trainingType;
+
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate trainingDate;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
     private Trainer trainer;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
     private Trainee trainee;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String trainingTypeName;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String trainerName;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
     private String traineeName;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
+    @JsonProperty(value = "username")
     private String traineeUsername;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
     private String trainerUsername;
 
 
@@ -43,7 +45,7 @@ public class TrainingDTO {
     }
 
     public TrainingDTO(String trainingName, LocalDate from, LocalDate to, Integer trainingDuration,
-                       TrainingType trainingType, Trainer trainer, Trainee trainee) {
+                       String trainingType, Trainer trainer, Trainee trainee) {
         this.trainingName = trainingName;
         this.trainingType = trainingType;
         this.from = from;
@@ -80,10 +82,10 @@ public class TrainingDTO {
         this.trainingDuration = trainingDuration;
     }
 
-    public TrainingType getTrainingType() {
+    public String getTrainingType() {
         return trainingType;
     }
-    public void setTrainingType(TrainingType trainingType) {
+    public void setTrainingType(String trainingType) {
         this.trainingType = trainingType;
     }
 
@@ -98,12 +100,6 @@ public class TrainingDTO {
     }
     public void setTrainee(Trainee trainee) {
         this.trainee = trainee;
-    }
-    public String getTrainingTypeName() {
-        return trainingTypeName;
-    }
-    public void setTrainingTypeName(String trainingTypeName) {
-        this.trainingTypeName = trainingTypeName;
     }
     public String getTrainerName() {
         return trainerName;

@@ -38,7 +38,7 @@ public class TrainingService {
 
     public List<TrainingDTO> getTraineesTrainingList(String username, LocalDate from,
                                                      LocalDate to, String trainerName,
-                                                     String trainingName) {
+                                                     String trainingType) {
 
         Trainee traineeByUsername = traineeRepository.findByUsername(username).orElseThrow();
         logger.info("Found trainee by username {}", traineeByUsername);
@@ -47,8 +47,8 @@ public class TrainingService {
         logger.info("Found trainer by username {}", trainerByUsername);
 
 
-        Training trainingByName = trainingRepository.findByTrainingName(trainingName).orElseThrow();
-        logger.info("Found training by username {}", trainingByName);
+        Training trainingByType = trainingRepository.findByTrainingType(trainingType).orElseThrow();
+        logger.info("Found training by name {}", trainingByType);
 
         TrainingDTO trainingRequestDTO = new TrainingDTO();
 
@@ -58,19 +58,19 @@ public class TrainingService {
 
 
         List<Training> trainingListByTrainee = trainingRepository.findTraineesTrainingList(
-                username, from, to, trainerName, trainingName);
+                username, from, to, trainerName, trainingType);
 
-        logger.info("Fetching training list for username: {}", trainingListByTrainee);
+        logger.info("Fetching training list: {}", trainingListByTrainee);
 
         List<TrainingDTO> traineesTrainingList = trainingListByTrainee.stream().map(training -> {
             TrainingDTO trainingResponseDTO = new TrainingDTO();
 
             trainingResponseDTO.setFrom(training.getTrainingDate());
             trainingResponseDTO.setTo(training.getTrainingDate());
-            trainingResponseDTO.setTrainingType(training.getTrainingType());
+            trainingResponseDTO.setTrainingType(training.getTrainingType().getTrainingTypeName());
             trainingResponseDTO.setTraineeUsername(trainingRequestDTO.getTrainee().getUser().getUsername());
             trainingResponseDTO.setTrainerName(trainingRequestDTO.getTrainer().getUser().getFirstName());
-            trainingResponseDTO.setTrainingName(trainingByName.getTrainingName());
+            trainingResponseDTO.setTrainingName(trainingByType.getTrainingName());
 
             return trainingResponseDTO;
 
@@ -81,22 +81,24 @@ public class TrainingService {
 
     }
 
-    public List<TrainingDTO> getTrainersTrainingList(String username, LocalDate from, LocalDate to, String traineeName, String trainingName)  {
-        Trainer trainerByUsername = trainerRepository.findByFirstName(traineeName).orElseThrow();
-        logger.info("Found trainer by username {}", trainerByUsername);
+    public List<TrainingDTO> getTrainersTrainingList(String username, LocalDate from, LocalDate to,
+                                                     String traineeName, String trainingType)  {
+
+        Trainer trainerByUsername = trainerRepository.findByUsername(username).orElseThrow();
+        logger.info("Found trainer by name {}", trainerByUsername);
 
         Trainee traineeByName = traineeRepository.findByFirstName(traineeName).orElseThrow();
-        logger.info("Found trainer by username {}", trainerByUsername);
+        logger.info("Found trainer by name {}", trainerByUsername);
 
-        Training trainingByName = trainingRepository.findByTrainingName(trainingName).orElseThrow();
-        logger.info("Found training by username {}", trainingByName);
+        Training trainingByType = trainingRepository.findByTrainingType(trainingType).orElseThrow();
+        logger.info("Found training by type {}", trainingByType);
 
         TrainingDTO trainingRequestDTO = new TrainingDTO();
         trainingRequestDTO.setTrainer(trainerByUsername);
         trainingRequestDTO.setTrainee(traineeByName);
 
 
-        List<Training> trainersTrainingList = trainingRepository.findTrainingListByTrainerCriteria(username, from, to, traineeName, trainingName);
+        List<Training> trainersTrainingList = trainingRepository.findTrainingListByTrainerCriteria(username, from, to, traineeName, trainingType);
         logger.info("Fetching training list for username: {}", trainerByUsername);
 
         List<TrainingDTO> trainingDTOS = trainersTrainingList.stream().map(training ->
@@ -105,8 +107,8 @@ public class TrainingService {
             trainingResponseDTO.setTrainerName(trainerByUsername.getUser().getUsername());
             trainingResponseDTO.setFrom(training.getTrainingDate());
             trainingResponseDTO.setTo(training.getTrainingDate());
-            trainingResponseDTO.setTrainingType(training.getTrainingType());
-            trainingResponseDTO.setTrainingName(trainingByName.getTrainingName());
+            trainingResponseDTO.setTrainingType(training.getTrainingType().getTrainingTypeName());
+            trainingResponseDTO.setTrainingName(trainingByType.getTrainingName());
 
             return trainingResponseDTO;
 
@@ -123,13 +125,20 @@ public class TrainingService {
         LocalDate trainingDate = trainingDTO.getTrainingDate();
         Integer trainingDuration = trainingDTO.getTrainingDuration();
 
-        Trainee traineeByUsername = traineeRepository.findByUsername(traineeUsername).orElseThrow();
+        Trainee traineeByUsername = traineeRepository.findByUsername(traineeUsername).orElseThrow(() ->
+                new EntityNotFoundException("Trainee not found by username"));
         logger.info("Found trainer by username {}", trainerUsername);
-        Trainer trainerByUsername = trainerRepository.findByUsername(trainerUsername).orElseThrow();
+
+        Trainer trainerByUsername = trainerRepository.findByUsername(trainerUsername).orElseThrow(() ->
+                new EntityNotFoundException("Trainer not found by username"));
         logger.info("Found trainer by username {}", trainerByUsername);
-        Training trainingByName = trainingRepository.findByTrainingName(trainingName).orElseThrow();
+
+        Training trainingByName = trainingRepository.findByTrainingName(trainingName).orElseThrow(() ->
+                new EntityNotFoundException("Training not found by name"));
         logger.info("Found training by username {}", trainingByName);
-        TrainingType trainingType = trainingTypeRepository.findById(trainingByName.getId()).orElseThrow();
+
+        TrainingType trainingType = trainingTypeRepository.findById(trainingByName.getId()).orElseThrow(() ->
+                new EntityNotFoundException("Training type not found"));
         logger.info("Found training type by id {}", trainingType);
 
 

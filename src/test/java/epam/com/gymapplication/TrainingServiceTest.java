@@ -29,7 +29,7 @@ public class TrainingServiceTest {
     private TrainingService trainingService;
 
     private Training training;
-    private Training training2;
+    private Training secondTraining;
 
     @BeforeEach
     public void setUp() {
@@ -47,12 +47,12 @@ public class TrainingServiceTest {
         training.setTrainingDuration(45);
 
 
-        training2 = new Training();
-        training2.setId(2L);
-        training2.setTrainingName("strength");
-        training2.setTrainingDate(LocalDate.now());
-        training2.setTrainingType(trainingType);
-        training2.setTrainingDuration(45);
+        secondTraining = new Training();
+        secondTraining.setId(2L);
+        secondTraining.setTrainingName("strength");
+        secondTraining.setTrainingDate(LocalDate.now());
+        secondTraining.setTrainingType(trainingType);
+        secondTraining.setTrainingDuration(45);
 
     }
 
@@ -72,60 +72,28 @@ public class TrainingServiceTest {
 
     }
 
-//    @Test
-//    public void update_withExistingEntity_updatesEntityDetails() {
-//        when(trainingRepository.findById(training.getId())).thenReturn(Optional.ofNullable(training));
-//
-//        trainingService.saveTraining(training);
-//
-//        Training trainingById = trainingService.findTrainingById(training.getId());
-//
-//        training2.setId(training.getId());
-//
-//        trainingService.updateTraining(training2);
-//
-//
-//        when(trainingRepository.findById(training2.getId())).thenReturn(Optional.ofNullable(training2));
-//
-//        Training updateTrainingById = trainingService.findTrainingById(training2.getId());
-//
-//        verify(trainingRepository).update(training2);
-//        verify(trainingRepository).save(training);
-//
-//        Assertions.assertEquals(training, trainingById);
-//        Assertions.assertEquals(training2, updateTrainingById);
-//
-//    }
 
     @Test
     public void findTrainingById_withExistingId_returnsEntity() {
-        when(trainingRepository.findById(training.getId())).thenReturn(Optional.ofNullable(training));
-
-        trainingService.saveTraining(training);
-
+        when(trainingRepository.findById(training.getId())).thenReturn(Optional.of(training));
 
         Training trainingById = trainingService.findTrainingById(training.getId());
 
-
         verify(trainingRepository).findById(training.getId());
-        verify(trainingRepository).save(training);
 
         Assertions.assertEquals(training, trainingById);
 
     }
 
     @Test
-    public void findTrainingById_withNonExistingId_returnsNull() {
+    public void findTrainingById_withNonExistingId_returnsEmptyOptional() {
         when(trainingRepository.findById(4L)).thenReturn(Optional.empty());
 
-        trainingService.saveTraining(training);
-
-        Training trainingServiceTrainingById = trainingService.findTrainingById(4L);
+        Optional<Training> trainingServiceTrainingById = trainingRepository.findById(4L);
 
         verify(trainingRepository).findById(4L);
-        verify(trainingRepository).save(training);
 
-        Assertions.assertNull(trainingServiceTrainingById);
+        Assertions.assertTrue(trainingServiceTrainingById.isEmpty());
 
     }
 
@@ -133,87 +101,68 @@ public class TrainingServiceTest {
     public void deleteTraining_withValidId_returnsValidEntity() {
         when(trainingRepository.findById(training.getId())).thenReturn(Optional.of(training));
 
-        trainingService.saveTraining(training);
-
         trainingService.deleteById(training.getId());
+
+        verify(trainingRepository).deleteById(training.getId());
 
         when(trainingRepository.findById(training.getId())).thenReturn(Optional.empty());
 
-        Training trainingServiceTrainingById = trainingService.findTrainingById(training.getId());
-
-        verify(trainingRepository).delete(training);
-        verify(trainingRepository).save(training);
-
-        Assertions.assertNull(trainingServiceTrainingById);
+        Optional<Training> deletedTraining = trainingRepository.findById(training.getId());
+        Assertions.assertTrue(deletedTraining.isEmpty());
     }
 
     @Test
     public void deleteTraining_withInvalidId_returnsNull() {
-        when(trainingRepository.findById(5L)).thenReturn(null);
+        when(trainingRepository.findById(5L)).thenReturn(Optional.empty());
 
-        trainingService.saveTraining(training);
+        trainingService.deleteById(5L);
 
-        trainingService.deleteById(training.getId());
+        verify(trainingRepository).deleteById(5L);
 
-        Training trainingServiceTrainingById = trainingService.findTrainingById(5L);
+        Optional<Training> trainingById = trainingRepository.findById(5L);
 
-        verify(trainingRepository).delete(training);
-        verify(trainingRepository).save(training);
-
-
-        Assertions.assertNull(trainingServiceTrainingById);
+        Assertions.assertTrue(trainingById.isEmpty());
 
     }
 
 
-//    @Test
-//    public void findByTrainingName_withExistingData_returnsValidEntity() {
-//        when(trainingRepository.findByTrainingName(training.getTrainingName())).thenReturn(training);
-//
-//        trainingService.saveTraining(training);
-//
-//        Training byTrainingName = trainingService.findByTrainingName(training.getTrainingName()).orElseThrow();
-//
-//
-//        verify(trainingRepository).findByTrainingName(training.getTrainingName());
-//        verify(trainingRepository).save(training);
-//
-//        Assertions.assertEquals(training, byTrainingName);
-//
-//    }
-//
-//    @Test
-//    public void findByTrainingType_withExistingData_returnsValidEntity() {
-//        when(trainingRepository.findByTrainingType(training.getTrainingType().toString())).thenReturn(training);
-//
-//        trainingService.saveTraining(training);
-//
-//        Training byTrainingName = trainingService.findByTrainingType(training.getTrainingName()).orElseThrow();
-//
-//
-//        verify(trainingRepository).save(training);
-//        verify(trainingRepository).findByTrainingType(training.getTrainingType().toString());
-//
-//        Assertions.assertEquals(training, byTrainingName);
-//
-//
-//    }
-//
+    @Test
+    public void findByTrainingName_withExistingData_returnsValidEntity() {
+        when(trainingRepository.findByTrainingName(training.getTrainingName())).thenReturn(Optional.ofNullable(training));
 
-//    @Test
-//    public void findByTrainingName_withNonExistingData_returnsNull() {
-//        when(trainingRepository.findByTrainingName("null")).thenReturn(null);
-//
-//        trainingService.saveTraining(training);
-//
-//        Training result = trainingService.findByTrainingName("null").orElseThrow();
-//
-//
-//        verify(trainingRepository).findByTrainingName("null");
-//        verify(trainingRepository).save(training);
-//
-//        //Assertions.assertNull(result);
-//
-//    }
+
+        Training byTrainingName = trainingService.findByTrainingName(training.getTrainingName());
+
+        verify(trainingRepository).findByTrainingName(training.getTrainingName());
+
+        Assertions.assertEquals(training, byTrainingName);
+
+    }
+
+    @Test
+    public void findByTrainingType_withExistingData_returnsValidEntity() {
+        when(trainingRepository.findByTrainingType(training.getTrainingType().getTrainingTypeName())).thenReturn(Optional.of(training));
+
+        Training byTrainingName = trainingService.findByTrainingType(training.getTrainingType().getTrainingTypeName());
+
+        verify(trainingRepository).findByTrainingType(training.getTrainingType().getTrainingTypeName());
+
+        Assertions.assertEquals(training, byTrainingName);
+
+
+    }
+
+
+    @Test
+    public void findByTrainingName_withNonExistingData_returnsNull() {
+        when(trainingRepository.findByTrainingName("null")).thenReturn(Optional.empty());
+
+        Optional<Training> trainingByName = trainingRepository.findByTrainingName("null");
+
+        verify(trainingRepository).findByTrainingName("null");
+
+        Assertions.assertTrue(trainingByName.isEmpty());
+
+    }
 }
 

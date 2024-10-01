@@ -5,40 +5,41 @@ package epam.com.gymapplication.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 
 
 import java.time.LocalDate;
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TraineeDTO {
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
     private String username;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
     private String password;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @NotNull
     private String firstname;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @NotNull
     private String lastname;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
     private String address;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
     @JsonProperty(value = "active")
     private Boolean isActive;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
     private List<TrainerDTO> trainers;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
     private List<TrainingDTO> trainings;
 
 

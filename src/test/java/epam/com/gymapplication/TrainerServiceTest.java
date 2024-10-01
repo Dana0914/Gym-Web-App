@@ -2,6 +2,7 @@ package epam.com.gymapplication;
 
 
 import epam.com.gymapplication.dao.TrainerRepository;
+import epam.com.gymapplication.entity.Trainee;
 import epam.com.gymapplication.entity.Trainer;
 import epam.com.gymapplication.entity.TrainingType;
 import epam.com.gymapplication.entity.User;
@@ -32,7 +33,7 @@ public class TrainerServiceTest {
     private TrainerService trainerService;
 
     private Trainer trainer;
-    private Trainer trainer2;
+    private Trainer secondTrainer;
 
     @BeforeEach
     public void setUp() {
@@ -55,17 +56,17 @@ public class TrainerServiceTest {
         trainer.setUser(user);
         trainer.setTrainingType(trainingType);
 
-        trainer2 = new Trainer();
-        trainer2.setId(2L);
-        trainer2.setUser(user);
-        trainer2.setTrainingType(trainingType);
+        secondTrainer = new Trainer();
+        secondTrainer.setId(2L);
+        secondTrainer.setUser(user);
+        secondTrainer.setTrainingType(trainingType);
 
 
     }
 
     @Test
     public void save_withValidData_returnsValidEntity() {
-        when(trainerRepository.findById(trainer.getId())).thenReturn(Optional.ofNullable(trainer));
+        when(trainerRepository.findById(trainer.getId())).thenReturn(Optional.of(trainer));
 
         trainerService.saveTrainer(trainer);
 
@@ -78,31 +79,6 @@ public class TrainerServiceTest {
 
     }
 
-//    @Test
-//    public void update_withExistingEntity_updatesEntityDetails() {
-//        when(trainerRepository.findById(trainer.getId())).thenReturn(Optional.ofNullable(trainer));
-//
-//        trainerService.saveTrainer(trainer);
-//
-//        Trainer trainerById = trainerService.findTrainerById(trainer.getId());
-//
-//        trainer2.setId(trainer.getId());
-//
-//        trainerService.updateTrainer(trainer2);
-//
-//        when(trainerRepository.findById(trainer2.getId())).thenReturn(Optional.ofNullable(trainer2));
-//
-//        Trainer updatedTrainerById = trainerService.findTrainerById(trainer2.getId());
-//
-//        verify(trainerRepository).update(trainer2);
-//        verify(trainerRepository).save(trainer);
-//
-//
-//        Assertions.assertEquals(trainerById, trainer);
-//        Assertions.assertEquals(updatedTrainerById, trainer2);
-//
-//
-//    }
 
     @Test
     public void findTrainerById_withExistingId_returnsEntity() {
@@ -138,98 +114,84 @@ public class TrainerServiceTest {
 
     @Test
     public void deleteTrainer_withValidId_returnsValidEntity() {
-        when(trainerRepository.findById(trainer.getId())).thenReturn(Optional.ofNullable(trainer));
-
-        trainerService.saveTrainer(trainer);
+        when(trainerRepository.findById(trainer.getId())).thenReturn(Optional.of(trainer));
 
         trainerService.deleteById(trainer.getId());
 
-        Trainer trainerById = trainerService.findTrainerById(trainer.getId());
+        verify(trainerRepository).deleteById(trainer.getId());
 
-        verify(trainerRepository).delete(trainer);
-        verify(trainerRepository).save(trainer);
 
-        Assertions.assertEquals(trainer, trainerById);
+        when(trainerRepository.findById(trainer.getId())).thenReturn(Optional.empty());
+
+
+        Optional<Trainer> deletedTrainer = trainerRepository.findById(trainer.getId());
+        Assertions.assertTrue(deletedTrainer.isEmpty());
 
     }
 
     @Test
-    public void deleteTrainer_withInvalidId_returnsNull() {
-        when(trainerRepository.findById(5L)).thenReturn(null);
+    public void deleteTrainer_withInvalidId_returnsEmptyOptional() {
+        when(trainerRepository.findById(5L)).thenReturn(Optional.empty());
 
-        trainerService.saveTrainer(trainer);
+        trainerService.deleteById(5L);
 
-        trainerService.deleteById(trainer.getId());
+        verify(trainerRepository).deleteById(5L);
 
-        Trainer trainerById = trainerService.findTrainerById(5L);
+        Optional<Trainer> trainerById = trainerRepository.findById(5L);
 
-        verify(trainerRepository).delete(trainer);
-        verify(trainerRepository).save(trainer);
-
-        Assertions.assertNull(trainerById);
+        Assertions.assertTrue(trainerById.isEmpty());
 
     }
 
 
     @Test
     public void findByFirstName_withExistingData_returnsValidEntity() {
-        when(trainerRepository.findByFirstName(trainer.getUser().getFirstName())).thenReturn(trainer);
+        when(trainerRepository.findByFirstName(trainer.getUser().getFirstName())).thenReturn(Optional.ofNullable(trainer));
 
-        trainerService.saveTrainer(trainer);
-
-        Trainer trainerByFirstname = trainerService.findByFirstName(trainer.getUser().getFirstName()).orElseThrow();
-
+        Trainer trainerByFirstname = trainerService.findByFirstName(trainer.getUser().getFirstName());
 
         verify(trainerRepository).findByFirstName(trainer.getUser().getFirstName());
-        verify(trainerRepository).save(trainer);
 
         Assertions.assertEquals(trainerByFirstname, trainer);
     }
 
     @Test
     public void findByLastName_withExistingData_returnsValidEntity() {
-        when(trainerRepository.findByLastName(trainer.getUser().getLastName())).thenReturn(trainer);
+        when(trainerRepository.findByLastName(trainer.getUser().getLastName())).thenReturn(Optional.ofNullable(trainer));
 
-        trainerService.saveTrainer(trainer);
-
-        Trainer lastName = trainerService.findByLastName(trainer.getUser().getLastName()).orElseThrow();
-
+        Trainer lastName = trainerService.findByLastName(trainer.getUser().getLastName());
 
         verify(trainerRepository).findByLastName(trainer.getUser().getLastName());
-        verify(trainerRepository).save(trainer);
 
         Assertions.assertEquals(lastName, trainer);
     }
 
     @Test
     public void findByFirstName_withNonExistingData_returnsNull() {
-        when(trainerRepository.findByFirstName("George")).thenReturn(null);
+        when(trainerRepository.findByFirstName("George")).thenReturn(Optional.empty());
 
-        trainerService.saveTrainer(trainer);
-
-        Trainer trainerServiceByFirstName = trainerService.findByFirstName("George").orElseThrow();
+        Optional<Trainer> trainerByFirstName = trainerRepository.findByFirstName("George");
 
         verify(trainerRepository).findByFirstName("George");
-        verify(trainerRepository).save(trainer);
 
-        //Assertions.assertThrows(trainerServiceByFirstName);
+
+        Assertions.assertTrue(trainerByFirstName.isEmpty());
+
 
 
     }
 
     @Test
     public void findByLastName_withNonExistingData_returnsNull() {
-        when(trainerRepository.findByLastName("Bush")).thenReturn(null);
+        when(trainerRepository.findByLastName("Bush")).thenReturn(Optional.empty());
 
-        trainerService.saveTrainer(trainer);
 
-        Trainer trainerServiceByLastName = trainerService.findByLastName("Bush").orElseThrow();
+        Optional<Trainer> trainerServiceByLastName = trainerRepository.findByLastName("Bush");
 
         verify(trainerRepository).findByLastName("Bush");
-        verify(trainerRepository).save(trainer);
 
-        //Assertions.assertNull(trainerServiceByLastName);
 
+        Assertions.assertTrue(trainerServiceByLastName.isEmpty());
 
     }
 

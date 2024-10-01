@@ -8,7 +8,6 @@ import epam.com.gymapplication.dto.TrainerDTO;
 import epam.com.gymapplication.entity.Trainee;
 import epam.com.gymapplication.entity.Trainer;
 import epam.com.gymapplication.entity.User;
-import epam.com.gymapplication.exceptions.ResourceNotFoundException;
 import epam.com.gymapplication.profile.PasswordGenerator;
 import epam.com.gymapplication.profile.UserProfileService;
 import jakarta.persistence.EntityNotFoundException;
@@ -62,6 +61,7 @@ public class TraineeService {
 
         List<TrainerDTO> savedTrainersResponseDTO = traineeByUsername.getTrainers().stream().
                 map(trainer -> {
+
                     TrainerDTO trainerDTO = new TrainerDTO();
                     trainerDTO.setUsername(trainer.getUser().getUsername());
                     trainerDTO.setFirstname(trainer.getUser().getFirstName());
@@ -110,6 +110,7 @@ public class TraineeService {
 
 
         userRepository.save(toUserEntity);
+        logger.info("Persisted user to database: " + toUserEntity);
 
 
         Trainee trainee = new Trainee();
@@ -119,6 +120,7 @@ public class TraineeService {
 
 
         traineeRepository.save(trainee);
+        logger.info("Persisted traine to database: " + trainee);
 
         TraineeDTO traineeResponse = new TraineeDTO();
         traineeResponse.setUsername(trainee.getUser().getUsername());
@@ -187,10 +189,12 @@ public class TraineeService {
     public boolean changePassword(String username, String password, String oldPassword) {
         Trainee traineeProfileByUsername = traineeRepository.findByUsername(username).orElseThrow(() ->
                 new EntityNotFoundException("Trainer not found by username: " + username));
+        logger.info("Found Trainee Profile by Username {} ", traineeProfileByUsername);
 
         if (traineeProfileByUsername.getUser().getPassword().equals(oldPassword)) {
             traineeProfileByUsername.getUser().setPassword(password);
             traineeRepository.save(traineeProfileByUsername);
+            logger.info("Changed password for trainer {} ", traineeProfileByUsername);
             return true;
         }
         return false;
@@ -201,6 +205,7 @@ public class TraineeService {
     public void activateOrDeactivateTraineeStatus(String username, Boolean isActive) {
         Trainee traineeById = traineeRepository.findByUsername(username).orElseThrow(() ->
                 new EntityNotFoundException("Trainer not found"));
+        logger.info("Found Trainee Profile by Username {} ", traineeById);
 
         if (traineeById.getUser().getActive()!= isActive) {
             traineeById.getUser().setActive(isActive);
@@ -213,6 +218,7 @@ public class TraineeService {
     public TraineeDTO updateTraineeProfile(Long id, TraineeDTO traineeDTO) {
         Trainee traineeById = traineeRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException("Trainer not found by id: " + id));
+        logger.info("Found Trainee Profile by Username {} ", traineeById);
 
 
         traineeById.getUser().setFirstName(traineeDTO.getFirstname());
@@ -254,8 +260,10 @@ public class TraineeService {
     public void deleteTraineeProfileByUsername(String username)  {
         Trainee traineeProfileByUsername = traineeRepository.findByUsername(username).orElseThrow(() ->
                 new EntityNotFoundException("Trainee not found by username: " + username));
-        logger.info("Trainee profile deleted by username");
+        logger.info("Trainee Profile found by username {}", traineeProfileByUsername);
+
         traineeRepository.delete(traineeProfileByUsername);
+        logger.info("Trainee profile deleted by username");
     }
 
 

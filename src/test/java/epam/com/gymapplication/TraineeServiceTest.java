@@ -4,6 +4,7 @@ import epam.com.gymapplication.dao.TraineeRepository;
 import epam.com.gymapplication.entity.Trainee;
 import epam.com.gymapplication.entity.User;
 import epam.com.gymapplication.service.TraineeService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ public class TraineeServiceTest {
     private TraineeService traineeService;
 
     private Trainee trainee;
-    private Trainee trainee2;
+    private Trainee secondTrainee;
     private Trainee invalidTrainee;
 
     @BeforeEach
@@ -52,11 +53,11 @@ public class TraineeServiceTest {
         trainee.setUser(user);
 
 
-        trainee2 = new Trainee();
-        trainee2.setId(2L);
-        trainee2.setAddress("Edinburgh street 4");
-        trainee2.setDateOfBirth(LocalDate.of(2000, 8, 15));
-        trainee2.setUser(user);
+        secondTrainee = new Trainee();
+        secondTrainee.setId(2L);
+        secondTrainee.setAddress("Edinburgh street 4");
+        secondTrainee.setDateOfBirth(LocalDate.of(2000, 8, 15));
+        secondTrainee.setUser(user);
 
         invalidTrainee = new Trainee();
         invalidTrainee.setUser(user);
@@ -90,66 +91,20 @@ public class TraineeServiceTest {
 
         traineeService.saveTrainee(trainee);
 
-        Trainee traineeById = traineeService.findTraineeById(trainee.getId());
-
 
         verify(traineeRepository).save(trainee);
 
-        Assertions.assertNull(traineeById);
+        Assertions.assertThrows(EntityNotFoundException.class,
+                () -> traineeService.findTraineeById(trainee.getId()));
 
 
     }
 
-//    @Test
-//    public void update_withExistingEntity_updatesEntityDetails() {
-//        when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.ofNullable(trainee));
-//
-//        traineeService.saveTrainee(trainee);
-//
-//        Trainee traineeById = traineeService.findTraineeById(trainee.getId());
-//
-//        trainee2.setId(trainee.getId());
-//
-//        traineeService.updateTrainee(trainee2);
-//
-//        when(traineeRepository.findById(trainee2.getId())).thenReturn(Optional.ofNullable(trainee2));
-//
-//        Trainee updatedTraineeById = traineeService.findTraineeById(trainee2.getId());
-//
-//        verify(traineeRepository).updateTrainee(trainee2);
-//        verify(traineeRepository).save(trainee);
-//
-//        Assertions.assertEquals(traineeById, trainee);
-//        Assertions.assertEquals(updatedTraineeById, trainee2);
-//    }
-
-//    @Test
-//    public void update_withInvalidData_returnsNull() {
-//        when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.ofNullable(trainee));
-//
-//        traineeService.saveTrainee(trainee);
-//
-//        Trainee traineeById = traineeService.findTraineeById(trainee.getId());
-//
-//        trainee2.setId(trainee.getId());
-//
-//        traineeService.updateTrainee(trainee2);
-//
-//        when(traineeRepository.findById(15L)).thenReturn(Optional.empty());
-//
-//        Trainee updatedTraineeById = traineeService.findTraineeById(15L);
-//
-//        verify(traineeRepository).updateTrainee(trainee2);
-//        verify(traineeRepository).save(trainee);
-//
-//        Assertions.assertEquals(traineeById, trainee);
-//        Assertions.assertNull(updatedTraineeById);
-//    }
 
 
     @Test
     public void findTraineeById_withExistingId_returnsEntity() {
-        when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.ofNullable(trainee));
+        when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.of(trainee));
 
         traineeService.saveTrainee(trainee);
 
@@ -164,53 +119,43 @@ public class TraineeServiceTest {
     }
 
     @Test
-    public void findTraineeById_withNonExistingId_returnsNull() {
+    public void findTraineeById_withNonExistingId_returnsEmpty() {
         when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.empty());
 
-        traineeService.saveTrainee(trainee);
+        Optional<Trainee> traineeById = traineeRepository.findById(trainee.getId());
 
-        Trainee traineeById = traineeService.findTraineeById(trainee.getId());
-
-        verify(traineeRepository).findById(trainee.getId());
-        verify(traineeRepository).save(trainee);
-
-        Assertions.assertNull(traineeById);
+        Assertions.assertTrue(traineeById.isEmpty());
 
     }
 
     @Test
     public void deleteTrainee_withValidId_returnsValidEntity() {
-        when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.ofNullable(trainee));
-
-        traineeService.saveTrainee(trainee);
+        when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.of(trainee));
 
         traineeService.deleteTraineeById(trainee.getId());
 
+        verify(traineeRepository).deleteById(trainee.getId());
+
+
         when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.empty());
 
-        Trainee traineeById = traineeService.findTraineeById(trainee.getId());
 
-        verify(traineeRepository).save(trainee);
-        verify(traineeRepository).delete(trainee);
-
-        Assertions.assertNull(traineeById);
+        Optional<Trainee> deletedTrainee = traineeRepository.findById(trainee.getId());
+        Assertions.assertTrue(deletedTrainee.isEmpty());
 
     }
 
     @Test
-    public void deleteTrainee_withInvalidId_returnsNull() {
+    public void deleteTrainee_withInvalidId_returnsEmpty() {
         when(traineeRepository.findById(5L)).thenReturn(Optional.empty());
 
-        traineeService.saveTrainee(trainee);
+        traineeService.deleteTraineeById(5L);
 
-        Trainee traineeById = traineeService.findTraineeById(5L);
+        verify(traineeRepository).deleteById(5L);
 
-        traineeService.deleteTraineeById(trainee.getId());
+        Optional<Trainee> traineeById = traineeRepository.findById(5L);
 
-        verify(traineeRepository).delete(trainee);
-        verify(traineeRepository).save(trainee);
-
-        Assertions.assertNull(traineeById);
+        Assertions.assertTrue(traineeById.isEmpty());
 
     }
 
@@ -220,30 +165,24 @@ public class TraineeServiceTest {
     public void findByFirstName_withExistingData_returnsValidEntity() {
         when(traineeRepository.findByFirstName(trainee.getUser().getFirstName())).thenReturn(Optional.of(trainee));
 
-        traineeService.saveTrainee(trainee);
-
         Trainee traineeByFirstname = traineeService.findByFirstName(trainee.getUser().getFirstName());
 
-
         verify(traineeRepository).findByFirstName(trainee.getUser().getFirstName());
-        verify(traineeRepository).save(trainee);
 
         Assertions.assertEquals(traineeByFirstname, trainee);
 
     }
 
     @Test
-    public void findByFirstName_withNonExistingData_returnsNull() {
+    public void findByFirstName_withNonExistingData_returnsEmpty() {
         when(traineeRepository.findByFirstName("George")).thenReturn(Optional.empty());
 
-        traineeService.saveTrainee(trainee);
-
-        Trainee traineeByFirstName = traineeService.findByFirstName("George");
+        Optional<Trainee> traineeByFirstName = traineeRepository.findByFirstName("George");
 
         verify(traineeRepository).findByFirstName("George");
-        verify(traineeRepository).save(trainee);
 
-        Assertions.assertNull(traineeByFirstName);
+
+        Assertions.assertTrue(traineeByFirstName.isEmpty());
 
     }
 
@@ -266,14 +205,13 @@ public class TraineeServiceTest {
     public void findByLastName_withNonExistingData_returnsNull() {
         when(traineeRepository.findByLastName("Bush")).thenReturn(Optional.empty());
 
-        traineeService.saveTrainee(trainee);
 
-        Trainee traineeServiceByLastName = traineeService.findByLastName("Bush");
+        Optional<Trainee> traineeServiceByLastName = traineeRepository.findByLastName("Bush");
 
         verify(traineeRepository).findByLastName("Bush");
-        verify(traineeRepository).save(trainee);
 
-        Assertions.assertNull(traineeServiceByLastName);
+
+        Assertions.assertTrue(traineeServiceByLastName.isEmpty());
     }
 
 

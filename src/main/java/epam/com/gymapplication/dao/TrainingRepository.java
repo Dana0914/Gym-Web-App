@@ -2,6 +2,7 @@ package epam.com.gymapplication.dao;
 
 
 import epam.com.gymapplication.entity.Training;
+import epam.com.gymapplication.entity.TrainingType;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -31,12 +32,12 @@ public interface TrainingRepository extends CrudRepository<Training, Long> {
             @Param("trainingDuration") Integer trainingDuration);
 
 
-    @Query(value = "select t FROM Training t join t.trainee t2 join t.trainer t3 " +
+    @Query(value = "select t FROM Training t join t.trainee t2 join t.trainer t3 join t.trainingType tt " +
             "where t2.user.username =:username " +
             "AND t3.user.firstname =:trainerName " +
             "AND t.trainingDate BETWEEN :from " +
             "AND :to " +
-            "AND t.trainingName =:trainingName",
+            "AND tt.trainingTypeName =:trainingType",
             nativeQuery = false)
 
 
@@ -44,23 +45,23 @@ public interface TrainingRepository extends CrudRepository<Training, Long> {
                                             @Param("from") LocalDate from,
                                             @Param("to") LocalDate to,
                                             @Param("trainerName") String trainerName,
-                                            @Param("trainingName") String trainingName);
+                                            @Param("trainingType") String trainingType);
 
 
 
-    @Query(value = "select t FROM Training t join t.trainer t2 join t.trainee t3 " +
+    @Query(value = "select t FROM Training t join t.trainer t2 join t.trainee t3 join t.trainingType tt " +
             "where t2.user.username =:username " +
             "AND t3.user.firstname =:traineeName " +
             "AND t.trainingDate BETWEEN :from " +
             "AND :to " +
-            "AND t.trainingName =:trainingName",
+            "AND tt.trainingTypeName =:trainingType",
             nativeQuery = false)
 
     List<Training> findTrainingListByTrainerCriteria(@Param("username") String username,
                                                      @Param("from") LocalDate from,
                                                      @Param("to") LocalDate to,
                                                      @Param("traineeName") String traineeName,
-                                                     @Param("trainingName") String trainingName);
+                                                     @Param("trainingType") String trainingType);
 
 
     @Query(value = "select t from Training t where t.trainingName =:trainingName", nativeQuery = false)

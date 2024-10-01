@@ -21,14 +21,14 @@ public class TrainingController {
 
     @GetMapping("/trainee/training/list")
     public ResponseEntity<List<TrainingDTO>> getTraineeTrainingList(
-            @RequestParam("username") String username,
+            @RequestParam("username") String traineeUsername,
             @RequestParam("from") LocalDate from,
             @RequestParam("to") LocalDate to,
             @RequestParam("trainerName") String trainerName,
-            @RequestParam("trainingName") String trainingName) {
+            @RequestParam("trainingType") String trainingType) {
 
-        List<TrainingDTO> result = trainingService.getTraineesTrainingList(username, from, to,
-                trainerName, trainingName);
+        List<TrainingDTO> result = trainingService.getTraineesTrainingList(traineeUsername, from, to,
+                trainerName, trainingType);
 
         return ResponseEntity.ok(result);
 
@@ -39,11 +39,11 @@ public class TrainingController {
                                                                     @RequestParam("from") LocalDate from,
                                                                     @RequestParam("to") LocalDate to,
                                                                     @RequestParam("traineeName") String traineeName,
-                                                                    @RequestParam("trainingName") String trainingName) {
+                                                                    @RequestParam("trainingType") String trainingType) {
 
 
         List<TrainingDTO> result = trainingService.getTrainersTrainingList(username, from, to,
-                traineeName, trainingName);
+                traineeName, trainingType);
 
         return ResponseEntity.ok(result);
     }

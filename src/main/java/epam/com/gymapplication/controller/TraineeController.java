@@ -4,6 +4,7 @@ package epam.com.gymapplication.controller;
 import epam.com.gymapplication.dto.TraineeDTO;
 import epam.com.gymapplication.dto.TrainerDTO;
 import epam.com.gymapplication.service.TraineeService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,8 @@ public class TraineeController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<TraineeDTO> registerTrainee(@RequestBody TraineeDTO traineeRequest) {
+    public ResponseEntity<TraineeDTO> registerTrainee(@Valid
+            @RequestBody TraineeDTO traineeRequest) {
 
         TraineeDTO registeredTraineeRequest = traineeService.createTraineeProfile(traineeRequest);
         return new ResponseEntity<>(registeredTraineeRequest, HttpStatus.CREATED);
@@ -78,7 +80,7 @@ public class TraineeController {
     }
 
     @DeleteMapping(value = "/delete")
-    public ResponseEntity<String> deleteTraineeProfile(@RequestParam("username") String username) {
+    public ResponseEntity<Void> deleteTraineeProfile(@RequestParam("username") String username) {
         traineeService.deleteTraineeProfileByUsername(username);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 

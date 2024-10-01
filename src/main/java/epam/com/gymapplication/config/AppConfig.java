@@ -1,7 +1,5 @@
 package epam.com.gymapplication.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import epam.com.gymapplication.profile.PasswordGenerator;
 import epam.com.gymapplication.profile.UserProfileService;
 import epam.com.gymapplication.service.*;
@@ -15,12 +13,6 @@ import org.springframework.dao.annotation.PersistenceExceptionTranslationPostPro
 @Configuration
 @ComponentScan(basePackages = "epam.com.gymapplication")
 public class AppConfig {
-
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper().registerModule(new JavaTimeModule());
-    }
 
 
     @Bean

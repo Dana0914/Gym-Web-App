@@ -3,10 +3,9 @@ package epam.com.gymapplication.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TrainingTypeDTO {
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long trainingTypeId;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String trainingTypeName;
 
     public TrainingTypeDTO() {

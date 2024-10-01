@@ -6,34 +6,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
+
 public class TrainerDTO {
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-
     private String username;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String password;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String firstname;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String lastname;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long specialization;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty(value = "active")
     private Boolean isActive;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<TraineeDTO> trainees;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<TrainingDTO> trainings;
-
 
     public TrainerDTO() {
 
