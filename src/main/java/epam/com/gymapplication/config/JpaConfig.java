@@ -11,15 +11,16 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
 @PropertySource("classpath:application.properties")
 @Configuration
+@EnableTransactionManagement
 @EnableJpaRepositories(basePackages = "epam.com.gymapplication.dao", entityManagerFactoryRef="entityManagerFactory")
 public class JpaConfig {
 
-    // Read from the application.properties file
     @Value("${spring.datasource.url}")
     private String dbUrl;
 
@@ -49,8 +50,8 @@ public class JpaConfig {
 
         LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
         factory.setJpaVendorAdapter(vendorAdapter);
-        factory.setPackagesToScan("epam.com.gymapplication.entity"); // Set package for entity classes
-        factory.setDataSource(dataSource); // Inject the DataSource bean
+        factory.setPackagesToScan("epam.com.gymapplication.entity");
+        factory.setDataSource(dataSource);
         return factory;
     }
 

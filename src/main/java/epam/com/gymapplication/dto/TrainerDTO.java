@@ -78,5 +78,19 @@ public class TrainerDTO {
     public void setTrainings(List<TrainingDTO> trainings) {
         this.trainings = trainings;
     }
+
+    @Override
+    public String toString() {
+        return "TrainerDTO{" +
+                "username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", firstname='" + firstname + '\'' +
+                ", lastname='" + lastname + '\'' +
+                ", specialization=" + specialization +
+                ", isActive=" + isActive +
+                ", trainees=" + trainees +
+                ", trainings=" + trainings +
+                '}';
+    }
 }
 

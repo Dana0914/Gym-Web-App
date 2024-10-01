@@ -1,9 +1,6 @@
 package epam.com.gymapplication.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
@@ -20,7 +17,7 @@ public class Trainee {
     private Long id;
 
 
-    @Column(name = "date_of_birth", nullable = false)
+    @Column(name = "date_of_birth")
     @NotNull(message = "date of birth can not be null")
     private LocalDate dateOfBirth;
 
@@ -42,7 +39,7 @@ public class Trainee {
     }
 
     @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
-    @JoinColumn(name = "users_id", unique = true, nullable = false)
+    @JoinColumn(name = "users_id")
     private User user;
 
     public void setUser(User user) {

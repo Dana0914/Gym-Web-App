@@ -2,7 +2,6 @@ package epam.com.gymapplication;
 
 
 import epam.com.gymapplication.dao.TrainerRepository;
-import epam.com.gymapplication.entity.Trainee;
 import epam.com.gymapplication.entity.Trainer;
 import epam.com.gymapplication.entity.TrainingType;
 import epam.com.gymapplication.entity.User;
@@ -82,32 +81,26 @@ public class TrainerServiceTest {
 
     @Test
     public void findTrainerById_withExistingId_returnsEntity() {
-        when(trainerRepository.findById(trainer.getId())).thenReturn(Optional.ofNullable(trainer));
-
-        trainerService.saveTrainer(trainer);
+        when(trainerRepository.findById(trainer.getId())).thenReturn(Optional.of(trainer));
 
         Trainer trainerById = trainerService.findTrainerById(trainer.getId());
 
-
         verify(trainerRepository).findById(trainer.getId());
-        verify(trainerRepository).save(trainer);
 
         Assertions.assertEquals(trainerById, trainer);
 
     }
 
     @Test
-    public void findTrainerById_withNonExistingId_returnsNull() {
-        when(trainerRepository.findById(4L)).thenReturn(null);
+    public void findTrainerById_withNonExistingId_returnsEmpty() {
+        when(trainerRepository.findById(4L)).thenReturn(Optional.empty());
 
-        trainerService.saveTrainer(trainer);
-
-        Trainer trainerById = trainerService.findTrainerById(4L);
+        Optional<Trainer> trainerById = trainerRepository.findById(4L);
 
         verify(trainerRepository).findById(4L);
-        verify(trainerRepository).save(trainer);
 
-        Assertions.assertNull(trainerById);
+
+        Assertions.assertTrue(trainerById.isEmpty());
 
 
     }

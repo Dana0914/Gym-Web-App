@@ -15,12 +15,12 @@ import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
-import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ITemplateResolver;
+
 
 import java.time.Duration;
 import java.util.List;
@@ -30,6 +30,22 @@ import java.util.List;
 @EnableWebMvc
 @ComponentScan(basePackages = "epam.com.gymapplication")
 public class WebConfig implements WebMvcConfigurer {
+
+    private final RestCallLoggingInterceptor restCallLoggingInterceptor;
+
+    public WebConfig(RestCallLoggingInterceptor restCallLoggingInterceptor) {
+        this.restCallLoggingInterceptor = restCallLoggingInterceptor;
+    }
+
+
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new LocaleChangeInterceptor());
+        registry.addInterceptor(restCallLoggingInterceptor)
+                .addPathPatterns("/**")
+                .excludePathPatterns("/admin/**");
+    }
 
     @Override
     public void addFormatters(FormatterRegistry registry) {
@@ -77,13 +93,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .setCacheControl(CacheControl.maxAge(Duration.ofDays(365)));
     }
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new LocaleChangeInterceptor());
-        registry.addInterceptor(new ThemeChangeInterceptor())
-                .addPathPatterns("/**")
-                .excludePathPatterns("/admin/**");
-    }
 
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {

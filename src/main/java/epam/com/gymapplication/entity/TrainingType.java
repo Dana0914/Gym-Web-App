@@ -15,7 +15,7 @@ public class TrainingType {
     @Id
     private Long id;
 
-    @Column(name = "training_type_name", nullable = false)
+    @Column(name = "training_type_name")
     @NotNull(message = "training type name can not be null")
     private String trainingTypeName;
 

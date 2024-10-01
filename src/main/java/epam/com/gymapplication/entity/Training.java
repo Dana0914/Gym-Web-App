@@ -17,15 +17,15 @@ public class Training {
     @Id
     private Long id;
 
-    @Column(name = "training_name", nullable = false)
+    @Column(name = "training_name")
     @NotNull(message = "training name can not be null")
     private String trainingName;
 
-    @Column(name = "training_date", nullable = false)
+    @Column(name = "training_date")
     @NotNull(message = "training date can not be null")
     private LocalDate trainingDate;
 
-    @Column(name = "training_duration", nullable = false)
+    @Column(name = "training_duration")
     @NotNull(message = "training duration can not be null")
     private Integer trainingDuration;
 
@@ -45,15 +45,15 @@ public class Training {
     }
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
-    @JoinColumn(name="training_type_id", nullable = false)
+    @JoinColumn(name="training_type_id")
     private TrainingType trainingType;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
-    @JoinColumn(name = "trainee_ID", nullable = false, unique = true)
+    @JoinColumn(name = "trainee_ID")
     private Trainee trainee;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
-    @JoinColumn(name = "trainer_ID", nullable = false, unique = true)
+    @JoinColumn(name = "trainer_ID")
     private Trainer trainer;
 
     public Trainee getTrainee() {

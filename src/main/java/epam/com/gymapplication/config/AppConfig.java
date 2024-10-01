@@ -14,6 +14,12 @@ import org.springframework.dao.annotation.PersistenceExceptionTranslationPostPro
 @ComponentScan(basePackages = "epam.com.gymapplication")
 public class AppConfig {
 
+    @Bean
+    public RestCallLoggingInterceptor restCallLoggingInterceptor() {
+        return new RestCallLoggingInterceptor();
+    }
+
+
 
     @Bean
     public PersistenceExceptionTranslationPostProcessor exceptionTranslation() {

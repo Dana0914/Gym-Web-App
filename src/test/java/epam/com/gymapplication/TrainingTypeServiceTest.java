@@ -1,7 +1,6 @@
 package epam.com.gymapplication;
 
 import epam.com.gymapplication.dao.TrainingTypeRepository;
-import epam.com.gymapplication.entity.Trainee;
 import epam.com.gymapplication.entity.TrainingType;
 import epam.com.gymapplication.service.TrainingTypeService;
 import org.junit.jupiter.api.Assertions;

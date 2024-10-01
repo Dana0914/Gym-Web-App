@@ -134,4 +134,22 @@ public class TrainingDTO {
     public void setTrainingDate(LocalDate trainingDate) {
         this.trainingDate = trainingDate;
     }
+
+    @Override
+    public String toString() {
+        return "TrainingDTO{" +
+                "trainingName='" + trainingName + '\'' +
+                ", from=" + from +
+                ", to=" + to +
+                ", trainingDuration=" + trainingDuration +
+                ", trainingType='" + trainingType + '\'' +
+                ", trainingDate=" + trainingDate +
+                ", trainer=" + trainer +
+                ", trainee=" + trainee +
+                ", trainerName='" + trainerName + '\'' +
+                ", traineeName='" + traineeName + '\'' +
+                ", traineeUsername='" + traineeUsername + '\'' +
+                ", trainerUsername='" + trainerUsername + '\'' +
+                '}';
+    }
 }

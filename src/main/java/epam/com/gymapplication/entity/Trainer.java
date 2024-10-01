@@ -25,7 +25,7 @@ public class Trainer {
     }
 
     @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE})
-    @JoinColumn(name = "specialization", nullable = false, unique = true)
+    @JoinColumn(name = "specialization")
     private TrainingType trainingType;
 
     public TrainingType getTrainingType() {
@@ -37,7 +37,7 @@ public class Trainer {
     }
 
     @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
-    @JoinColumn(name = "users_id", unique = true, nullable = false)
+    @JoinColumn(name = "users_id")
     private User user;
 
     public User getUser() {

@@ -1,12 +1,11 @@
 package epam.com.gymapplication.dao;
 
 import epam.com.gymapplication.entity.Trainer;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
+
 
 
 import java.util.List;
@@ -29,12 +28,4 @@ public interface TrainerRepository extends CrudRepository<Trainer, Long> {
     @Query(value = "select t from Trainer t where t.user.lastname =:lastname", nativeQuery = false)
     Optional<Trainer> findByLastName(@Param("lastname") String lastName);
 
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE Trainer t SET t.user.id =:users_id, t.trainingType.id =:trainingType WHERE t.id =:id",
-            nativeQuery = false)
-
-    void updateTrainee(@Param("users_id") Long usersId,
-                       @Param("id") Long trainingType,
-                       @Param("id") Long id);
 }

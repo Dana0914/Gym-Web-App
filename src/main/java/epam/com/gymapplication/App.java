@@ -13,6 +13,9 @@ import java.io.File;
 
 public class App  {
     public static void main( String[] args ) throws LifecycleException {
+        Tomcat tomcat = new Tomcat();
+        tomcat.setPort(8080);
+
         AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
         cxt.register(WebConfig.class);
 
@@ -20,10 +23,6 @@ public class App  {
         cxt.register(TrainerController.class);
 
 
-
-
-        Tomcat tomcat = new Tomcat();
-        tomcat.setPort(8080);
         tomcat.getConnector();
         tomcat.addWebapp("/", new File("src/main/webapp").getAbsolutePath());
         tomcat.start();

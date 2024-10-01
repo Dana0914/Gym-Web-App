@@ -29,4 +29,11 @@ public class TrainingTypeDTO {
         this.trainingTypeName = trainingTypeName;
     }
 
+    @Override
+    public String toString() {
+        return "TrainingTypeDTO{" +
+                "trainingTypeId=" + trainingTypeId +
+                ", trainingTypeName='" + trainingTypeName + '\'' +
+                '}';
+    }
 }

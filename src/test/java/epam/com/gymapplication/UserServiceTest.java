@@ -2,7 +2,6 @@ package epam.com.gymapplication;
 
 
 import epam.com.gymapplication.dao.UserRepository;
-import epam.com.gymapplication.entity.Trainee;
 import epam.com.gymapplication.entity.User;
 import epam.com.gymapplication.service.UserService;
 import org.junit.jupiter.api.Assertions;

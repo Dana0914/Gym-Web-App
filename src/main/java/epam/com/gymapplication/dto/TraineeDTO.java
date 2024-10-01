@@ -115,4 +115,19 @@ public class TraineeDTO {
     public void setTrainings(List<TrainingDTO> trainings) {
         this.trainings = trainings;
     }
+
+    @Override
+    public String toString() {
+        return "TraineeDTO{" +
+                "username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", firstname='" + firstname + '\'' +
+                ", lastname='" + lastname + '\'' +
+                ", address='" + address + '\'' +
+                ", dateOfBirth=" + dateOfBirth +
+                ", isActive=" + isActive +
+                ", trainers=" + trainers +
+                ", trainings=" + trainings +
+                '}';
+    }
 }

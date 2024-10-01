@@ -230,17 +230,6 @@ public class TrainerService {
 
     }
 
-    public void updateTrainer(Trainer trainer) {
-        Trainer byId = trainerRepository.findById(trainer.getId()).orElseThrow(() ->
-                new EntityNotFoundException("Entity not found"));
-
-        trainerRepository.updateTrainee(byId.getId(),
-                trainer.getTrainingType().getId(),
-                trainer.getUser().getId());
-
-        logger.info("Updated trainer by id {}", trainer);
-
-    }
 
     public void deleteById(Long id)  {
         trainerRepository.deleteById(id);

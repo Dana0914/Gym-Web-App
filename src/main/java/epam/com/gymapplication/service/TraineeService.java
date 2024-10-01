@@ -59,6 +59,8 @@ public class TraineeService {
 
         traineeByUsername.setTrainers(trainers);
 
+        traineeRepository.save(traineeByUsername);
+
         List<TrainerDTO> savedTrainersResponseDTO = traineeByUsername.getTrainers().stream().
                 map(trainer -> {
 
