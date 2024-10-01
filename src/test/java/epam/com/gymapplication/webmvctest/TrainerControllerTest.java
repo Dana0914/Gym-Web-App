@@ -77,22 +77,28 @@ public class TrainerControllerTest {
     }
 
     @Test
-    public void testChangeLogin_validRequest_ReturnsChangedPassword() throws Exception {
-        String username = "Ben.Gosling";
-        String oldPassword = "testPassword";
-        String newPassword = "newPassword";
+    public void testChangeLogin_validRequest_ReturnsTrue() throws Exception {
+        TrainerDTO trainerDTO = new TrainerDTO();
+        trainerDTO.setUsername("Ben.Gosling");
+        trainerDTO.setOldPassword("testPassword");
+        trainerDTO.setNewPassword("newPassword");
 
-        when(trainerService.changePassword(username, newPassword, oldPassword)).thenReturn(true);
+
+        when(trainerService.changePassword(any(TrainerDTO.class))).thenReturn(true);
 
         mockMvc.perform(MockMvcRequestBuilders.put("/api/trainers/change-login")
-                        .param("username", username)
-                        .param("oldPassword", oldPassword)
-                        .param("password", newPassword)
+                        .content("""
+                {
+                   "username": "Ben.Gosling",
+                   "oldPassword": "testPassword",
+                   "newPassword": "newPassword"
+                }""")
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
+
     }
 
     @Test

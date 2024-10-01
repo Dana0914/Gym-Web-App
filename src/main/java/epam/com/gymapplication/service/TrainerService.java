@@ -5,6 +5,7 @@ import epam.com.gymapplication.dao.TrainingTypeRepository;
 import epam.com.gymapplication.dao.UserRepository;
 import epam.com.gymapplication.dto.TraineeDTO;
 import epam.com.gymapplication.dto.TrainerDTO;
+import epam.com.gymapplication.entity.Trainee;
 import epam.com.gymapplication.entity.Trainer;
 import epam.com.gymapplication.entity.TrainingType;
 import epam.com.gymapplication.entity.User;
@@ -145,11 +146,24 @@ public class TrainerService {
     }
 
 
-    public boolean changePassword(String username, String password, String oldPassword) {
+    public boolean changePassword(TrainerDTO trainerDTO) {
+        String username = trainerDTO.getUsername();
+        String oldPassword = trainerDTO.getOldPassword();
+        String newPassword = trainerDTO.getNewPassword();
+
         Trainer trainerProfileByUsername = trainerRepository.findByUsername(username).orElseThrow(() ->
-                new EntityNotFoundException("Entity not found"));
+                new EntityNotFoundException("Trainer not found by username: " + username));
+
+        logger.info("Found Trainer Profile by Username {} ", trainerProfileByUsername);
+
+
         if (trainerProfileByUsername.getUser().getPassword().equals(oldPassword)) {
-            trainerProfileByUsername.getUser().setPassword(password);
+            trainerProfileByUsername.getUser().setPassword(newPassword);
+
+            trainerRepository.save(trainerProfileByUsername);
+            logger.info("Changed password for trainer {} ", trainerProfileByUsername);
+
+            return true;
         }
         return false;
 

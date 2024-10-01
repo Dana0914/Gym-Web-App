@@ -1,12 +1,13 @@
 package epam.com.gymapplication.controller;
 
 
-import epam.com.gymapplication.dto.TrainerDTO;
+import epam.com.gymapplication.dto.*;
 import epam.com.gymapplication.service.TrainerService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,8 +37,8 @@ public class TrainerController {
 
     @GetMapping("/login")
     public ResponseEntity<String> login(@Valid
-            @RequestParam("username") String username,
-                                        @RequestParam("password") String password) {
+                                            @RequestParam("username") String username,
+                                            @RequestParam("password") String password) {
 
         boolean authenticatedTrainerProfile = trainerService.authenticateTrainerProfile(username, password);
         if (authenticatedTrainerProfile) {
@@ -47,11 +48,9 @@ public class TrainerController {
     }
 
     @PutMapping("/change-login")
-    public ResponseEntity<String> changeLogin(@Valid
-            @RequestParam("username") String username,
-                                              @RequestParam("password") String password,
-                                              @RequestParam("oldPassword") String oldPassword) {
-        boolean passwordChange = trainerService.changePassword(username, password, oldPassword);
+    public ResponseEntity<String> changeLogin(@Validated(ChangeLogin.class)
+                                                  @RequestBody TrainerDTO trainerDTO) {
+        boolean passwordChange = trainerService.changePassword(trainerDTO);
         if (passwordChange) {
             return ResponseEntity.ok("Password changed successfully");
         }
@@ -68,7 +67,7 @@ public class TrainerController {
     @PutMapping(value = "/trainer-profile/{id}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TrainerDTO> updateTrainerProfile(@Valid
+    public ResponseEntity<TrainerDTO> updateTrainerProfile(@Validated(UpdateTrainerProfile.class)
             @PathVariable("id") Long id,
                                                            @RequestBody TrainerDTO trainerDTO)
     {
@@ -79,7 +78,7 @@ public class TrainerController {
 
     }
     @GetMapping(value = "not-assigned")
-    public ResponseEntity<List<TrainerDTO>> getUnassignedOnTraineeTrainersList(@Valid
+    public ResponseEntity<List<TrainerDTO>> getUnassignedOnTraineeTrainersList(@Validated(UnassignedTrainersOnTrainee.class)
             @RequestParam("username") String username)
     {
 
@@ -89,7 +88,7 @@ public class TrainerController {
     }
 
     @PatchMapping(value = "/active-inactive")
-    public ResponseEntity<Void> activateDeactivateTrainer(@Valid
+    public ResponseEntity<Void> activateDeactivateTrainer(@Validated(ActivateDeactivateTrainer.class)
             @RequestParam("username") String username,
                                                           @RequestBody TrainerDTO trainerDTO) {
 

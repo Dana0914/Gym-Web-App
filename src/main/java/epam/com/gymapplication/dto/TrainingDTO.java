@@ -2,9 +2,10 @@ package epam.com.gymapplication.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import epam.com.gymapplication.entity.Trainee;
 import epam.com.gymapplication.entity.Trainer;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 
 import java.time.LocalDate;
@@ -12,17 +13,22 @@ import java.time.LocalDate;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TrainingDTO {
 
+    @NotBlank(groups = {GetTraineeTrainingList.class, GetTrainerTrainingList.class})
+    private String username;
+
+    @NotBlank(groups = {AddTraining.class})
     private String trainingName;
 
     private LocalDate from;
 
     private LocalDate to;
 
+    @NotNull(groups = {AddTraining.class})
     private Integer trainingDuration;
 
     private String trainingType;
 
-
+    @NotNull(groups = {AddTraining.class})
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate trainingDate;
 
@@ -30,22 +36,26 @@ public class TrainingDTO {
 
     private Trainee trainee;
 
+
     private String trainerName;
 
     private String traineeName;
 
-    @JsonProperty(value = "username")
+    @NotBlank(groups = {AddTraining.class})
     private String traineeUsername;
-
+    @NotBlank(groups = {AddTraining.class})
     private String trainerUsername;
+
 
 
     public TrainingDTO() {
 
     }
 
-    public TrainingDTO(String trainingName, LocalDate from, LocalDate to, Integer trainingDuration,
-                       String trainingType, Trainer trainer, Trainee trainee) {
+    public TrainingDTO(String username, String trainingName, LocalDate from, LocalDate to, Integer trainingDuration,
+                       String trainingType, Trainer trainer, Trainee trainee,
+                       String trainerUsername, String traineeUsername) {
+        this.username = username;
         this.trainingName = trainingName;
         this.trainingType = trainingType;
         this.from = from;
@@ -53,7 +63,17 @@ public class TrainingDTO {
         this.trainingDuration = trainingDuration;
         this.trainer = trainer;
         this.trainee = trainee;
+        this.trainerUsername = trainerUsername;
+        this.traineeUsername = traineeUsername;
 
+    }
+
+    public void setUsername(@NotBlank(groups = GetTraineeTrainingList.class) String username) {
+        this.username = username;
+    }
+
+    public @NotBlank(groups = GetTraineeTrainingList.class) String getUsername() {
+        return username;
     }
 
     public String getTrainingName() {
@@ -107,19 +127,6 @@ public class TrainingDTO {
     public void setTrainerName(String trainerName) {
         this.trainerName = trainerName;
     }
-    public String getTraineeUsername() {
-        return traineeUsername;
-    }
-    public void setTraineeUsername(String traineeUsername) {
-        this.traineeUsername = traineeUsername;
-    }
-
-    public String getTrainerUsername() {
-        return trainerUsername;
-    }
-    public void setTrainerUsername(String trainerUsername) {
-        this.trainerUsername = trainerUsername;
-    }
 
     public String getTraineeName() {
         return traineeName;
@@ -135,10 +142,27 @@ public class TrainingDTO {
         this.trainingDate = trainingDate;
     }
 
+    public @NotBlank(groups = {AddTraining.class}) String getTrainerUsername() {
+        return trainerUsername;
+    }
+
+    public @NotBlank(groups = {AddTraining.class}) String getTraineeUsername() {
+        return traineeUsername;
+    }
+
+    public void setTraineeUsername(@NotBlank(groups = {AddTraining.class}) String traineeUsername) {
+        this.traineeUsername = traineeUsername;
+    }
+
+    public void setTrainerUsername(@NotBlank(groups = {AddTraining.class}) String trainerUsername) {
+        this.trainerUsername = trainerUsername;
+    }
+
     @Override
     public String toString() {
         return "TrainingDTO{" +
-                "trainingName='" + trainingName + '\'' +
+                "username='" + username + '\'' +
+                ", trainingName='" + trainingName + '\'' +
                 ", from=" + from +
                 ", to=" + to +
                 ", trainingDuration=" + trainingDuration +

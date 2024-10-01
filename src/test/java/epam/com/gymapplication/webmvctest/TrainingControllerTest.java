@@ -34,7 +34,7 @@ public class TrainingControllerTest {
 
     @Mock
     private TrainingService trainingService;
-    private TraineeService traineeService;
+
 
     @InjectMocks
     private TrainingController trainingController;
@@ -47,35 +47,37 @@ public class TrainingControllerTest {
 
     @Test
     public void getTraineesTrainingListTest_whenRequestIsValid_ReturnResponseOk() throws Exception {
-        String username = "Ben.Gosling";
-        LocalDate from = LocalDate.parse(LocalDate.of(2024, 9, 30).toString());
-        LocalDate to = LocalDate.parse(LocalDate.of(2024, 10, 30).toString());
-        String trainerName = "Rick";
-        String trainingType = "cross-fit";
+        TrainingDTO trainingRequest = new TrainingDTO();
+        trainingRequest.setUsername("Ben.Gosling");
+        trainingRequest.setFrom(LocalDate.parse("2024-09-30"));
+        trainingRequest.setTo(LocalDate.parse("2024-10-30"));
+        trainingRequest.setTrainerName("Rick");
+        trainingRequest.setTrainingType("cross-fit");
 
         List<TrainingDTO> trainings = new ArrayList<>();
 
         TrainingDTO trainingResponse = new TrainingDTO();
         trainingResponse.setTrainingName("run");
-        trainingResponse.setTrainingType(trainingType);
-        trainingResponse.setTrainingDate(LocalDate.parse(LocalDate.of(2024, 10, 2).toString()));
+        trainingResponse.setTrainingType(trainingRequest.getTrainingType());
+        trainingResponse.setTrainingDate(LocalDate.parse("2024-10-02"));
         trainingResponse.setTrainingDuration(70);
-        trainingResponse.setTrainerName(trainerName);
+        trainingResponse.setTrainerName(trainingRequest.getTrainerName());
 
         trainings.add(trainingResponse);
 
 
 
-        when(trainingService.getTraineesTrainingList(username, from, to, trainerName, trainingType)).thenReturn(trainings);
+        when(trainingService.getTraineesTrainingList(trainingRequest.getUsername(),
+                trainingRequest.getFrom(), trainingRequest.getTo(),
+                trainingRequest.getTrainerName(), trainingRequest.getTrainingType())).thenReturn(trainings);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/trainings/trainee/training/list")
+                        .param("username", trainingRequest.getUsername())
+                        .param("from", trainingRequest.getFrom().toString())
+                        .param("to", trainingRequest.getTo().toString())
+                        .param("trainerName", trainingRequest.getTrainerName())
+                        .param("trainingType", trainingRequest.getTrainingType())
                 .contentType(MediaType.APPLICATION_JSON)
-                        .param("username", username)
-                        .param("from", String.valueOf(from))
-                        .param("to", String.valueOf(to))
-                        .param("trainerName", trainingResponse.getTrainerName())
-                        .param("trainingType", trainingResponse.getTrainingType())
-
                 .characterEncoding("UTF-8")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -90,8 +92,8 @@ public class TrainingControllerTest {
     @Test
     public void getTrainersTrainingListTest_whenRequestIsValid_ReturnResponseOk() throws Exception {
         String username = "Ben.Gosling";
-        LocalDate from = LocalDate.parse(LocalDate.of(2024, 9, 30).toString());
-        LocalDate to = LocalDate.parse(LocalDate.of(2024, 10, 30).toString());
+        LocalDate from = LocalDate.parse("2024-09-30");
+        LocalDate to = LocalDate.parse("2024-10-30");
         String traineeName = "Shon";
         String trainingType = "stretching";
 
@@ -100,7 +102,7 @@ public class TrainingControllerTest {
         TrainingDTO trainingResponse = new TrainingDTO();
         trainingResponse.setTrainingName("run");
         trainingResponse.setTrainingType(trainingType);
-        trainingResponse.setTrainingDate(LocalDate.parse(LocalDate.of(2024, 10, 2).toString()));
+        trainingResponse.setTrainingDate(LocalDate.parse("2024-10-02"));
         trainingResponse.setTrainingDuration(70);
         trainingResponse.setTraineeName(traineeName);
 

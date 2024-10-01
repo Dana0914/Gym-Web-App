@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -73,28 +74,35 @@ public class TraineeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")
                         .accept(MediaType.APPLICATION_JSON))
+
                 .andExpect(status().isCreated()).andDo(print())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.username").value(traineeResponse.getUsername()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.password").value(traineeResponse.getPassword()));
     }
 
     @Test
-    public void testChangeLogin_validRequest_ReturnsChangedPassword() throws Exception {
-        String username = "Ben.Gosling";
-        String oldPassword = "testPassword";
-        String newPassword = "newPassword";
+    public void testChangeLogin_validRequest_ReturnsTrue() throws Exception {
+        TraineeDTO traineeDTO = new TraineeDTO();
+        traineeDTO.setUsername("Ben.Gosling");
+        traineeDTO.setOldPassword("testPassword");
+        traineeDTO.setNewPassword("newPassword");
 
-        when(traineeService.changePassword(username, newPassword, oldPassword)).thenReturn(true);
+
+        when(traineeService.changePassword(any(TraineeDTO.class))).thenReturn(true);
 
         mockMvc.perform(MockMvcRequestBuilders.put("/api/trainees/change-login")
-                .param("username", username)
-                .param("oldPassword", oldPassword)
-                .param("password", newPassword)
-                .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                {
+                   "username": "Ben.Gosling",
+                   "oldPassword": "testPassword",
+                   "newPassword": "newPassword"
+                }""")
+                        .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
+
 
 
     }

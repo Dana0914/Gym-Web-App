@@ -3,22 +3,34 @@ package epam.com.gymapplication.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-
 public class TrainerDTO {
-
+    @NotBlank(groups = {Login.class, GetTrainerProfile.class, UpdateTrainerProfile.class,
+    UnassignedTrainersOnTrainee.class, ActivateDeactivateTrainer.class})
     private String username;
+    @NotBlank(groups = Login.class)
     private String password;
+    @NotBlank(groups = {Registration.class, UpdateTrainerProfile.class})
     private String firstname;
+    @NotBlank(groups = {Registration.class, UpdateTrainerProfile.class})
     private String lastname;
+    @NotBlank(groups = Registration.class)
     private Long specialization;
+
     @JsonProperty(value = "active")
+    @NotBlank(groups = {UpdateTrainerProfile.class, ActivateDeactivateTrainer.class})
     private Boolean isActive;
     private List<TraineeDTO> trainees;
     private List<TrainingDTO> trainings;
+
+    @NotBlank(groups = ChangeLogin.class)
+    private String oldPassword;
+    @NotBlank(groups = ChangeLogin.class)
+    private String newPassword;
 
     public TrainerDTO() {
 
@@ -79,6 +91,19 @@ public class TrainerDTO {
         this.trainings = trainings;
     }
 
+    public @NotBlank(groups = ChangeLogin.class) String getNewPassword() {
+        return newPassword;
+    }
+    public void setNewPassword(@NotBlank(groups = ChangeLogin.class) String newPassword) {
+        this.newPassword = newPassword;
+    }
+    public String getOldPassword() {
+        return oldPassword;
+    }
+    public void setOldPassword(String oldPassword) {
+        this.oldPassword = oldPassword;
+    }
+
     @Override
     public String toString() {
         return "TrainerDTO{" +
@@ -90,6 +115,8 @@ public class TrainerDTO {
                 ", isActive=" + isActive +
                 ", trainees=" + trainees +
                 ", trainings=" + trainings +
+                ", oldPassword='" + oldPassword + '\'' +
+                ", newPassword='" + newPassword + '\'' +
                 '}';
     }
 }

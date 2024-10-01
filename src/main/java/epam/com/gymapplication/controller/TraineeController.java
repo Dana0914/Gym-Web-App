@@ -1,13 +1,13 @@
 package epam.com.gymapplication.controller;
 
 
-import epam.com.gymapplication.dto.TraineeDTO;
-import epam.com.gymapplication.dto.TrainerDTO;
+import epam.com.gymapplication.dto.*;
 import epam.com.gymapplication.service.TraineeService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +24,6 @@ public class TraineeController {
 
     }
 
-
-
     @PostMapping(value = "/register" ,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -39,8 +37,7 @@ public class TraineeController {
     }
 
     @GetMapping("/login")
-    public ResponseEntity<String> login(@Valid
-            @RequestParam("username") String username,
+    public ResponseEntity<String> login(@Valid @RequestParam("username") String username,
                                         @RequestParam("password") String password) {
 
         boolean authenticatedTraineeProfile = traineeService.authenticateTraineeProfile(username, password);
@@ -51,20 +48,18 @@ public class TraineeController {
     }
 
     @PutMapping("/change-login")
-    public ResponseEntity<String> changeLogin(@Valid
-            @RequestParam("username") String username,
-                                              @RequestParam("password") String password,
-                                              @RequestParam("oldPassword") String oldPassword) {
-        boolean passwordChange = traineeService.changePassword(username, password, oldPassword);
+    public ResponseEntity<TraineeDTO> changeLogin(@Validated(ChangeLogin.class) @RequestBody
+            TraineeDTO traineeDTO) {
+        boolean passwordChange = traineeService.changePassword(traineeDTO);
         if (passwordChange) {
-            return ResponseEntity.ok("Password changed successfully");
-        } else {
-            return ResponseEntity.badRequest().body("Invalid password");
+            return ResponseEntity.ok(traineeDTO);
         }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(traineeDTO);
+
     }
 
     @GetMapping(value = "/trainee-profile")
-    public ResponseEntity<TraineeDTO> getTraineeProfile(@Valid
+    public ResponseEntity<TraineeDTO> getTraineeProfile(@Validated(GetTraineeProfile.class)
             @RequestParam("username") String username) {
 
         TraineeDTO traineeProfileByUsername = traineeService.findTraineeProfileByUsername(username);
@@ -73,8 +68,8 @@ public class TraineeController {
     }
 
     @PutMapping(value = "/trainee-profile/{id}")
-    public ResponseEntity<TraineeDTO> updateTraineeProfile(@Valid
-            @PathVariable("id") Long id,
+    public ResponseEntity<TraineeDTO> updateTraineeProfile(@Validated(UpdatedTraineeProfile.class)
+                                                               @PathVariable("id") Long id,
                                                            @RequestBody
                                                            TraineeDTO traineeDTO) {
         TraineeDTO updateTraineeProfile = traineeService.updateTraineeProfile(id, traineeDTO);
@@ -84,7 +79,7 @@ public class TraineeController {
     }
 
     @DeleteMapping(value = "/delete")
-    public ResponseEntity<Void> deleteTraineeProfile(@Valid
+    public ResponseEntity<Void> deleteTraineeProfile(@Validated(DeleteTraineeProfile.class)
             @RequestParam("username") String username) {
         traineeService.deleteTraineeProfileByUsername(username);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -95,14 +90,14 @@ public class TraineeController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
 
-    public ResponseEntity<List<TrainerDTO>> updateTraineesTrainerList(@Valid
+    public ResponseEntity<List<TrainerDTO>> updateTraineesTrainerList(@Validated(UpdateTraineesTrainerList.class)
             @RequestBody TraineeDTO traineeDTO) {
         List<TrainerDTO> trainerDTOS = traineeService.updateTraineesTrainerList(traineeDTO);
         return new ResponseEntity<>(trainerDTOS, HttpStatus.OK);
     }
 
     @PatchMapping(value = "/active-inactive")
-    public ResponseEntity<Void> activateDeactivateTrainee(@Valid
+    public ResponseEntity<Void> activateDeactivateTrainee(@Validated(ActivateDeactivateTrainee.class)
             @RequestParam("username") String username,
             @RequestBody TraineeDTO traineeDTO) {
 

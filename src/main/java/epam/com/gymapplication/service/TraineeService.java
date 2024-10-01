@@ -188,15 +188,23 @@ public class TraineeService {
 
     }
 
-    public boolean changePassword(String username, String password, String oldPassword) {
+    public boolean changePassword(TraineeDTO traineeDTO) {
+        String username = traineeDTO.getUsername();
+        String oldPassword = traineeDTO.getOldPassword();
+        String newPassword = traineeDTO.getNewPassword();
+
         Trainee traineeProfileByUsername = traineeRepository.findByUsername(username).orElseThrow(() ->
-                new EntityNotFoundException("Trainer not found by username: " + username));
+                new EntityNotFoundException("Trainee not found by username: " + username));
+
         logger.info("Found Trainee Profile by Username {} ", traineeProfileByUsername);
 
+
         if (traineeProfileByUsername.getUser().getPassword().equals(oldPassword)) {
-            traineeProfileByUsername.getUser().setPassword(password);
+            traineeProfileByUsername.getUser().setPassword(newPassword);
+
             traineeRepository.save(traineeProfileByUsername);
             logger.info("Changed password for trainer {} ", traineeProfileByUsername);
+
             return true;
         }
         return false;

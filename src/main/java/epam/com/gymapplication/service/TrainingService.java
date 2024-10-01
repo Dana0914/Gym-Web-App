@@ -36,9 +36,9 @@ public class TrainingService {
 
 
 
-    public List<TrainingDTO> getTraineesTrainingList(String username, LocalDate from,
-                                                     LocalDate to, String trainerName,
-                                                     String trainingType) {
+    public List<TrainingDTO> getTraineesTrainingList(String username, LocalDate from, LocalDate to,
+                                                     String trainerName, String trainingType) {
+
 
         Trainee traineeByUsername = traineeRepository.findByUsername(username).orElseThrow();
         logger.info("Found trainee by username {}", traineeByUsername);
@@ -65,10 +65,9 @@ public class TrainingService {
         List<TrainingDTO> traineesTrainingList = trainingListByTrainee.stream().map(training -> {
             TrainingDTO trainingResponseDTO = new TrainingDTO();
 
-            trainingResponseDTO.setFrom(training.getTrainingDate());
-            trainingResponseDTO.setTo(training.getTrainingDate());
+            trainingResponseDTO.setTrainingDate(training.getTrainingDate());
             trainingResponseDTO.setTrainingType(training.getTrainingType().getTrainingTypeName());
-            trainingResponseDTO.setTraineeUsername(trainingRequestDTO.getTrainee().getUser().getUsername());
+            trainingResponseDTO.setUsername(trainingRequestDTO.getTrainee().getUser().getUsername());
             trainingResponseDTO.setTrainerName(trainingRequestDTO.getTrainer().getUser().getFirstName());
             trainingResponseDTO.setTrainingName(trainingByType.getTrainingName());
 
@@ -117,6 +116,7 @@ public class TrainingService {
         return trainingDTOS;
     }
 
+
     public void addTraining(TrainingDTO trainingDTO) {
 
         String traineeUsername = trainingDTO.getTraineeUsername();
@@ -147,7 +147,6 @@ public class TrainingService {
         training.setTrainingDuration(trainingDuration);
         training.setTrainingDate(trainingDate);
         training.setTrainingType(trainingType);
-        training.setTrainingDuration(trainingDuration);
         training.setTrainer(trainerByUsername);
         training.setTrainee(traineeByUsername);
         training.setTrainingName(trainingName);

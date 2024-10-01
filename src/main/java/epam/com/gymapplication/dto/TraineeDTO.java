@@ -1,12 +1,9 @@
 package epam.com.gymapplication.dto;
 
-
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotNull;
-
+import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,16 +11,18 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TraineeDTO {
 
-
+    @NotBlank(groups = {Login.class, ChangeLogin.class, GetTraineeProfile.class,
+            UpdatedTraineeProfile.class, DeleteTraineeProfile.class,
+    ActivateDeactivateTrainee.class})
     private String username;
 
-
+    @NotBlank(groups = Login.class)
     private String password;
 
-    @NotNull
+    @NotBlank(groups = {Registration.class, UpdatedTraineeProfile.class})
     private String firstname;
 
-    @NotNull
+    @NotBlank(groups = {Registration.class, UpdatedTraineeProfile.class})
     private String lastname;
 
 
@@ -32,15 +31,21 @@ public class TraineeDTO {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
 
-
+    @NotBlank(groups = {UpdatedTraineeProfile.class, ActivateDeactivateTrainee.class})
     @JsonProperty(value = "active")
     private Boolean isActive;
 
-
+    @NotBlank(groups = {UpdateTraineesTrainerList.class})
     private List<TrainerDTO> trainers;
 
 
     private List<TrainingDTO> trainings;
+
+    @NotBlank(groups = ChangeLogin.class)
+    private String oldPassword;
+
+    @NotBlank(groups = ChangeLogin.class)
+    private String newPassword;
 
 
     public TraineeDTO() {
@@ -116,6 +121,20 @@ public class TraineeDTO {
         this.trainings = trainings;
     }
 
+    public @NotBlank(groups = ChangeLogin.class) String getNewPassword() {
+        return newPassword;
+    }
+    public void setNewPassword(@NotBlank(groups = ChangeLogin.class) String newPassword) {
+        this.newPassword = newPassword;
+    }
+    public String getOldPassword() {
+        return oldPassword;
+    }
+    public void setOldPassword(String oldPassword) {
+        this.oldPassword = oldPassword;
+    }
+
+
     @Override
     public String toString() {
         return "TraineeDTO{" +
@@ -128,6 +147,8 @@ public class TraineeDTO {
                 ", isActive=" + isActive +
                 ", trainers=" + trainers +
                 ", trainings=" + trainings +
+                ", oldPassword='" + oldPassword + '\'' +
+                ", newPassword='" + newPassword + '\'' +
                 '}';
     }
 }
