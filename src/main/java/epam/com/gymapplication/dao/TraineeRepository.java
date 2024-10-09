@@ -42,4 +42,6 @@ public interface TraineeRepository extends CrudRepository<Trainee, Long> {
     @Query(value = "select t from Trainee t where t.user.username = :username", nativeQuery = false)
     Optional<Trainee> findByUsername(@Param("username") String username);
 
+
+
 }

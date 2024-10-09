@@ -18,6 +18,7 @@ import epam.com.gymapplication.utility.exception.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDate;
@@ -45,7 +46,7 @@ public class TraineeService {
         this.trainingRepository = trainingRepository;
     }
 
-
+    @Transactional
     public List<TrainerDTO> updateTraineesTrainerList(TraineeDTO traineeDTO)  {
         String username = traineeDTO.getUsername();
 
@@ -89,6 +90,7 @@ public class TraineeService {
 
 
 
+    @Transactional
     public void assignTraineeToTrainer(Long traineeId, Long trainerId) {
         Trainee trainee = traineeRepository
                 .findById(traineeId)
@@ -112,6 +114,7 @@ public class TraineeService {
 
 
 
+    @Transactional
     public TraineeDTO createTraineeProfile(TraineeDTO traineeDTO)  {
         String username = userProfileService.concatenateUsername(
                 traineeDTO.getFirstname(),
@@ -254,6 +257,7 @@ public class TraineeService {
 
 
 
+    @Transactional
     public TraineeDTO updateTraineeProfile(Long id, TraineeDTO traineeDTO) {
         Trainee traineeById = traineeRepository
                 .findById(id)
@@ -299,7 +303,7 @@ public class TraineeService {
 
     }
 
-
+    @Transactional
     public void deleteTraineeProfileByUsername(String username)  {
         Trainee traineeProfileByUsername = traineeRepository
                 .findByUsername(username)
@@ -309,6 +313,7 @@ public class TraineeService {
         logger.info("Trainee Profile found by username {}", traineeProfileByUsername);
 
         traineeRepository.delete(traineeProfileByUsername);
+
         logger.info("Trainee profile deleted by username");
     }
 
@@ -319,8 +324,7 @@ public class TraineeService {
     }
 
 
-
-
+    @Transactional
     public void saveTrainee(Trainee trainee) {
         traineeRepository.save(trainee);
         logger.info("Trainee saved");
@@ -328,7 +332,7 @@ public class TraineeService {
     }
 
 
-
+    @Transactional
     public void deleteTraineeById(Long id)  {
         traineeRepository.deleteById(id);
         logger.info("Trainee deleted {}", id);

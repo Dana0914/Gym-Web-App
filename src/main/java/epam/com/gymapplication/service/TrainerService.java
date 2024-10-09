@@ -12,6 +12,7 @@ import epam.com.gymapplication.utility.exception.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDate;
@@ -206,6 +207,7 @@ public class TrainerService {
     }
 
 
+    @Transactional
     public TrainerDTO updateTrainerProfile(Long id, TrainerDTO trainerDTO) {
         Trainer trainerById = trainerRepository
                 .findById(id)
@@ -257,6 +259,7 @@ public class TrainerService {
     }
 
 
+    @Transactional
     public void deleteTrainerProfileByUsername(String username)  {
         Trainer trainerProfileByUsername = trainerRepository
                 .findByUsername(username)
@@ -275,7 +278,7 @@ public class TrainerService {
 
     }
 
-
+    @Transactional
     public void deleteById(Long id)  {
         trainerRepository.deleteById(id);
         logger.info("Trainer id deleted");

@@ -4,7 +4,6 @@ package epam.com.gymapplication.entity;
 import jakarta.persistence.*;
 
 
-import java.io.Serializable;
 import java.util.*;
 
 
