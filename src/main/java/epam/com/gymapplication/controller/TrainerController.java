@@ -5,15 +5,14 @@ import epam.com.gymapplication.dto.*;
 import epam.com.gymapplication.service.TrainerService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/trainers")
 public class TrainerController {
 
     private final TrainerService trainerService;
@@ -22,9 +21,23 @@ public class TrainerController {
         this.trainerService = trainerService;
     }
 
-    @PostMapping(value = "/register" ,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+
+    @GetMapping("/api/trainers/trainings")
+    public ResponseEntity<List<TrainingDTO>> getTrainerTrainingList(
+                                                                    @RequestParam("username") String username,
+                                                                    @RequestParam("from") LocalDate from,
+                                                                    @RequestParam("to") LocalDate to,
+                                                                    @RequestParam("traineeName") String traineeName,
+                                                                    @RequestParam("trainingType") String trainingType) {
+
+
+        List<TrainingDTO> result = trainerService.getTrainersTrainingList(username, from, to,
+                traineeName, trainingType);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping(value = "api/trainers/registration")
 
     public ResponseEntity<TrainerDTO> registerTrainer(@Valid
             @RequestBody TrainerDTO trainerRequestDTO) {
@@ -35,41 +48,38 @@ public class TrainerController {
 
     }
 
-    @GetMapping("/login")
+    @GetMapping("/api/trainers/{username}/{password}")
     public ResponseEntity<String> login(@Valid
-                                            @RequestParam("username") String username,
-                                            @RequestParam("password") String password) {
+                                            @PathVariable("username") String username,
+                                            @PathVariable("password") String password) {
 
         boolean authenticatedTrainerProfile = trainerService.authenticateTrainerProfile(username, password);
         if (authenticatedTrainerProfile) {
-            return ResponseEntity.ok("Authorized successfully");
+            return new ResponseEntity<>(HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @PutMapping("/change-login")
+    @PutMapping(value = "api/trainers/login")
     public ResponseEntity<String> changeLogin(@Validated(ChangeLogin.class)
                                                   @RequestBody TrainerDTO trainerDTO) {
         boolean passwordChange = trainerService.changePassword(trainerDTO);
         if (passwordChange) {
-            return ResponseEntity.ok("Password changed successfully");
+            return new ResponseEntity<>(HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping(value = "/trainer-profile")
+    @GetMapping(value = "/api/trainers/{username}/profile")
     public ResponseEntity<TrainerDTO> getTrainerProfile(@Valid
-            @RequestParam("username") String username) {
+            @PathVariable("username") String username) {
         TrainerDTO trainerProfileByUsername = trainerService.findTrainerProfileByUsername(username);
         return new ResponseEntity<>(trainerProfileByUsername, HttpStatus.OK);
     }
 
-    @PutMapping(value = "/trainer-profile/{id}",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TrainerDTO> updateTrainerProfile(@Validated(UpdateTrainerProfile.class)
-            @PathVariable("id") Long id,
-                                                           @RequestBody TrainerDTO trainerDTO)
+    @PutMapping(value = "/api/trainers/{id}")
+    public ResponseEntity<TrainerDTO> updateTrainerProfile(@Validated(TrainerDTO.UpdateTrainerProfile.class)
+            @PathVariable("id") Long id, @RequestBody TrainerDTO trainerDTO)
     {
 
         TrainerDTO updateTrainerProfile = trainerService.updateTrainerProfile(id, trainerDTO);
@@ -77,9 +87,10 @@ public class TrainerController {
 
 
     }
-    @GetMapping(value = "not-assigned")
-    public ResponseEntity<List<TrainerDTO>> getUnassignedOnTraineeTrainersList(@Validated(UnassignedTrainersOnTrainee.class)
-            @RequestParam("username") String username)
+    @GetMapping(value = "/api/trainers/{username}")
+    public ResponseEntity<List<TrainerDTO>> getUnassignedOnTraineeTrainersList(
+            @Validated(TrainerDTO.UnassignedTrainersOnTrainee.class)
+            @PathVariable("username") String username)
     {
 
         List<TrainerDTO> unassignedTraineesTrainersList = trainerService.findUnassignedTraineesTrainersListByTraineeUsername(username);
@@ -87,9 +98,9 @@ public class TrainerController {
 
     }
 
-    @PatchMapping(value = "/active-inactive")
-    public ResponseEntity<Void> activateDeactivateTrainer(@Validated(ActivateDeactivateTrainer.class)
-            @RequestParam("username") String username,
+    @PatchMapping(value = "/api/trainers/{username}/status")
+    public ResponseEntity<Void> activateDeactivateTrainer(@Validated(TrainerDTO.ActivateDeactivateTrainer.class)
+            @PathVariable("username") String username,
                                                           @RequestBody TrainerDTO trainerDTO) {
 
         trainerService.activateOrDeactivateTrainerStatus(username, trainerDTO.getActive());
@@ -97,9 +108,10 @@ public class TrainerController {
 
     }
 
-    @DeleteMapping(value = "/delete")
+    @DeleteMapping(value = "/api/trainers/{username}")
     public ResponseEntity<String> deleteTrainerProfile(@Valid
-            @RequestParam("username") String username) {
+            @PathVariable("username") String username) {
+
         trainerService.deleteTrainerProfileByUsername(username);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 

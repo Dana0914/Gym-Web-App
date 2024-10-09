@@ -9,6 +9,11 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TrainerDTO {
+
+    public interface ActivateDeactivateTrainer {}
+    public interface GetTrainerProfile{}
+    public interface UnassignedTrainersOnTrainee{}
+    public interface UpdateTrainerProfile{}
     @NotBlank(groups = {Login.class, GetTrainerProfile.class, UpdateTrainerProfile.class,
     UnassignedTrainersOnTrainee.class, ActivateDeactivateTrainer.class})
     private String username;

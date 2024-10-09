@@ -2,21 +2,25 @@ package epam.com.gymapplication.service;
 
 import epam.com.gymapplication.dao.TraineeRepository;
 import epam.com.gymapplication.dao.TrainerRepository;
+import epam.com.gymapplication.dao.TrainingRepository;
 import epam.com.gymapplication.dao.UserRepository;
 import epam.com.gymapplication.dto.TraineeDTO;
 import epam.com.gymapplication.dto.TrainerDTO;
+import epam.com.gymapplication.dto.TrainingDTO;
 import epam.com.gymapplication.entity.Trainee;
 import epam.com.gymapplication.entity.Trainer;
+import epam.com.gymapplication.entity.Training;
 import epam.com.gymapplication.entity.User;
 import epam.com.gymapplication.profile.PasswordGenerator;
 import epam.com.gymapplication.profile.UserProfileService;
-import jakarta.persistence.EntityNotFoundException;
+import epam.com.gymapplication.utility.exception.BadRequestException;
+import epam.com.gymapplication.utility.exception.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -25,27 +29,31 @@ import java.util.List;
 public class TraineeService {
     private static final Logger logger = LoggerFactory.getLogger(TraineeService.class);
 
-    @Autowired
-    private TraineeRepository traineeRepository;
+    private final TraineeRepository traineeRepository;
+    private final UserProfileService userProfileService;
+    private final PasswordGenerator passwordGenerator;
+    private final UserRepository userRepository;
+    private final TrainerRepository trainerRepository;
+    private final TrainingRepository trainingRepository;
 
-    @Autowired
-    private UserProfileService userProfileService;
-
-    @Autowired
-    private PasswordGenerator passwordGenerator;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private TrainerRepository trainerRepository;
+    public TraineeService(TraineeRepository traineeRepository, UserProfileService userProfileService, PasswordGenerator passwordGenerator, UserRepository userRepository, TrainerRepository trainerRepository, TrainingRepository trainingRepository) {
+        this.traineeRepository = traineeRepository;
+        this.userProfileService = userProfileService;
+        this.passwordGenerator = passwordGenerator;
+        this.userRepository = userRepository;
+        this.trainerRepository = trainerRepository;
+        this.trainingRepository = trainingRepository;
+    }
 
 
     public List<TrainerDTO> updateTraineesTrainerList(TraineeDTO traineeDTO)  {
         String username = traineeDTO.getUsername();
 
-        Trainee traineeByUsername = traineeRepository.findByUsername(username).orElseThrow(() ->
-                new EntityNotFoundException("Trainee not found by username: " + traineeDTO));
+        Trainee traineeByUsername = traineeRepository
+                .findByUsername(username)
+                .orElseThrow(() ->
+                new EntityNotFoundException("Trainee not found by username: " + traineeDTO.getUsername()));
+
         logger.info("Trainee by Username: " + traineeByUsername);
 
 
@@ -53,7 +61,8 @@ public class TraineeService {
                 .map(trainerDTO -> {
                     String trainerUsername = trainerDTO.getUsername();
                     return trainerRepository.findByUsername(trainerUsername)
-                            .orElseThrow(() -> new EntityNotFoundException("Trainer not found: " + trainerUsername));
+                            .orElseThrow(() ->
+                                    new EntityNotFoundException("Trainer not found by username: " + trainerUsername));
                 })
                 .toList();
 
@@ -81,8 +90,15 @@ public class TraineeService {
 
 
     public void assignTraineeToTrainer(Long traineeId, Long trainerId) {
-        Trainee trainee = traineeRepository.findById(traineeId).orElseThrow();
-        Trainer trainer = trainerRepository.findById(trainerId).orElseThrow();
+        Trainee trainee = traineeRepository
+                .findById(traineeId)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Trainee not found by id " + traineeId));
+
+        Trainer trainer = trainerRepository
+                .findById(trainerId)
+                .orElseThrow(() ->
+                new EntityNotFoundException("Trainer not found by id " + trainerId));
 
 
         trainee.getTrainers().add(trainer);
@@ -134,8 +150,10 @@ public class TraineeService {
     }
 
     public TraineeDTO findTraineeProfileByUsername(String username) {
-        Trainee traineeByUsername = traineeRepository.findByUsername(username).orElseThrow(() ->
-                new EntityNotFoundException("Trainee not found by username"));
+        Trainee traineeByUsername = traineeRepository
+                .findByUsername(username)
+                .orElseThrow(() ->
+                new EntityNotFoundException("Trainee not found by username,  " +  username));
 
         logger.info("Found Trainee Profile by Username {} ", traineeByUsername);
 
@@ -180,11 +198,16 @@ public class TraineeService {
     }
 
     public boolean authenticateTraineeProfile(String username, String password) {
-        Trainee traineeProfileByUsername = traineeRepository.findByUsername(username).orElseThrow(() ->
-                new EntityNotFoundException("Trainer not found: " + username));
+        Trainee traineeProfileByUsername = traineeRepository
+                .findByUsername(username)
+                .orElseThrow(() ->
+                new EntityNotFoundException("Trainer not found by username: " + username));
 
-        return traineeProfileByUsername.getUser().getUsername().equals(username) &&
-                traineeProfileByUsername.getUser().getPassword().equals(password);
+        if (traineeProfileByUsername.getUser().getUsername().equals(username) &&
+                traineeProfileByUsername.getUser().getPassword().equals(password)) {
+            return true;
+        }
+        throw new BadRequestException("Username or password is incorrect");
 
     }
 
@@ -193,7 +216,9 @@ public class TraineeService {
         String oldPassword = traineeDTO.getOldPassword();
         String newPassword = traineeDTO.getNewPassword();
 
-        Trainee traineeProfileByUsername = traineeRepository.findByUsername(username).orElseThrow(() ->
+        Trainee traineeProfileByUsername = traineeRepository
+                .findByUsername(username)
+                .orElseThrow(() ->
                 new EntityNotFoundException("Trainee not found by username: " + username));
 
         logger.info("Found Trainee Profile by Username {} ", traineeProfileByUsername);
@@ -204,30 +229,37 @@ public class TraineeService {
 
             traineeRepository.save(traineeProfileByUsername);
             logger.info("Changed password for trainer {} ", traineeProfileByUsername);
-
             return true;
         }
-        return false;
-
+        throw new BadRequestException("The password is invalid");
     }
 
 
     public void activateOrDeactivateTraineeStatus(String username, Boolean isActive) {
-        Trainee traineeById = traineeRepository.findByUsername(username).orElseThrow(() ->
-                new EntityNotFoundException("Trainer not found"));
+        Trainee traineeById = traineeRepository
+                .findByUsername(username)
+                .orElseThrow(() ->
+                new EntityNotFoundException("Trainer not found by usrname " + username));
+
         logger.info("Found Trainee Profile by Username {} ", traineeById);
 
         if (traineeById.getUser().getActive()!= isActive) {
             traineeById.getUser().setActive(isActive);
             traineeRepository.save(traineeById);
+
+        } else {
+            throw new BadRequestException("Trainee is " + traineeById.getUser().getActive());
         }
     }
 
 
 
     public TraineeDTO updateTraineeProfile(Long id, TraineeDTO traineeDTO) {
-        Trainee traineeById = traineeRepository.findById(id).orElseThrow(() ->
+        Trainee traineeById = traineeRepository
+                .findById(id)
+                .orElseThrow(() ->
                 new EntityNotFoundException("Trainer not found by id: " + id));
+
         logger.info("Found Trainee Profile by Username {} ", traineeById);
 
 
@@ -239,6 +271,7 @@ public class TraineeService {
         traineeById.getUser().setActive(traineeDTO.getActive());
 
         logger.info("Entity update profile successfully");
+
         traineeRepository.save(traineeById);
 
 
@@ -268,8 +301,11 @@ public class TraineeService {
 
 
     public void deleteTraineeProfileByUsername(String username)  {
-        Trainee traineeProfileByUsername = traineeRepository.findByUsername(username).orElseThrow(() ->
+        Trainee traineeProfileByUsername = traineeRepository
+                .findByUsername(username)
+                .orElseThrow(() ->
                 new EntityNotFoundException("Trainee not found by username: " + username));
+
         logger.info("Trainee Profile found by username {}", traineeProfileByUsername);
 
         traineeRepository.delete(traineeProfileByUsername);
@@ -301,7 +337,9 @@ public class TraineeService {
 
     public Trainee findTraineeById(Long id) {
         logger.info("Found trainee by id {} ", id);
-        return traineeRepository.findById(id).orElseThrow(() ->
+        return traineeRepository
+                .findById(id)
+                .orElseThrow(() ->
                 new EntityNotFoundException("Trainee not found by id: " + id));
 
     }
@@ -310,23 +348,87 @@ public class TraineeService {
 
     public Trainee findByFirstName(String firstName)  {
         logger.info("Trainee found by name {}", firstName);
-        return traineeRepository.findByFirstName(firstName).orElseThrow(() ->
+
+        return traineeRepository
+                .findByFirstName(firstName)
+                .orElseThrow(() ->
                 new EntityNotFoundException("Trainee not found by name: " + firstName));
 
     }
 
     public Trainee findByLastName(String lastName)  {
         logger.info("Trainee found by lastName {}", lastName);
-        return traineeRepository.findByLastName(lastName).orElseThrow(() ->
+
+        return traineeRepository
+                .findByLastName(lastName)
+                .orElseThrow(() ->
                 new EntityNotFoundException("Trainee not found by name: " + lastName));
 
     }
 
     public Trainee findByUsername(String username)  {
         logger.info("Trainee found by username {}", username);
-        return traineeRepository.findByUsername(username).orElseThrow(() ->
+
+        return traineeRepository
+                .findByUsername(username)
+                .orElseThrow(() ->
                 new EntityNotFoundException("Trainee not found by name: " + username));
 
     }
+
+    public List<TrainingDTO> getTraineesTrainingList(String username, LocalDate from, LocalDate to,
+                                                     String trainerName, String trainingType) {
+
+
+        Trainee traineeByUsername = traineeRepository
+                .findByUsername(username)
+                .orElseThrow(() ->
+                new EntityNotFoundException("Trainee not found by username " + username));
+
+        logger.info("Found trainee by username {}", traineeByUsername);
+
+        Trainer trainerByUsername = trainerRepository
+                .findByFirstName(trainerName)
+                .orElseThrow(() -> new EntityNotFoundException("Trainer not found by firstname " + trainerName));
+
+        logger.info("Found trainer by username {}", trainerByUsername);
+
+
+        Training trainingByType = trainingRepository
+                .findByTrainingType(trainingType)
+                .orElseThrow(() -> new EntityNotFoundException("Training not found by type " + trainingType));
+
+        logger.info("Found training by name {}", trainingByType);
+
+        TrainingDTO trainingRequestDTO = new TrainingDTO();
+
+        trainingRequestDTO.setTrainee(traineeByUsername);
+        trainingRequestDTO.setTrainer(trainerByUsername);
+
+
+
+        List<Training> trainingListByTrainee = traineeRepository.findTraineesTrainingList(username, from,
+                to, trainerName, trainingType);
+
+        logger.info("Fetching training list: {}", trainingListByTrainee);
+
+        List<TrainingDTO> traineesTrainingList = trainingListByTrainee.stream().map(training -> {
+            TrainingDTO trainingResponseDTO = new TrainingDTO();
+
+            trainingResponseDTO.setTrainingDate(training.getTrainingDate());
+            trainingResponseDTO.setTrainingType(training.getTrainingType().getTrainingTypeName());
+            trainingResponseDTO.setUsername(trainingRequestDTO.getTrainee().getUser().getUsername());
+            trainingResponseDTO.setTrainerName(trainingRequestDTO.getTrainer().getUser().getFirstName());
+            trainingResponseDTO.setTrainingName(trainingByType.getTrainingName());
+
+            return trainingResponseDTO;
+
+        }).toList();
+
+        return traineesTrainingList;
+
+
+    }
+
 
 }

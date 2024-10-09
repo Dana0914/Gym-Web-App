@@ -1,33 +1,43 @@
 package epam.com.gymapplication.controller;
 
 
+
 import epam.com.gymapplication.dto.*;
 import epam.com.gymapplication.service.TraineeService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
 @RestController
-@RequestMapping("/api/trainees")
 public class TraineeController {
     private final TraineeService traineeService;
-
 
     public TraineeController(TraineeService traineeService) {
         this.traineeService = traineeService;
 
     }
 
-    @PostMapping(value = "/register" ,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
+    @GetMapping("/api/trainees/trainings")
+    public ResponseEntity<List<TrainingDTO>> getTraineeTrainingList(
+                                                                    @RequestParam("username") String username, @RequestParam("from") LocalDate from,
+                                                                    @RequestParam("to") LocalDate to,
+                                                                    @RequestParam("trainerName") String trainerName,
+                                                                    @RequestParam("trainingType") String trainingType
+    ) {
+
+        List<TrainingDTO> result = traineeService.getTraineesTrainingList(username, from, to, trainerName, trainingType);
+
+        return ResponseEntity.ok(result);
+
+    }
+
+    @PostMapping(value = "/api/trainees/registration")
     public ResponseEntity<TraineeDTO> registerTrainee(@Valid
             @RequestBody TraineeDTO traineeRequest) {
 
@@ -36,39 +46,37 @@ public class TraineeController {
 
     }
 
-    @GetMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestParam("username") String username,
-                                        @RequestParam("password") String password) {
+    @GetMapping(value = "/api/trainees/{username}/{password}")
+    public ResponseEntity<String> login(@Valid @PathVariable("username") String username,
+                                        @PathVariable("password") String password) {
 
         boolean authenticatedTraineeProfile = traineeService.authenticateTraineeProfile(username, password);
-        if (authenticatedTraineeProfile) {
-            return ResponseEntity.ok("Authorized successfully");
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+        return ResponseEntity.ok(authenticatedTraineeProfile ? "Login Successful" : "Login Failed");
     }
 
-    @PutMapping("/change-login")
-    public ResponseEntity<TraineeDTO> changeLogin(@Validated(ChangeLogin.class) @RequestBody
-            TraineeDTO traineeDTO) {
+    @PutMapping("/api/trainees/login")
+    public ResponseEntity<TraineeDTO> changeLogin(@Validated(ChangeLogin.class)
+                                                      @RequestBody TraineeDTO traineeDTO) {
         boolean passwordChange = traineeService.changePassword(traineeDTO);
         if (passwordChange) {
-            return ResponseEntity.ok(traineeDTO);
+            return new ResponseEntity<>(traineeDTO, HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(traineeDTO);
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
     }
 
-    @GetMapping(value = "/trainee-profile")
-    public ResponseEntity<TraineeDTO> getTraineeProfile(@Validated(GetTraineeProfile.class)
-            @RequestParam("username") String username) {
+    @GetMapping(value = "/api/trainees/{username}")
+    public ResponseEntity<TraineeDTO> getTraineeProfile(
+            @PathVariable("username") String username) {
 
         TraineeDTO traineeProfileByUsername = traineeService.findTraineeProfileByUsername(username);
-        return new ResponseEntity<>(traineeProfileByUsername, HttpStatus.OK);
+        return ResponseEntity.ok(traineeProfileByUsername);
+
 
     }
 
-    @PutMapping(value = "/trainee-profile/{id}")
-    public ResponseEntity<TraineeDTO> updateTraineeProfile(@Validated(UpdatedTraineeProfile.class)
+    @PutMapping(value = "/api/trainees/{id}")
+    public ResponseEntity<TraineeDTO> updateTraineeProfile(@Validated(TraineeDTO.UpdatedTraineeProfile.class)
                                                                @PathVariable("id") Long id,
                                                            @RequestBody
                                                            TraineeDTO traineeDTO) {
@@ -78,27 +86,26 @@ public class TraineeController {
 
     }
 
-    @DeleteMapping(value = "/delete")
-    public ResponseEntity<Void> deleteTraineeProfile(@Validated(DeleteTraineeProfile.class)
-            @RequestParam("username") String username) {
+    @DeleteMapping(value = "/api/trainees/{username}")
+    public ResponseEntity<Void> deleteTraineeProfile(@Validated(TraineeDTO.DeleteTraineeProfile.class)
+            @PathVariable("username") String username) {
         traineeService.deleteTraineeProfileByUsername(username);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
     }
 
-    @PutMapping(value = "/list",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-
-    public ResponseEntity<List<TrainerDTO>> updateTraineesTrainerList(@Validated(UpdateTraineesTrainerList.class)
+    @PutMapping(value = "/api/trainees/trainers")
+    public ResponseEntity<List<TrainerDTO>> updateTraineesTrainerList(
+            @Validated(TraineeDTO.UpdatedTraineesTrainerList.class)
             @RequestBody TraineeDTO traineeDTO) {
+
         List<TrainerDTO> trainerDTOS = traineeService.updateTraineesTrainerList(traineeDTO);
         return new ResponseEntity<>(trainerDTOS, HttpStatus.OK);
     }
 
-    @PatchMapping(value = "/active-inactive")
-    public ResponseEntity<Void> activateDeactivateTrainee(@Validated(ActivateDeactivateTrainee.class)
-            @RequestParam("username") String username,
+    @PatchMapping(value = "/api/trainees/{username}/status")
+    public ResponseEntity<Void> activateDeactivateTrainee(@Validated(TraineeDTO.ActivateDeactivateTrainee.class)
+            @PathVariable("username") String username,
             @RequestBody TraineeDTO traineeDTO) {
 
         traineeService.activateOrDeactivateTraineeStatus(username, traineeDTO.getActive());

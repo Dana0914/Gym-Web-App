@@ -4,7 +4,6 @@ package epam.com.gymapplication.profile;
 
 import epam.com.gymapplication.dao.UserRepository;
 import epam.com.gymapplication.entity.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
@@ -14,9 +13,12 @@ public class UserProfileService {
     private static int counter = 1;
     private static int serialNumber;
 
-    @Autowired
-    private UserRepository userRepository;
 
+    private final UserRepository userRepository;
+
+    public UserProfileService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
 
     public String concatenateUsername(String firstName, String lastName) {

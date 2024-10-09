@@ -13,7 +13,8 @@ import java.time.LocalDate;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TrainingDTO {
 
-    @NotBlank(groups = {GetTraineeTrainingList.class, GetTrainerTrainingList.class})
+    public interface AddTraining{}
+
     private String username;
 
     @NotBlank(groups = {AddTraining.class})
@@ -52,10 +53,9 @@ public class TrainingDTO {
 
     }
 
-    public TrainingDTO(String username, String trainingName, LocalDate from, LocalDate to, Integer trainingDuration,
+    public TrainingDTO(String trainingName, LocalDate from, LocalDate to, Integer trainingDuration,
                        String trainingType, Trainer trainer, Trainee trainee,
                        String trainerUsername, String traineeUsername) {
-        this.username = username;
         this.trainingName = trainingName;
         this.trainingType = trainingType;
         this.from = from;
@@ -68,11 +68,11 @@ public class TrainingDTO {
 
     }
 
-    public void setUsername(@NotBlank(groups = GetTraineeTrainingList.class) String username) {
+    public void setUsername(String username) {
         this.username = username;
     }
 
-    public @NotBlank(groups = GetTraineeTrainingList.class) String getUsername() {
+    public String getUsername() {
         return username;
     }
 
@@ -161,7 +161,6 @@ public class TrainingDTO {
     @Override
     public String toString() {
         return "TrainingDTO{" +
-                "username='" + username + '\'' +
                 ", trainingName='" + trainingName + '\'' +
                 ", from=" + from +
                 ", to=" + to +

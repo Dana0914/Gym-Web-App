@@ -1,12 +1,14 @@
 package epam.com.gymapplication.profile;
 
+import org.springframework.stereotype.Component;
+
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 
-
+@Component
 public class PasswordGenerator {
 
     private static final String LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";

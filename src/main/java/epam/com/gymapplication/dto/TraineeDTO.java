@@ -4,14 +4,24 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TraineeDTO {
+    public interface ActivateDeactivateTrainee{}
 
-    @NotBlank(groups = {Login.class, ChangeLogin.class, GetTraineeProfile.class,
+    public interface DeleteTraineeProfile{}
+
+    public interface GetTraineeProfile{}
+
+    public interface UpdatedTraineeProfile{}
+
+    public interface UpdatedTraineesTrainerList{}
+
+    @NotNull(groups = {Login.class, ChangeLogin.class, GetTraineeProfile.class,
             UpdatedTraineeProfile.class, DeleteTraineeProfile.class,
     ActivateDeactivateTrainee.class})
     private String username;
@@ -35,7 +45,7 @@ public class TraineeDTO {
     @JsonProperty(value = "active")
     private Boolean isActive;
 
-    @NotBlank(groups = {UpdateTraineesTrainerList.class})
+    @NotBlank(groups = {UpdatedTraineesTrainerList.class})
     private List<TrainerDTO> trainers;
 
 

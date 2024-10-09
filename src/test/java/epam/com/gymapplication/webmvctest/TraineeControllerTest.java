@@ -3,13 +3,16 @@ package epam.com.gymapplication.webmvctest;
 import epam.com.gymapplication.controller.TraineeController;
 import epam.com.gymapplication.dto.TraineeDTO;
 import epam.com.gymapplication.dto.TrainerDTO;
+import epam.com.gymapplication.dto.TrainingDTO;
 import epam.com.gymapplication.service.TraineeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -27,8 +30,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
+@SpringBootTest
+@AutoConfigureMockMvc
 public class TraineeControllerTest {
 
+    @Autowired
     private MockMvc mockMvc;
 
 
@@ -42,6 +48,50 @@ public class TraineeControllerTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(traineeController).build();
+    }
+
+    @Test
+    public void getTraineesTrainingListTest_whenRequestIsValid_ReturnResponseOk() throws Exception {
+        TrainingDTO trainingRequest = new TrainingDTO();
+        trainingRequest.setUsername("Ben.Gosling");
+        trainingRequest.setFrom(LocalDate.parse("2024-09-30"));
+        trainingRequest.setTo(LocalDate.parse("2024-10-30"));
+        trainingRequest.setTrainerName("Rick");
+        trainingRequest.setTrainingType("cross-fit");
+
+        List<TrainingDTO> trainings = new ArrayList<>();
+
+        TrainingDTO trainingResponse = new TrainingDTO();
+        trainingResponse.setTrainingName("run");
+        trainingResponse.setTrainingType(trainingRequest.getTrainingType());
+        trainingResponse.setTrainingDate(LocalDate.parse("2024-10-02"));
+        trainingResponse.setTrainingDuration(70);
+        trainingResponse.setTrainerName(trainingRequest.getTrainerName());
+
+        trainings.add(trainingResponse);
+
+
+
+        when(traineeService.getTraineesTrainingList(trainingRequest.getUsername(),
+                trainingRequest.getFrom(), trainingRequest.getTo(),
+                trainingRequest.getTrainerName(), trainingRequest.getTrainingType())).thenReturn(trainings);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/trainees/trainings")
+                        .param("username", trainingRequest.getUsername())
+                        .param("from", trainingRequest.getFrom().toString())
+                        .param("to", trainingRequest.getTo().toString())
+                        .param("trainerName", trainingRequest.getTrainerName())
+                        .param("trainingType", trainingRequest.getTrainingType())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].trainingName").value(trainingResponse.getTrainingName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].trainingDate").value(trainingResponse.getTrainingDate().toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].trainingDuration").value(trainingResponse.getTrainingDuration()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].trainerName").value(trainingResponse.getTrainerName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].trainingType").value(trainingResponse.getTrainingType()))
+                .andDo(print());
     }
 
     @Test
@@ -63,7 +113,7 @@ public class TraineeControllerTest {
 
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .post("/api/trainees/register")
+                        .post("/api/trainees/registration")
                         .content("""
                             {
                             "firstname": "Ben",
@@ -90,7 +140,7 @@ public class TraineeControllerTest {
 
         when(traineeService.changePassword(any(TraineeDTO.class))).thenReturn(true);
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/trainees/change-login")
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/trainees/login")
                         .content("""
                 {
                    "username": "Ben.Gosling",
@@ -131,7 +181,7 @@ public class TraineeControllerTest {
 
         when(traineeService.findTraineeProfileByUsername(username)).thenReturn(traineeDTO);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/trainees/trainee-profile")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/trainees/{username}", "Ben.Gosling")
                 .param("username", username)
 
                 .contentType(MediaType.APPLICATION_JSON)
@@ -174,7 +224,7 @@ public class TraineeControllerTest {
 
         when(traineeService.updateTraineeProfile(eq(1L), any(TraineeDTO.class))).thenReturn(traineeResponse);
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/trainees/trainee-profile/{id}", 1L)
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/trainees/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
 
@@ -211,7 +261,7 @@ public class TraineeControllerTest {
 
         doNothing().when(traineeService).deleteTraineeProfileByUsername(username);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/trainees/delete")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/trainees/{username}", "Ben.Gosling")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .param("username", username)
                         .characterEncoding("UTF-8")
@@ -233,7 +283,7 @@ public class TraineeControllerTest {
         doNothing().when(traineeService).activateOrDeactivateTraineeStatus(username, traineeDTO.getActive());
 
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/trainees/active-inactive")
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/trainees/{username}/status", "Ben.Gosling")
                         .param("username", username)
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")
