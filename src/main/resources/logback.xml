@@ -1,10 +1,11 @@
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <!-- Custom logging pattern that includes the transactionId from MDC -->
             <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg - transactionId=%X{transactionId}%n</pattern>
         </encoder>
     </appender>
+
+    <logger name="org.springframework.security" level="debug" additivity="false"/>
 
     <root level="info">
         <appender-ref ref="STDOUT" />

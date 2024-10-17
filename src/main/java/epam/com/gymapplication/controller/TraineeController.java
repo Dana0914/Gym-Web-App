@@ -10,8 +10,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,10 +27,12 @@ import java.util.List;
 @RestController
 public class TraineeController {
     private final TraineeService traineeService;
+    private final AuthenticationManager authenticationManager;
 
-    public TraineeController(TraineeService traineeService) {
+    @Autowired
+    public TraineeController(TraineeService traineeService, AuthenticationManager authenticationManager) {
         this.traineeService = traineeService;
-
+        this.authenticationManager = authenticationManager;
     }
 
     @Operation(summary = "Get Trainees training list by parameters")
@@ -56,6 +63,7 @@ public class TraineeController {
             @ApiResponse(responseCode = "404",description = "Trainee not found",content = @Content),
             @ApiResponse(responseCode = "400",description = "Invalid trainee request body",content = @Content)})
     @PostMapping(value = "/api/trainees/registration")
+
     public ResponseEntity<TraineeDTO> registerTrainee(@Valid
             @RequestBody TraineeDTO traineeRequest) {
 
@@ -71,13 +79,15 @@ public class TraineeController {
             @ApiResponse(responseCode = "404",description = "Trainee username or password not found",content = @Content),
             @ApiResponse(responseCode = "400",description = "Invalid username or password",content = @Content)})
 
-    @GetMapping(value = "/api/trainees/{username}/{password}")
-    public ResponseEntity<String> login(@Valid @PathVariable("username") String username,
-                                        @PathVariable("password") String password) {
+    @GetMapping(value = "/api/trainees/login")
+    public ResponseEntity<String> login(@Valid @RequestParam("username") String username,
+                                        @RequestParam("password") String password) {
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         boolean authenticatedTraineeProfile = traineeService.authenticateTraineeProfile(username, password);
         if (authenticatedTraineeProfile) {
-            return ResponseEntity.ok("Login successful");
+            return ResponseEntity.ok("User signed successful");
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
@@ -89,7 +99,7 @@ public class TraineeController {
             @ApiResponse(responseCode = "404",description = "Password not found",content = @Content),
             @ApiResponse(responseCode = "400",description = "Invalid password",content = @Content)})
 
-    @PutMapping("/api/trainees/login")
+    @PutMapping("/api/trainees/change-login")
     public ResponseEntity<TraineeDTO> changeLogin(@Validated(ChangeLogin.class)
                                                       @RequestBody TraineeDTO traineeDTO) {
         boolean passwordChange = traineeService.changePassword(traineeDTO);

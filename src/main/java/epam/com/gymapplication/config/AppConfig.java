@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 
+
 @Configuration
 @EnableAutoConfiguration
 public class AppConfig {
@@ -18,6 +19,8 @@ public class AppConfig {
     public HealthIndicator postgresTableSizeHealthIndicator(MeterRegistry meterRegistry, JdbcTemplate jdbcTemplate) {
         return new DatabaseTableHealthIndicator(meterRegistry, jdbcTemplate);
     }
+
+
 
 
 
