@@ -11,6 +11,8 @@ import epam.com.gymapplication.utility.exception.BadRequestException;
 import epam.com.gymapplication.utility.exception.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,7 @@ import java.util.List;
 
 @Service
 public class TrainerService {
+    private final PasswordEncoder passwordEncoder;
     private static final Logger logger = LoggerFactory.getLogger(TrainerService.class);
 
     private final UserProfileService userProfileService;
@@ -32,7 +35,10 @@ public class TrainerService {
     private final TraineeRepository traineeRepository;
     private final TrainingRepository trainingRepository;
 
-    public TrainerService(UserProfileService userProfileService, PasswordGenerator passwordGenerator, TrainerRepository trainerRepository, UserRepository userRepository, TrainingTypeRepository trainingTypeRepository, TraineeRepository traineeRepository, TrainingRepository trainingRepository) {
+
+    @Autowired
+    public TrainerService(PasswordEncoder passwordEncoder, UserProfileService userProfileService, PasswordGenerator passwordGenerator, TrainerRepository trainerRepository, UserRepository userRepository, TrainingTypeRepository trainingTypeRepository, TraineeRepository traineeRepository, TrainingRepository trainingRepository) {
+        this.passwordEncoder = passwordEncoder;
         this.userProfileService = userProfileService;
         this.passwordGenerator = passwordGenerator;
         this.trainerRepository = trainerRepository;
@@ -73,7 +79,7 @@ public class TrainerService {
 
         User user = new User();
         user.setUsername(username);
-        user.setPassword(password);
+        user.setPassword(passwordEncoder.encode(password));
         user.setFirstName(trainerDTO.getFirstname());
         user.setLastName(trainerDTO.getLastname());
 

@@ -17,6 +17,8 @@ import epam.com.gymapplication.utility.exception.BadRequestException;
 import epam.com.gymapplication.utility.exception.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,10 @@ import java.util.List;
 
 @Service
 public class TraineeService {
+
+    private final PasswordEncoder passwordEncoder;
+
+
     private static final Logger logger = LoggerFactory.getLogger(TraineeService.class);
 
     private final TraineeRepository traineeRepository;
@@ -37,7 +43,9 @@ public class TraineeService {
     private final TrainerRepository trainerRepository;
     private final TrainingRepository trainingRepository;
 
-    public TraineeService(TraineeRepository traineeRepository, UserProfileService userProfileService, PasswordGenerator passwordGenerator, UserRepository userRepository, TrainerRepository trainerRepository, TrainingRepository trainingRepository) {
+    @Autowired
+    public TraineeService(PasswordEncoder passwordEncoder, TraineeRepository traineeRepository, UserProfileService userProfileService, PasswordGenerator passwordGenerator, UserRepository userRepository, TrainerRepository trainerRepository, TrainingRepository trainingRepository) {
+        this.passwordEncoder = passwordEncoder;
         this.traineeRepository = traineeRepository;
         this.userProfileService = userProfileService;
         this.passwordGenerator = passwordGenerator;
@@ -124,7 +132,7 @@ public class TraineeService {
 
         User toUserEntity = new User();
         toUserEntity.setUsername(username);
-        toUserEntity.setPassword(password);
+        toUserEntity.setPassword(passwordEncoder.encode(password));
         toUserEntity.setFirstName(traineeDTO.getFirstname());
         toUserEntity.setLastName(traineeDTO.getLastname());
         toUserEntity.setActive(traineeDTO.getActive());
