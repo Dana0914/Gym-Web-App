@@ -24,7 +24,7 @@ import java.util.List;
 
 @Service
 public class TrainerService {
-    private final PasswordEncoder passwordEncoder;
+    //private final PasswordEncoder passwordEncoder;
     private static final Logger logger = LoggerFactory.getLogger(TrainerService.class);
 
     private final UserProfileService userProfileService;
@@ -37,8 +37,8 @@ public class TrainerService {
 
 
     @Autowired
-    public TrainerService(PasswordEncoder passwordEncoder, UserProfileService userProfileService, PasswordGenerator passwordGenerator, TrainerRepository trainerRepository, UserRepository userRepository, TrainingTypeRepository trainingTypeRepository, TraineeRepository traineeRepository, TrainingRepository trainingRepository) {
-        this.passwordEncoder = passwordEncoder;
+    public TrainerService(UserProfileService userProfileService, PasswordGenerator passwordGenerator, TrainerRepository trainerRepository, UserRepository userRepository, TrainingTypeRepository trainingTypeRepository, TraineeRepository traineeRepository, TrainingRepository trainingRepository) {
+        //this.passwordEncoder = passwordEncoder;
         this.userProfileService = userProfileService;
         this.passwordGenerator = passwordGenerator;
         this.trainerRepository = trainerRepository;
@@ -79,7 +79,7 @@ public class TrainerService {
 
         User user = new User();
         user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(password));
+        user.setPassword(password);
         user.setFirstName(trainerDTO.getFirstname());
         user.setLastName(trainerDTO.getLastname());
 

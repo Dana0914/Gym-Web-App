@@ -1,7 +1,6 @@
 package epam.com.gymapplication.controller;
 
 
-
 import epam.com.gymapplication.dto.*;
 import epam.com.gymapplication.service.TraineeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,12 +12,9 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,12 +23,11 @@ import java.util.List;
 @RestController
 public class TraineeController {
     private final TraineeService traineeService;
-    private final AuthenticationManager authenticationManager;
+
 
     @Autowired
-    public TraineeController(TraineeService traineeService, AuthenticationManager authenticationManager) {
+    public TraineeController(TraineeService traineeService) {
         this.traineeService = traineeService;
-        this.authenticationManager = authenticationManager;
     }
 
     @Operation(summary = "Get Trainees training list by parameters")
@@ -82,15 +77,16 @@ public class TraineeController {
     @GetMapping(value = "/api/trainees/login")
     public ResponseEntity<String> login(@Valid @RequestParam("username") String username,
                                         @RequestParam("password") String password) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        boolean authenticatedTraineeProfile = traineeService.authenticateTraineeProfile(username, password);
-        if (authenticatedTraineeProfile) {
-            return ResponseEntity.ok("User signed successful");
+        if (traineeService.authenticateTraineeProfile(username, password)) {
+            return ResponseEntity.ok("Login successful");
+
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
     }
+
+
 
     @Operation(summary = "Change the login")
     @ApiResponses(value = {

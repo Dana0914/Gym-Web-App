@@ -18,6 +18,8 @@ import epam.com.gymapplication.utility.exception.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +33,7 @@ import java.util.List;
 @Service
 public class TraineeService {
 
-    private final PasswordEncoder passwordEncoder;
+    private final NoOpPasswordEncoder noOpPasswordEncoder;
 
 
     private static final Logger logger = LoggerFactory.getLogger(TraineeService.class);
@@ -44,11 +46,16 @@ public class TraineeService {
     private final TrainingRepository trainingRepository;
 
     @Autowired
-    public TraineeService(PasswordEncoder passwordEncoder, TraineeRepository traineeRepository, UserProfileService userProfileService, PasswordGenerator passwordGenerator, UserRepository userRepository, TrainerRepository trainerRepository, TrainingRepository trainingRepository) {
-        this.passwordEncoder = passwordEncoder;
+    public TraineeService(
+            NoOpPasswordEncoder noOpPasswordEncoder, TraineeRepository traineeRepository,
+            UserProfileService userProfileService,
+            UserRepository userRepository,
+            TrainerRepository trainerRepository,
+            TrainingRepository trainingRepository) {
+        this.noOpPasswordEncoder = noOpPasswordEncoder;
         this.traineeRepository = traineeRepository;
         this.userProfileService = userProfileService;
-        this.passwordGenerator = passwordGenerator;
+        this.passwordGenerator = new PasswordGenerator();
         this.userRepository = userRepository;
         this.trainerRepository = trainerRepository;
         this.trainingRepository = trainingRepository;
@@ -132,7 +139,7 @@ public class TraineeService {
 
         User toUserEntity = new User();
         toUserEntity.setUsername(username);
-        toUserEntity.setPassword(passwordEncoder.encode(password));
+        toUserEntity.setPassword(noOpPasswordEncoder.encode(password));
         toUserEntity.setFirstName(traineeDTO.getFirstname());
         toUserEntity.setLastName(traineeDTO.getLastname());
         toUserEntity.setActive(traineeDTO.getActive());
@@ -149,7 +156,7 @@ public class TraineeService {
 
 
         traineeRepository.save(trainee);
-        logger.info("Persisted traine to database: " + trainee);
+        logger.info("Persisted trainee to database: " + trainee);
 
         TraineeDTO traineeResponse = new TraineeDTO();
         traineeResponse.setUsername(trainee.getUser().getUsername());
@@ -213,6 +220,10 @@ public class TraineeService {
                 .findByUsername(username)
                 .orElseThrow(() ->
                 new EntityNotFoundException("Trainer not found by username: " + username));
+
+        if (noOpPasswordEncoder.matches(password, traineeProfileByUsername.getUser().getPassword())) {
+            return true;
+        }
 
         if (traineeProfileByUsername.getUser().getUsername().equals(username) &&
                 traineeProfileByUsername.getUser().getPassword().equals(password)) {

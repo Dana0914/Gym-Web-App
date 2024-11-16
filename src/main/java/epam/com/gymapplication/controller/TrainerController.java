@@ -73,10 +73,10 @@ public class TrainerController {
             @ApiResponse(responseCode = "404",description = "Trainer username or password not found",content = @Content),
             @ApiResponse(responseCode = "400",description = "Invalid username or password",content = @Content)})
 
-    @GetMapping("/api/trainers/{username}/{password}")
+    @GetMapping("/api/trainers/login")
     public ResponseEntity<String> login(@Valid
-                                            @PathVariable("username") String username,
-                                            @PathVariable("password") String password) {
+                                            @RequestParam("username") String username,
+                                            @RequestParam("password") String password) {
 
         boolean authenticatedTrainerProfile = trainerService.authenticateTrainerProfile(username, password);
         if (authenticatedTrainerProfile) {
@@ -92,7 +92,7 @@ public class TrainerController {
             @ApiResponse(responseCode = "404",description = "Password not found",content = @Content),
             @ApiResponse(responseCode = "400",description = "Invalid password",content = @Content)})
 
-    @PutMapping(value = "api/trainers/login")
+    @PutMapping(value = "api/trainers/change-login")
     public ResponseEntity<String> changeLogin(@Validated(ChangeLogin.class)
                                                   @RequestBody TrainerDTO trainerDTO) {
         boolean passwordChange = trainerService.changePassword(trainerDTO);
