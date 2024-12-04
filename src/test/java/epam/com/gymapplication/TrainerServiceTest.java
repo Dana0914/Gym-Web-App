@@ -53,12 +53,12 @@ public class TrainerServiceTest {
         trainer = new Trainer();
         trainer.setId(1L);
         trainer.setUser(user);
-        trainer.setTrainingType(trainingType);
+        trainer.setSpecialization(trainingType.getId());
 
         secondTrainer = new Trainer();
         secondTrainer.setId(2L);
         secondTrainer.setUser(user);
-        secondTrainer.setTrainingType(trainingType);
+        secondTrainer.setSpecialization(trainingType.getId());
 
 
     }
