@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 
@@ -21,4 +20,7 @@ public interface TrainingRepository extends CrudRepository<Training, Long> {
 
     @Query(value = "select t from Training t where t.trainingType =:trainingType", nativeQuery = false)
     Optional<Training> findByTrainingType(@Param("trainingType") String trainingType);
+
+    @Query(value = "select t from Training t where t.trainingDate =:trainingDate", nativeQuery = false)
+    Optional<Training> findByTrainingDate(@Param("trainingDate")LocalDate trainingDate);
 }

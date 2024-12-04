@@ -18,7 +18,7 @@ import java.util.Optional;
 @Repository
 public interface TraineeRepository extends CrudRepository<Trainee, Long> {
 
-    @Query(value = "select t FROM Trainee t join t.trainers t2 join t.trainings tt join t2.trainingType t3 " +
+    @Query(value = "select t FROM Trainee t join t.trainers t2 join t.trainings tt join tt.trainingType t3 " +
             "where t.user.username =:username " +
             "AND t2.user.firstname =:trainerName " +
             "AND tt.trainingDate BETWEEN :from " +
