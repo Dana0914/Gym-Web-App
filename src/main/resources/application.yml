@@ -1,0 +1,32 @@
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+spring:
+  application:
+    name: gym-service
+
+server:
+  port: 8762
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        register-health-indicator:
+        sliding-window-size: 100
+        permitted-number-of-calls-in-half-open-state: 10
+        slow-call-duration-threshold: 4s
+        slow-call-rate-threshold: 90
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        minimum-number-of-calls: 10
+    instances:
+      myCircuitBreaker:
+        baseConfig: default
+        wait-duration-in-open-state: 20s
+      myCircuitBreaker2:
+        baseConfig: default
+        wait-duration-in-open-state: 30s
+
