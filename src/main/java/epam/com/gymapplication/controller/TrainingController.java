@@ -13,11 +13,15 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
+
 @RestController
 public class TrainingController {
+
     private final TrainingService trainingService;
 
-    public TrainingController(TrainingService trainingService) {
+
+    public TrainingController(TrainingService trainingService)
+    {
         this.trainingService = trainingService;
     }
 
@@ -33,6 +37,7 @@ public class TrainingController {
             @RequestBody TrainingDTO trainingDTO) {
 
         trainingService.addTraining(trainingDTO);
+
         return new ResponseEntity<>(HttpStatus.OK);
 
 

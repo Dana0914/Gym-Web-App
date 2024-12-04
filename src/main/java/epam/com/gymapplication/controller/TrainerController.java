@@ -2,6 +2,8 @@ package epam.com.gymapplication.controller;
 
 
 import epam.com.gymapplication.dto.*;
+import epam.com.gymapplication.entity.Trainer;
+import epam.com.gymapplication.entity.User;
 import epam.com.gymapplication.service.TrainerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
