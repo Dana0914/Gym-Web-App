@@ -1,9 +1,8 @@
 package epam.com.gymapplication.entity;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 
-import java.util.Objects;
+import jakarta.persistence.*;
+
 
 
 @Entity
@@ -13,29 +12,24 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
-    @NotNull(message = "firstname can not be null")
-    private String firstname;
-
-    @NotNull(message = "lastname can not be null")
-    private String lastname;
-
-    @NotNull(message = "username can not be null")
+    @Column(name = "username")
     private String username;
-
-    @NotNull(message = "password can not be null")
+    @Column(name = "firstname")
+    private String firstname;
+    @Column(name = "lastname")
+    private String lastname;
+    @Column(name = "password")
     private String password;
-
     @Column(name = "is_active")
-    @NotNull(message = "isActive switch can not be null")
     private Boolean isActive;
+
 
     public User() {
 
     }
 
-    public User(String firstname, String lastname,
-                String username, String password,
-                boolean isActive) {
+    public User(String username, String firstname, String lastname,
+                String password, boolean isActive) {
 
         this.firstname = firstname;
         this.lastname = lastname;
@@ -111,32 +105,14 @@ public class User {
         this.isActive = isActive;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return isActive == user.isActive
-                && Objects.equals(id, user.id)
-                && Objects.equals(firstname, user.firstname)
-                && Objects.equals(lastname, user.lastname)
-                && Objects.equals(username, user.username)
-                && Objects.equals(password, user.password);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, firstname, lastname, username, password, isActive);
-    }
 
     @Override
     public String toString() {
         return "User{" +
                 "id=" + id +
+                ", username='" + username + '\'' +
                 ", firstname='" + firstname + '\'' +
                 ", lastname='" + lastname + '\'' +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
                 ", isActive=" + isActive +
                 '}';
     }

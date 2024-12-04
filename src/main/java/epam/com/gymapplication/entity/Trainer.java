@@ -23,21 +23,21 @@ public class Trainer {
         this.id = id;
     }
 
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE})
-    @JoinColumn(name = "specialization")
-    private TrainingType trainingType;
 
-    public TrainingType getTrainingType() {
-        return trainingType;
-    }
+    @Column(name = "specialization")
+    private Long specialization;
 
-    public void setTrainingType(TrainingType trainingType) {
-        this.trainingType = trainingType;
-    }
 
     @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
     @JoinColumn(name = "users_id")
     private User user;
+
+    public void setSpecialization(Long specialization) {
+        this.specialization = specialization;
+    }
+    public Long getSpecialization() {
+        return specialization;
+    }
 
     public User getUser() {
         return user;
@@ -76,28 +76,14 @@ public class Trainer {
         this.id = id;
     }
 
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Trainer trainer = (Trainer) o;
-        return Objects.equals(id, trainer.id)
-                && Objects.equals(trainingType, trainer.trainingType)
-                && Objects.equals(user, trainer.user);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, trainingType, user);
-    }
-
     @Override
     public String toString() {
         return "Trainer{" +
                 "id=" + id +
-                ", trainingType=" + trainingType +
+                ", specialization=" + specialization +
                 ", user=" + user +
+                ", trainees=" + trainees +
+                ", trainings=" + trainings +
                 '}';
     }
 }

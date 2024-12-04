@@ -2,7 +2,7 @@ package epam.com.gymapplication.entity;
 
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+
 
 import java.time.LocalDate;
 import java.util.*;
@@ -18,10 +18,8 @@ public class Trainee {
 
 
     @Column(name = "date_of_birth")
-    @NotNull(message = "date of birth can not be null")
     private LocalDate dateOfBirth;
 
-    @NotNull(message = "Address can not be null")
     private String address;
 
 
@@ -98,22 +96,6 @@ public class Trainee {
         this.address = address;
     }
 
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Trainee trainee = (Trainee) o;
-        return Objects.equals(id, trainee.id)
-                && Objects.equals(dateOfBirth, trainee.dateOfBirth)
-                && Objects.equals(address, trainee.address)
-                && Objects.equals(user, trainee.user);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, dateOfBirth, address, user);
-    }
 
     @Override
     public String toString() {

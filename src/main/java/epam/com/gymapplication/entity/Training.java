@@ -1,12 +1,13 @@
 package epam.com.gymapplication.entity;
 
 
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
-import java.util.Objects;
+
 
 
 @Entity
@@ -18,16 +19,17 @@ public class Training {
     private Long id;
 
     @Column(name = "training_name")
-    @NotNull(message = "training name can not be null")
     private String trainingName;
 
     @Column(name = "training_date")
-    @NotNull(message = "training date can not be null")
     private LocalDate trainingDate;
 
     @Column(name = "training_duration")
-    @NotNull(message = "training duration can not be null")
     private Integer trainingDuration;
+
+    @Column(name = "action_type")
+    @Enumerated(EnumType.STRING)
+    private ActionType actionType;
 
     public Training() {
 
@@ -36,12 +38,14 @@ public class Training {
     public Training(Long id,
                     String trainingName,
                     LocalDate trainingDate,
-                    Integer trainingDuration) {
+                    Integer trainingDuration,
+                    ActionType actionType) {
 
         this.id = id;
         this.trainingName = trainingName;
         this.trainingDate = trainingDate;
         this.trainingDuration = trainingDuration;
+        this.actionType = actionType;
     }
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
@@ -114,6 +118,13 @@ public class Training {
         this.trainingDuration = trainingDuration;
     }
 
+    public void setActionType(ActionType actionType) {
+        this.actionType = actionType;
+    }
+    public ActionType getActionType() {
+        return actionType;
+    }
+
     @Override
     public String toString() {
         return "Training{" +
@@ -121,24 +132,7 @@ public class Training {
                 ", trainingName='" + trainingName + '\'' +
                 ", trainingDate=" + trainingDate +
                 ", trainingDuration=" + trainingDuration +
-                ", trainingType=" + trainingType +
+                ", actionType=" + actionType +
                 '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Training training = (Training) o;
-        return Objects.equals(id, training.id)
-                && Objects.equals(trainingName, training.trainingName)
-                && Objects.equals(trainingDate, training.trainingDate)
-                && Objects.equals(trainingDuration, training.trainingDuration)
-                && Objects.equals(trainingType, training.trainingType);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, trainingName, trainingDate, trainingDuration, trainingType, trainee, trainer);
     }
 }
