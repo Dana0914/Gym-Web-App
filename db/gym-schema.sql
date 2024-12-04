@@ -1,29 +1,27 @@
 CREATE TABLE users (
     id SERIAL4 NOT NULL,
+    username VARCHAR (100) NOT NULL,
     firstname VARCHAR (50) NOT NULL,
     lastname VARCHAR (80) NOT NULL,
-    username VARCHAR (100) NOT NULL,
     password VARCHAR (10) NOT NULL,
-    is_active BOOLEAN NOT NULL DEFAULT FALSE,
+    is_active BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (id)
-
 );
-
 
 
 CREATE TABLE trainee (
     id SERIAL4 NOT NULL,
     users_id INT4 NOT NULL,
-    date_of_birth DATE NOT NULL,
-    address VARCHAR(100) NOT NULL,
+    date_of_birth DATE,
+    address VARCHAR(100),
     PRIMARY KEY (id),
-    FOREIGN KEY (users_id) REFERENCES users (id)
+    FOREIGN KEY (users_id) REFERENCES users (id) ON DELETE CASCADE
 
 );
 
 CREATE TABLE training_type (
     id SERIAL4 NOT NULL,
-    training_type_name VARCHAR (50)  NOT NULL,
+    training_type_name VARCHAR (50),
     PRIMARY KEY (id)
 
 );
@@ -33,24 +31,18 @@ CREATE TABLE trainer (
     users_id INT4 NOT NULL,
     specialization INT4 NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (specialization) REFERENCES training_type (id)
+    FOREIGN KEY (users_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (specialization) REFERENCES training_type (id) ON DELETE CASCADE
 
 );
-
-ALTER TABLE trainer
-    DROP CONSTRAINT trainer_specialization_fkey;
-
-ALTER TABLE trainer
-    ADD CONSTRAINT trainer_specialization_fkey
-        FOREIGN KEY (specialization) REFERENCES training_type (id) ON DELETE CASCADE;
 
 
 CREATE TABLE trainer_trainee (
     trainee_id INT4 NOT NULL,
     trainer_id INT4 NOT NULL,
     PRIMARY KEY (trainee_id, trainer_id),
-    FOREIGN KEY (trainee_id) REFERENCES trainee (id),
-    FOREIGN KEY (trainer_id) REFERENCES  trainer (id)
+    FOREIGN KEY (trainee_id) REFERENCES trainee (id) ON DELETE CASCADE,
+    FOREIGN KEY (trainer_id) REFERENCES  trainer (id) ON DELETE CASCADE
 
 );
 
@@ -59,23 +51,17 @@ CREATE TABLE training (
     trainee_id INT4 NOT NULL,
     trainer_id INT4 NOT NULL,
     training_type_id INT4 NOT NULL,
-    training_name VARCHAR(50) UNIQUE NOT NULL,
-    training_date DATE NOT NULL,
-    training_duration INTEGER NOT NULL,
+    training_name VARCHAR(50),
+    training_date DATE,
+    training_duration INTEGER,
+    action_type VARCHAR NOT NULL,
+    CHECK (action_type in ('ADD', 'DELETE')),
     PRIMARY KEY (id),
-    FOREIGN KEY (trainee_id) REFERENCES trainee (id),
-    FOREIGN KEY (trainer_id) REFERENCES trainer (id),
-    FOREIGN KEY (training_type_id) REFERENCES training_type (id)
+    FOREIGN KEY (trainee_id) REFERENCES trainee (id) ON DELETE CASCADE,
+    FOREIGN KEY (trainer_id) REFERENCES trainer (id) ON DELETE CASCADE,
+    FOREIGN KEY (training_type_id) REFERENCES training_type (id) ON DELETE CASCADE
 
 );
 
-ALTER TABLE training
-    DROP CONSTRAINT training_training_type_id_fkey;
 
-ALTER TABLE training
-    ADD CONSTRAINT training_training_type_id_fkey
-        FOREIGN KEY (training_type_id) REFERENCES training_type (id) ON DELETE CASCADE;
-
-
-
-
+INSERT INTO training_type (id, training_type_name) VALUES (1, 'aerobics');
