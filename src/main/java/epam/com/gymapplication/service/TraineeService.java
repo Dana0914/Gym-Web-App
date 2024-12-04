@@ -18,9 +18,6 @@ import epam.com.gymapplication.utility.exception.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,12 +26,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 
-
+@Transactional
 @Service
 public class TraineeService {
-
-    private final NoOpPasswordEncoder noOpPasswordEncoder;
-
 
     private static final Logger logger = LoggerFactory.getLogger(TraineeService.class);
 
@@ -47,12 +41,12 @@ public class TraineeService {
 
     @Autowired
     public TraineeService(
-            NoOpPasswordEncoder noOpPasswordEncoder, TraineeRepository traineeRepository,
+            TraineeRepository traineeRepository,
             UserProfileService userProfileService,
             UserRepository userRepository,
             TrainerRepository trainerRepository,
             TrainingRepository trainingRepository) {
-        this.noOpPasswordEncoder = noOpPasswordEncoder;
+
         this.traineeRepository = traineeRepository;
         this.userProfileService = userProfileService;
         this.passwordGenerator = new PasswordGenerator();
@@ -61,7 +55,7 @@ public class TraineeService {
         this.trainingRepository = trainingRepository;
     }
 
-    @Transactional
+
     public List<TrainerDTO> updateTraineesTrainerList(TraineeDTO traineeDTO)  {
         String username = traineeDTO.getUsername();
 
@@ -93,7 +87,7 @@ public class TraineeService {
                     trainerDTO.setUsername(trainer.getUser().getUsername());
                     trainerDTO.setFirstname(trainer.getUser().getFirstName());
                     trainerDTO.setLastname(trainer.getUser().getLastName());
-                    trainerDTO.setSpecialization(trainer.getTrainingType().getId());
+                    trainerDTO.setSpecialization(trainer.getSpecialization());
                     return trainerDTO;
                 })
                 .toList();
@@ -105,7 +99,6 @@ public class TraineeService {
 
 
 
-    @Transactional
     public void assignTraineeToTrainer(Long traineeId, Long trainerId) {
         Trainee trainee = traineeRepository
                 .findById(traineeId)
@@ -129,7 +122,7 @@ public class TraineeService {
 
 
 
-    @Transactional
+
     public TraineeDTO createTraineeProfile(TraineeDTO traineeDTO)  {
         String username = userProfileService.concatenateUsername(
                 traineeDTO.getFirstname(),
@@ -139,7 +132,7 @@ public class TraineeService {
 
         User toUserEntity = new User();
         toUserEntity.setUsername(username);
-        toUserEntity.setPassword(noOpPasswordEncoder.encode(password));
+        toUserEntity.setPassword(password);
         toUserEntity.setFirstName(traineeDTO.getFirstname());
         toUserEntity.setLastName(traineeDTO.getLastname());
         toUserEntity.setActive(traineeDTO.getActive());
@@ -196,7 +189,7 @@ public class TraineeService {
                     trainerDto.setUsername(trainer.getUser().getUsername());
                     trainerDto.setFirstname(trainer.getUser().getFirstName());
                     trainerDto.setLastname(trainer.getUser().getLastName());
-                    trainerDto.setSpecialization(trainer.getTrainingType().getId());
+                    trainerDto.setSpecialization(trainer.getSpecialization());
 
 
                     return trainerDto;
@@ -220,10 +213,6 @@ public class TraineeService {
                 .findByUsername(username)
                 .orElseThrow(() ->
                 new EntityNotFoundException("Trainer not found by username: " + username));
-
-        if (noOpPasswordEncoder.matches(password, traineeProfileByUsername.getUser().getPassword())) {
-            return true;
-        }
 
         if (traineeProfileByUsername.getUser().getUsername().equals(username) &&
                 traineeProfileByUsername.getUser().getPassword().equals(password)) {
@@ -276,7 +265,6 @@ public class TraineeService {
 
 
 
-    @Transactional
     public TraineeDTO updateTraineeProfile(Long id, TraineeDTO traineeDTO) {
         Trainee traineeById = traineeRepository
                 .findById(id)
@@ -308,7 +296,7 @@ public class TraineeService {
                     trainerDto.setUsername(trainer.getUser().getUsername());
                     trainerDto.setFirstname(trainer.getUser().getFirstName());
                     trainerDto.setLastname(trainer.getUser().getLastName());
-                    trainerDto.setSpecialization(trainer.getTrainingType().getId());
+                    trainerDto.setSpecialization(trainer.getSpecialization());
 
                     return trainerDto;
                 })
@@ -322,7 +310,7 @@ public class TraineeService {
 
     }
 
-    @Transactional
+
     public void deleteTraineeProfileByUsername(String username)  {
         Trainee traineeProfileByUsername = traineeRepository
                 .findByUsername(username)
@@ -343,7 +331,7 @@ public class TraineeService {
     }
 
 
-    @Transactional
+
     public void saveTrainee(Trainee trainee) {
         traineeRepository.save(trainee);
         logger.info("Trainee saved");
@@ -440,7 +428,7 @@ public class TraineeService {
 
             trainingResponseDTO.setTrainingDate(training.getTrainingDate());
             trainingResponseDTO.setTrainingType(training.getTrainingType().getTrainingTypeName());
-            trainingResponseDTO.setUsername(trainingRequestDTO.getTrainee().getUser().getUsername());
+            trainingResponseDTO.setTrainerUsername(trainingRequestDTO.getTrainee().getUser().getUsername());
             trainingResponseDTO.setTrainerName(trainingRequestDTO.getTrainer().getUser().getFirstName());
             trainingResponseDTO.setTrainingName(trainingByType.getTrainingName());
 

@@ -21,11 +21,12 @@ import java.time.LocalDate;
 import java.util.List;
 
 
-
+@Transactional
 @Service
 public class TrainerService {
-    //private final PasswordEncoder passwordEncoder;
     private static final Logger logger = LoggerFactory.getLogger(TrainerService.class);
+
+    private final PasswordEncoder passwordEncoder;
 
     private final UserProfileService userProfileService;
     private final PasswordGenerator passwordGenerator;
@@ -36,9 +37,17 @@ public class TrainerService {
     private final TrainingRepository trainingRepository;
 
 
+
     @Autowired
-    public TrainerService(UserProfileService userProfileService, PasswordGenerator passwordGenerator, TrainerRepository trainerRepository, UserRepository userRepository, TrainingTypeRepository trainingTypeRepository, TraineeRepository traineeRepository, TrainingRepository trainingRepository) {
-        //this.passwordEncoder = passwordEncoder;
+    public TrainerService(PasswordEncoder passwordEncoder, UserProfileService userProfileService,
+                          PasswordGenerator passwordGenerator,
+                          TrainerRepository trainerRepository,
+                          UserRepository userRepository,
+                          TrainingTypeRepository trainingTypeRepository,
+                          TraineeRepository traineeRepository,
+                          TrainingRepository trainingRepository) {
+        this.passwordEncoder = passwordEncoder;
+
         this.userProfileService = userProfileService;
         this.passwordGenerator = passwordGenerator;
         this.trainerRepository = trainerRepository;
@@ -59,7 +68,7 @@ public class TrainerService {
             trainerDTO.setFirstname(trainer.getUser().getFirstName());
             trainerDTO.setLastname(trainer.getUser().getLastName());
             trainerDTO.setActive(trainer.getUser().getActive());
-            trainerDTO.setSpecialization(trainer.getTrainingType().getId());
+            trainerDTO.setSpecialization(trainer.getSpecialization());
             return trainerDTO;
 
         }).toList();
@@ -75,11 +84,13 @@ public class TrainerService {
                 trainerDTO.getLastname());
 
         String password = passwordGenerator.generatePassword();
+        System.out.println(password);
+
 
 
         User user = new User();
         user.setUsername(username);
-        user.setPassword(password);
+        user.setPassword(passwordEncoder.encode(password));
         user.setFirstName(trainerDTO.getFirstname());
         user.setLastName(trainerDTO.getLastname());
 
@@ -97,7 +108,7 @@ public class TrainerService {
 
         Trainer trainer = new Trainer();
         trainer.setUser(user);
-        trainer.setTrainingType(trainingType);
+        trainer.setSpecialization(trainingType.getId());
 
 
         trainerRepository.save(trainer);
@@ -106,7 +117,7 @@ public class TrainerService {
 
         TrainerDTO trainerResponse = new TrainerDTO();
         trainerResponse.setUsername(username);
-        trainerResponse.setPassword(password);
+        trainerResponse.setPassword(passwordEncoder.encode(password));
 
 
         return trainerResponse;
@@ -126,7 +137,7 @@ public class TrainerService {
         TrainerDTO trainerResponse = new TrainerDTO();
         trainerResponse.setFirstname(trainerByProfileUsername.getUser().getFirstName());
         trainerResponse.setLastname(trainerByProfileUsername.getUser().getLastName());
-        trainerResponse.setSpecialization(trainerByProfileUsername.getTrainingType().getId());
+        trainerResponse.setSpecialization(trainerByProfileUsername.getSpecialization());
         trainerResponse.setActive(trainerByProfileUsername.getUser().getActive());
 
         // Map trainers using the TrainerDTO
@@ -213,7 +224,6 @@ public class TrainerService {
     }
 
 
-    @Transactional
     public TrainerDTO updateTrainerProfile(Long id, TrainerDTO trainerDTO) {
         Trainer trainerById = trainerRepository
                 .findById(id)
@@ -236,7 +246,7 @@ public class TrainerService {
 
         logger.info("Training type found by id {} ", trainingType);
 
-        trainerById.setTrainingType(trainingType);
+        trainerById.setSpecialization(trainingType.getId());
 
         trainerRepository.save(trainerById);
         logger.info("Persisted trainer profile {} in database", trainerById);
@@ -265,7 +275,6 @@ public class TrainerService {
     }
 
 
-    @Transactional
     public void deleteTrainerProfileByUsername(String username)  {
         Trainer trainerProfileByUsername = trainerRepository
                 .findByUsername(username)
@@ -284,7 +293,6 @@ public class TrainerService {
 
     }
 
-    @Transactional
     public void deleteById(Long id)  {
         trainerRepository.deleteById(id);
         logger.info("Trainer id deleted");

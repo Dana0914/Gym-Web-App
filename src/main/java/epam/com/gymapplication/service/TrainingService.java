@@ -13,14 +13,16 @@ import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
 
-
+@Transactional
 @Service
 public class TrainingService {
     private static final Logger logger = LoggerFactory.getLogger(TrainingService.class);
+
 
     private final TrainingRepository trainingRepository;
     private final TraineeRepository traineeRepository;
@@ -82,7 +84,6 @@ public class TrainingService {
         training.setTrainingName(trainingName);
 
         trainingRepository.save(training);
-
 
     }
 
