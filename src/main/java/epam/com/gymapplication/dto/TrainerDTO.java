@@ -113,15 +113,12 @@ public class TrainerDTO {
     public String toString() {
         return "TrainerDTO{" +
                 "username='" + username + '\'' +
-                ", password='" + password + '\'' +
                 ", firstname='" + firstname + '\'' +
                 ", lastname='" + lastname + '\'' +
                 ", specialization=" + specialization +
                 ", isActive=" + isActive +
                 ", trainees=" + trainees +
                 ", trainings=" + trainings +
-                ", oldPassword='" + oldPassword + '\'' +
-                ", newPassword='" + newPassword + '\'' +
                 '}';
     }
 }
