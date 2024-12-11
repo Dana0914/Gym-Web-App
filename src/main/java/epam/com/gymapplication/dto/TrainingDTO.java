@@ -1,6 +1,7 @@
 package epam.com.gymapplication.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import epam.com.gymapplication.entity.ActionType;
 import epam.com.gymapplication.entity.Trainee;
 import epam.com.gymapplication.entity.Trainer;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -17,6 +19,7 @@ import java.time.LocalDate;
 
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TrainingDTO {
 
     public TrainingDTO() {
@@ -45,6 +48,7 @@ public class TrainingDTO {
 
     @NotNull(groups = {AddTrainersTrainingWorkload.class})
     @JsonProperty(value = "isActive")
+    @Column(name = "is_active")
     private Boolean isActive;
 
     @NotBlank(groups = {AddTraining.class})
@@ -56,6 +60,8 @@ public class TrainingDTO {
     private LocalDate to;
 
     @NotNull(groups = {AddTraining.class, AddTrainersTrainingWorkload.class})
+    @JsonProperty(value = "trainingDuration")
+    @Column(name = "training_duration")
     private Integer trainingDuration;
 
     private String trainingType;
@@ -63,6 +69,8 @@ public class TrainingDTO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @NotNull(groups = {AddTraining.class, AddTrainersTrainingWorkload.class})
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate trainingDate;
 
     private Trainer trainer;
