@@ -1,10 +1,13 @@
 package epam.com.gymapplication.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import epam.com.gymapplication.dao.*;
 import epam.com.gymapplication.dto.TrainingDTO;
 import epam.com.gymapplication.entity.*;
 import epam.com.gymapplication.profile.PasswordGenerator;
+import epam.com.gymapplication.utility.exception.ResourceNotFoundException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +33,8 @@ public class TrainersTrainingSessionService {
 
 
     private final RestTemplate restTemplate;
-    private static final String ADDRESS_SERVICE_URL = "http://localhost:8763/api/workload/trainers/trainings";
+    private final TrainersTrainingSessionProducer trainersTrainingSessionProducer;
+    private static final String ADDRESS_SERVICE_URL = "http://localhost:8763/api/workload";
 
 
     public TrainersTrainingSessionService(TrainerRepository trainerRepository,
@@ -40,7 +44,8 @@ public class TrainersTrainingSessionService {
                                           PasswordEncoder passwordEncoder,
                                           TrainingTypeRepository trainingTypeRepository,
                                           TraineeRepository traineeRepository,
-                                          RestTemplate restTemplate) {
+                                          RestTemplate restTemplate,
+                                          TrainersTrainingSessionProducer trainersTrainingSessionProducer) {
 
         this.trainerRepository = trainerRepository;
         this.trainingRepository = trainingRepository;
@@ -50,9 +55,10 @@ public class TrainersTrainingSessionService {
         this.trainingTypeRepository = trainingTypeRepository;
         this.traineeRepository = traineeRepository;
         this.restTemplate = restTemplate;
+        this.trainersTrainingSessionProducer = trainersTrainingSessionProducer;
     }
 
-    public void addTraining(TrainingDTO trainingDTO) {
+    public void addTraining(TrainingDTO trainingDTO) throws ResourceNotFoundException {
         User user = new User();
         user.setUsername(trainingDTO.getTrainerUsername());
         user.setFirstName(trainingDTO.getTrainerFirstname());
@@ -60,18 +66,19 @@ public class TrainersTrainingSessionService {
         user.setPassword(passwordEncoder.encode(passwordGenerator.generatePassword()));
         user.setActive(trainingDTO.getIsActive());
 
+        userRepository.save(user);
+
         Trainer trainer = new Trainer();
         trainer.setUser(user);
 
         TrainingType trainingType = trainingTypeRepository
                 .findById(1L)
                 .orElseThrow(() ->
-                        new RuntimeException("TrainingType not found with ID"));
+                        new ResourceNotFoundException("TrainingType not found with ID"));
         logger.info("TrainingType ID: {}", trainingType.getId());
 
         trainer.setSpecialization(trainingType.getId());
 
-        userRepository.save(user);
 
         logger.info("User added successfully {} ", user);
 
@@ -79,10 +86,13 @@ public class TrainersTrainingSessionService {
 
         logger.info("Trainer added successfully {} ", trainer);
 
+
         Training training = new Training();
         training.setTrainingDate(trainingDTO.getTrainingDate());
         training.setTrainingDuration(training.getTrainingDuration());
         training.setActionType(trainingDTO.getActionType());
+        training.setTrainingType(trainingType);
+
 
 
         training.setTrainer(trainer);
@@ -91,7 +101,7 @@ public class TrainersTrainingSessionService {
         Trainee trainee = traineeRepository
                 .findById(2L)
                 .orElseThrow(() ->
-                        new RuntimeException("Trainee not found with ID"));
+                        new ResourceNotFoundException("Trainee not found with ID"));
         logger.info("Trainee ID: {}", trainee.getId());
 
         training.setTrainee(trainee);
@@ -105,12 +115,12 @@ public class TrainersTrainingSessionService {
 
 
 
-    public void deleteTraining(TrainingDTO trainingDTO) {
+    public void deleteTraining(TrainingDTO trainingDTO) throws ResourceNotFoundException {
         User user = userRepository
                 .findByUsername(trainingDTO
                         .getTrainerUsername())
                 .orElseThrow(() ->
-                        new RuntimeException("User not found by username"));
+                        new ResourceNotFoundException("User not found by username"));
 
         logger.info("User username: {}", user.getUsername());
 
@@ -118,14 +128,14 @@ public class TrainersTrainingSessionService {
                 .findByUsername(trainingDTO
                         .getTrainerUsername())
                 .orElseThrow(() ->
-                        new RuntimeException("Trainer not found by username"));
+                        new ResourceNotFoundException("Trainer not found by username"));
         logger.info("Trainer username: {}", trainer.getUser().getUsername());
 
         Training training = trainingRepository
                 .findByTrainingDate(trainingDTO
                         .getTrainingDate())
                 .orElseThrow(() ->
-                        new RuntimeException("Training not found by date"));
+                        new ResourceNotFoundException("Training not found by date"));
         logger.info("Training date: {}", training.getTrainingDate());
 
 
@@ -159,18 +169,20 @@ public class TrainersTrainingSessionService {
                 String.class);
 
 
+
         if (response.getStatusCode() == HttpStatus.OK) {
             logger.info("Successfully call secondary microservice {}", response.getBody());
-        } else {
-            logger.info("Failed to call secondary microservice {}", response.getBody());
-        }
+        } else logger.info("Failed to call secondary microservice {}", response.getBody());
+
         return response;
+
     }
 
-    public ResponseEntity<String> fallBackMethod(TrainingDTO trainingDTO, Throwable throwable) {
+
+    public ResponseEntity<TrainingDTO> fallBackMethod(Throwable throwable) {
         logger.error("Falling back exception {}", throwable.getMessage());
 
-        trainingDTO = new TrainingDTO(
+        TrainingDTO trainingDTO = new TrainingDTO(
                 "Unavailable.Trainer",
                 "Unavailable",
                 "Trainer",
@@ -181,7 +193,7 @@ public class TrainersTrainingSessionService {
 
         logger.info("TrainingDTO : {}", trainingDTO);
 
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Service is unavailable, please try again");
+        return new ResponseEntity<>(trainingDTO, HttpStatus.INTERNAL_SERVER_ERROR);
 
     }
 

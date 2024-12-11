@@ -3,6 +3,7 @@ package epam.com.gymapplication.service;
 
 import epam.com.gymapplication.dao.TrainingTypeRepository;
 import epam.com.gymapplication.entity.TrainingType;
+import epam.com.gymapplication.utility.exception.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +32,11 @@ public class TrainingTypeService {
         trainingTypeRepository.save(trainingType);
     }
 
-    public void update(TrainingType trainingType) {
+    public void update(TrainingType trainingType) throws ResourceNotFoundException {
         TrainingType byId = trainingTypeRepository
                 .findById(trainingType.getId())
                 .orElseThrow(()->
-                new EntityNotFoundException("TrainingType not found for ID: " + trainingType.getId()));
+                new ResourceNotFoundException("TrainingType not found for ID: " + trainingType.getId()));
 
         logger.info("Entity found by id {}",trainingType.getId());
 

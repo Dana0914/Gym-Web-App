@@ -9,7 +9,7 @@ import epam.com.gymapplication.entity.Trainee;
 import epam.com.gymapplication.entity.Trainer;
 import epam.com.gymapplication.entity.Training;
 import epam.com.gymapplication.entity.TrainingType;
-import jakarta.persistence.EntityNotFoundException;
+import epam.com.gymapplication.utility.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -38,7 +38,7 @@ public class TrainingService {
     }
 
 
-    public void addTraining(TrainingDTO trainingDTO) {
+    public void addTraining(TrainingDTO trainingDTO) throws ResourceNotFoundException {
 
         String traineeUsername = trainingDTO.getTraineeUsername();
         String trainerUsername = trainingDTO.getTrainerUsername();
@@ -49,28 +49,28 @@ public class TrainingService {
         Trainee traineeByUsername = traineeRepository
                 .findByUsername(traineeUsername)
                 .orElseThrow(() ->
-                new EntityNotFoundException("Trainee not found by username"));
+                new ResourceNotFoundException("Trainee not found by username"));
 
         logger.info("Found trainer by username {}", trainerUsername);
 
         Trainer trainerByUsername = trainerRepository
                 .findByUsername(trainerUsername)
                 .orElseThrow(() ->
-                new EntityNotFoundException("Trainer not found by username"));
+                new ResourceNotFoundException("Trainer not found by username"));
 
         logger.info("Found trainer by username {}", trainerByUsername);
 
         Training trainingByName = trainingRepository
                 .findByTrainingName(trainingName)
                 .orElseThrow(() ->
-                new EntityNotFoundException("Training not found by name"));
+                new ResourceNotFoundException("Training not found by name"));
 
         logger.info("Found training by username {}", trainingByName);
 
         TrainingType trainingType = trainingTypeRepository
                 .findById(trainingByName.getId())
                 .orElseThrow(() ->
-                new EntityNotFoundException("Training type not found by id"));
+                new ResourceNotFoundException("Training type not found by id"));
         logger.info("Found training type by id {}", trainingType);
 
 
@@ -100,22 +100,22 @@ public class TrainingService {
 
     }
 
-    public Training findTrainingById(Long id) {
+    public Training findTrainingById(Long id) throws ResourceNotFoundException {
         logger.info("Found training by id {} ", id);
         return trainingRepository.findById(id).orElseThrow(()
-                -> new EntityNotFoundException("Entity not found by id " + id));
+                -> new ResourceNotFoundException("Entity not found by id " + id));
     }
 
 
-    public Training findByTrainingName(String trainingName) {
+    public Training findByTrainingName(String trainingName) throws ResourceNotFoundException {
         logger.info("Training name found {} ", trainingName);
         return trainingRepository.findByTrainingName(trainingName).orElseThrow(() ->
-                new EntityNotFoundException("Entity not found  by trainingName " + trainingName));
+                new ResourceNotFoundException("Entity not found  by trainingName " + trainingName));
     }
 
-    public Training findByTrainingType(String trainingType) {
+    public Training findByTrainingType(String trainingType) throws ResourceNotFoundException {
         logger.info("Training type found {} ", trainingType);
         return trainingRepository.findByTrainingType(trainingType).orElseThrow(() ->
-                new EntityNotFoundException("Entity not found by trainingType " + trainingType)) ;
+                new ResourceNotFoundException("Entity not found by trainingType " + trainingType)) ;
     }
 }
