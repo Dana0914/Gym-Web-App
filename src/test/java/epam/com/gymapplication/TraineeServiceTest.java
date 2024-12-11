@@ -4,6 +4,7 @@ import epam.com.gymapplication.dao.TraineeRepository;
 import epam.com.gymapplication.entity.Trainee;
 import epam.com.gymapplication.entity.User;
 import epam.com.gymapplication.service.TraineeService;
+import epam.com.gymapplication.utility.exception.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,7 +72,7 @@ public class TraineeServiceTest {
     }
 
     @Test
-    public void save_withValidData_returnsValidEntity() {
+    public void save_withValidData_returnsValidEntity() throws ResourceNotFoundException {
         when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.of(trainee));
 
 
@@ -103,7 +104,7 @@ public class TraineeServiceTest {
 
 
     @Test
-    public void findTraineeById_withExistingId_returnsEntity() {
+    public void findTraineeById_withExistingId_returnsEntity() throws ResourceNotFoundException {
         when(traineeRepository.findById(trainee.getId())).thenReturn(Optional.of(trainee));
 
         traineeService.saveTrainee(trainee);
@@ -162,7 +163,7 @@ public class TraineeServiceTest {
 
 
     @Test
-    public void findByFirstName_withExistingData_returnsValidEntity() {
+    public void findByFirstName_withExistingData_returnsValidEntity() throws ResourceNotFoundException {
         when(traineeRepository.findByFirstName(trainee.getUser().getFirstName())).thenReturn(Optional.of(trainee));
 
         Trainee traineeByFirstname = traineeService.findByFirstName(trainee.getUser().getFirstName());
@@ -187,7 +188,7 @@ public class TraineeServiceTest {
     }
 
     @Test
-    public void findByLastName_withExistingData_returnsValidEntity() {
+    public void findByLastName_withExistingData_returnsValidEntity() throws ResourceNotFoundException {
         when(traineeRepository.findByLastName(trainee.getUser().getLastName())).thenReturn(Optional.of(trainee));
 
         traineeService.saveTrainee(trainee);

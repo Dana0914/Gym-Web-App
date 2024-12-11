@@ -4,6 +4,7 @@ package epam.com.gymapplication;
 import epam.com.gymapplication.dao.UserRepository;
 import epam.com.gymapplication.entity.User;
 import epam.com.gymapplication.service.UserService;
+import epam.com.gymapplication.utility.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,7 +54,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void save_withValidData_returnsValidEntity() {
+    public void save_withValidData_returnsValidEntity() throws ResourceNotFoundException {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
         userService.save(user);
@@ -83,7 +84,7 @@ public class UserServiceTest {
 
 
     @Test
-    public void findUserById_withExistingId_returnsEntity() {
+    public void findUserById_withExistingId_returnsEntity() throws ResourceNotFoundException {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
         User userServiceById = userService.findById(user.getId());
@@ -137,7 +138,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void findByFirstName_withExistingData_returnsValidEntity() {
+    public void findByFirstName_withExistingData_returnsValidEntity() throws ResourceNotFoundException {
         when(userRepository.findByFirstName(user.getFirstName())).thenReturn(Optional.ofNullable(user));
 
         User userServiceByFirstname = userService.findByFirstname(user.getFirstName());
@@ -163,7 +164,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void findByLastName_withExistingData_returnsValidEntity() {
+    public void findByLastName_withExistingData_returnsValidEntity() throws ResourceNotFoundException {
         when(userRepository.findByLastName(user.getLastName())).thenReturn(Optional.ofNullable(user));
 
         User userServiceByLastname = userService.findByLastname(user.getLastName());
@@ -184,7 +185,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void findByUsername_withExistingData_returnsValidEntity() {
+    public void findByUsername_withExistingData_returnsValidEntity() throws ResourceNotFoundException {
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.ofNullable(user));
 
         User userServiceByUsername = userService.findByUsername(user.getUsername());

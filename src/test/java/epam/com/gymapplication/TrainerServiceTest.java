@@ -6,6 +6,7 @@ import epam.com.gymapplication.entity.Trainer;
 import epam.com.gymapplication.entity.TrainingType;
 import epam.com.gymapplication.entity.User;
 import epam.com.gymapplication.service.TrainerService;
+import epam.com.gymapplication.utility.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,7 +65,7 @@ public class TrainerServiceTest {
     }
 
     @Test
-    public void save_withValidData_returnsValidEntity() {
+    public void save_withValidData_returnsValidEntity() throws ResourceNotFoundException {
         when(trainerRepository.findById(trainer.getId())).thenReturn(Optional.of(trainer));
 
         trainerService.saveTrainer(trainer);
@@ -80,7 +81,7 @@ public class TrainerServiceTest {
 
 
     @Test
-    public void findTrainerById_withExistingId_returnsEntity() {
+    public void findTrainerById_withExistingId_returnsEntity() throws ResourceNotFoundException {
         when(trainerRepository.findById(trainer.getId())).thenReturn(Optional.of(trainer));
 
         Trainer trainerById = trainerService.findTrainerById(trainer.getId());
@@ -138,7 +139,7 @@ public class TrainerServiceTest {
 
 
     @Test
-    public void findByFirstName_withExistingData_returnsValidEntity() {
+    public void findByFirstName_withExistingData_returnsValidEntity() throws ResourceNotFoundException {
         when(trainerRepository.findByFirstName(trainer.getUser().getFirstName())).thenReturn(Optional.ofNullable(trainer));
 
         Trainer trainerByFirstname = trainerService.findByFirstName(trainer.getUser().getFirstName());
@@ -149,7 +150,7 @@ public class TrainerServiceTest {
     }
 
     @Test
-    public void findByLastName_withExistingData_returnsValidEntity() {
+    public void findByLastName_withExistingData_returnsValidEntity() throws ResourceNotFoundException {
         when(trainerRepository.findByLastName(trainer.getUser().getLastName())).thenReturn(Optional.ofNullable(trainer));
 
         Trainer lastName = trainerService.findByLastName(trainer.getUser().getLastName());

@@ -3,6 +3,7 @@ package epam.com.gymapplication;
 import epam.com.gymapplication.dao.TrainingRepository;
 import epam.com.gymapplication.entity.*;
 import epam.com.gymapplication.service.TrainingService;
+import epam.com.gymapplication.utility.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,7 @@ public class TrainingServiceTest {
     }
 
     @Test
-    public void save_withValidData_returnsValidEntity() {
+    public void save_withValidData_returnsValidEntity() throws ResourceNotFoundException {
         when(trainingRepository.findById(training.getId())).thenReturn(Optional.of(training));
 
         trainingService.saveTraining(training);
@@ -74,7 +75,7 @@ public class TrainingServiceTest {
 
 
     @Test
-    public void findTrainingById_withExistingId_returnsEntity() {
+    public void findTrainingById_withExistingId_returnsEntity() throws ResourceNotFoundException {
         when(trainingRepository.findById(training.getId())).thenReturn(Optional.of(training));
 
         Training trainingById = trainingService.findTrainingById(training.getId());
@@ -127,7 +128,7 @@ public class TrainingServiceTest {
 
 
     @Test
-    public void findByTrainingName_withExistingData_returnsValidEntity() {
+    public void findByTrainingName_withExistingData_returnsValidEntity() throws ResourceNotFoundException {
         when(trainingRepository.findByTrainingName(training.getTrainingName())).thenReturn(Optional.ofNullable(training));
 
 
@@ -140,7 +141,7 @@ public class TrainingServiceTest {
     }
 
     @Test
-    public void findByTrainingType_withExistingData_returnsValidEntity() {
+    public void findByTrainingType_withExistingData_returnsValidEntity() throws ResourceNotFoundException {
         when(trainingRepository.findByTrainingType(training.getTrainingType().getTrainingTypeName())).thenReturn(Optional.of(training));
 
         Training byTrainingName = trainingService.findByTrainingType(training.getTrainingType().getTrainingTypeName());
