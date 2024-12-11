@@ -6,6 +6,7 @@
         <setting name="validation-enabled" value="true" />
         <datasource-mapping>
           <factory-entry name="Gym-CRM-System-Spring" value="c7887579-8844-4943-abc3-100d38bbd1d7" />
+          <factory-entry name="entityManagerFactory" value="c7887579-8844-4943-abc3-100d38bbd1d7" />
           <factory-entry name="main" />
         </datasource-mapping>
         <naming-strategy-map />
