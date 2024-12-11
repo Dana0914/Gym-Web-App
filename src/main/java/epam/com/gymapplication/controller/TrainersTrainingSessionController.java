@@ -1,33 +1,26 @@
 package epam.com.gymapplication.controller;
 
 
-import epam.com.gymapplication.config.SwaggerConfig;
 import epam.com.gymapplication.dto.TrainingDTO;
 import epam.com.gymapplication.service.TrainersTrainingSessionService;
-import io.swagger.annotations.Api;
+import epam.com.gymapplication.utility.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration;
-import springfox.documentation.spring.data.rest.configuration.SpringDataRestConfiguration;
+
 
 
 @RestController
 @RequestMapping(value = "api/session")
-@Api(tags = {SwaggerConfig.GYM_APP_TAG})
-@Import({SpringDataRestConfiguration.class, BeanValidatorPluginsConfiguration.class})
 public class TrainersTrainingSessionController {
 
     private final TrainersTrainingSessionService trainersTrainingSessionService;
-
-
 
 
     public TrainersTrainingSessionController(TrainersTrainingSessionService trainersTrainingSessionService) {
@@ -49,13 +42,16 @@ public class TrainersTrainingSessionController {
 
 
     @PostMapping(value = "trainers/trainings/planned")
-    public ResponseEntity<String> addTraining(
+    public ResponseEntity<TrainingDTO> addTraining(
                                               @Validated(TrainingDTO.AddTrainersTrainingWorkload.class)
                                               @RequestBody TrainingDTO trainingDTO) {
 
-
-        trainersTrainingSessionService.addTraining(trainingDTO);
-        return ResponseEntity.ok("Created training session");
+        try {
+            trainersTrainingSessionService.addTraining(trainingDTO);
+        } catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(trainingDTO, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(trainingDTO, HttpStatus.OK);
 
     }
 
@@ -71,10 +67,14 @@ public class TrainersTrainingSessionController {
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
     })
     @DeleteMapping(value = "trainers/trainings/cancelled")
-    public ResponseEntity<String> deleteTraining(@Validated(TrainingDTO.AddTrainersTrainingWorkload.class)
+    public ResponseEntity<TrainingDTO> deleteTraining(@Validated(TrainingDTO.AddTrainersTrainingWorkload.class)
                                                      @RequestBody TrainingDTO trainingDTO) {
+        try {
 
-        trainersTrainingSessionService.deleteTraining(trainingDTO);
+            trainersTrainingSessionService.deleteTraining(trainingDTO);
+        } catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(trainingDTO, HttpStatus.NOT_FOUND);
+        }
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 

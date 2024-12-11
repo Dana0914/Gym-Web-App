@@ -3,17 +3,20 @@ package epam.com.gymapplication.controller;
 
 import epam.com.gymapplication.dto.*;
 import epam.com.gymapplication.service.TraineeService;
+import epam.com.gymapplication.utility.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.time.LocalDate;
@@ -43,7 +46,7 @@ public class TraineeController {
                                                                     @RequestParam("to") LocalDate to,
                                                                     @RequestParam("trainerName") String trainerName,
                                                                     @RequestParam("trainingType") String trainingType
-    ) {
+    ) throws ResourceNotFoundException {
 
         List<TrainingDTO> result = traineeService.getTraineesTrainingList(username, from, to, trainerName, trainingType);
 
@@ -76,7 +79,7 @@ public class TraineeController {
 
     @GetMapping(value = "/api/trainees/login")
     public ResponseEntity<String> login(@Valid @RequestParam("username") String username,
-                                        @RequestParam("password") String password) {
+                                        @RequestParam("password") String password) throws BadRequestException, ResourceNotFoundException {
 
         if (traineeService.authenticateTraineeProfile(username, password)) {
             return ResponseEntity.ok("Login successful");
@@ -98,11 +101,12 @@ public class TraineeController {
     @PutMapping("/api/trainees/change-login")
     public ResponseEntity<TraineeDTO> changeLogin(@Validated(ChangeLogin.class)
                                                       @RequestBody TraineeDTO traineeDTO) {
-        boolean passwordChange = traineeService.changePassword(traineeDTO);
-        if (passwordChange) {
-            return new ResponseEntity<>(traineeDTO, HttpStatus.OK);
+        try {
+            traineeService.changePassword(traineeDTO);
+        } catch (BadRequestException | ResourceNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return ResponseEntity.ok(traineeDTO);
 
     }
 
@@ -115,7 +119,7 @@ public class TraineeController {
 
     @GetMapping(value = "/api/trainees/{username}")
     public ResponseEntity<TraineeDTO> getTraineeProfile(@Valid
-            @PathVariable("username") String username) {
+            @PathVariable("username") String username) throws ResourceNotFoundException {
 
         TraineeDTO traineeProfileByUsername = traineeService.findTraineeProfileByUsername(username);
         return ResponseEntity.ok(traineeProfileByUsername);
@@ -134,7 +138,8 @@ public class TraineeController {
     public ResponseEntity<TraineeDTO> updateTraineeProfile(@Validated(TraineeDTO.UpdatedTraineeProfile.class)
                                                                @PathVariable("id") Long id,
                                                            @RequestBody
-                                                           TraineeDTO traineeDTO) {
+                                                           TraineeDTO traineeDTO) throws ResourceNotFoundException {
+
         TraineeDTO updateTraineeProfile = traineeService.updateTraineeProfile(id, traineeDTO);
         return new ResponseEntity<>(updateTraineeProfile, HttpStatus.OK);
 
@@ -150,7 +155,7 @@ public class TraineeController {
 
     @DeleteMapping(value = "/api/trainees/{username}")
     public ResponseEntity<Void> deleteTraineeProfile(@Validated(TraineeDTO.DeleteTraineeProfile.class)
-            @PathVariable("username") String username) {
+            @PathVariable("username") String username) throws ResourceNotFoundException {
 
         traineeService.deleteTraineeProfileByUsername(username);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -167,7 +172,7 @@ public class TraineeController {
     @PutMapping(value = "/api/trainees/trainers")
     public ResponseEntity<List<TrainerDTO>> updateTraineesTrainerList(
             @Validated(TraineeDTO.UpdatedTraineesTrainerList.class)
-            @RequestBody TraineeDTO traineeDTO) {
+            @RequestBody TraineeDTO traineeDTO) throws ResourceNotFoundException {
 
         List<TrainerDTO> trainerDTOS = traineeService.updateTraineesTrainerList(traineeDTO);
         return new ResponseEntity<>(trainerDTOS, HttpStatus.OK);
@@ -186,9 +191,12 @@ public class TraineeController {
             @PathVariable("username") String username,
             @RequestBody TraineeDTO traineeDTO) {
 
-        traineeService.activateOrDeactivateTraineeStatus(username, traineeDTO.getActive());
+        try {
+            traineeService.activateOrDeactivateTraineeStatus(username, traineeDTO.getActive());
+        } catch (BadRequestException | ResourceNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         return new ResponseEntity<>(HttpStatus.OK);
-
     }
 
 

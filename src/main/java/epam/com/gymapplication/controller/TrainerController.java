@@ -2,9 +2,8 @@ package epam.com.gymapplication.controller;
 
 
 import epam.com.gymapplication.dto.*;
-import epam.com.gymapplication.entity.Trainer;
-import epam.com.gymapplication.entity.User;
 import epam.com.gymapplication.service.TrainerService;
+import epam.com.gymapplication.utility.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -41,7 +40,7 @@ public class TrainerController {
                                                                     @RequestParam("from") LocalDate from,
                                                                     @RequestParam("to") LocalDate to,
                                                                     @RequestParam("traineeName") String traineeName,
-                                                                    @RequestParam("trainingType") String trainingType) {
+                                                                    @RequestParam("trainingType") String trainingType) throws ResourceNotFoundException {
 
 
         List<TrainingDTO> result = trainerService.getTrainersTrainingList(username, from, to,
@@ -60,7 +59,7 @@ public class TrainerController {
     @PostMapping(value = "api/trainers/registration")
 
     public ResponseEntity<TrainerDTO> registerTrainer(@Valid
-            @RequestBody TrainerDTO trainerRequestDTO) {
+            @RequestBody TrainerDTO trainerRequestDTO) throws ResourceNotFoundException {
 
         TrainerDTO registeredTrainerRequest = trainerService.createTrainerProfile(trainerRequestDTO);
         return new ResponseEntity<>(registeredTrainerRequest, HttpStatus.CREATED);
@@ -78,7 +77,7 @@ public class TrainerController {
     @GetMapping("/api/trainers/login")
     public ResponseEntity<String> login(@Valid
                                             @RequestParam("username") String username,
-                                            @RequestParam("password") String password) {
+                                            @RequestParam("password") String password) throws ResourceNotFoundException {
 
         boolean authenticatedTrainerProfile = trainerService.authenticateTrainerProfile(username, password);
         if (authenticatedTrainerProfile) {
@@ -96,7 +95,7 @@ public class TrainerController {
 
     @PutMapping(value = "api/trainers/change-login")
     public ResponseEntity<String> changeLogin(@Validated(ChangeLogin.class)
-                                                  @RequestBody TrainerDTO trainerDTO) {
+                                                  @RequestBody TrainerDTO trainerDTO) throws ResourceNotFoundException {
         boolean passwordChange = trainerService.changePassword(trainerDTO);
         if (passwordChange) {
             return new ResponseEntity<>(HttpStatus.OK);
@@ -113,7 +112,7 @@ public class TrainerController {
 
     @GetMapping(value = "/api/trainers/{username}/profile")
     public ResponseEntity<TrainerDTO> getTrainerProfile(@Valid
-            @PathVariable("username") String username) {
+            @PathVariable("username") String username) throws ResourceNotFoundException {
         TrainerDTO trainerProfileByUsername = trainerService.findTrainerProfileByUsername(username);
         return new ResponseEntity<>(trainerProfileByUsername, HttpStatus.OK);
     }
@@ -128,20 +127,19 @@ public class TrainerController {
 
     @PutMapping(value = "/api/trainers/{id}")
     public ResponseEntity<TrainerDTO> updateTrainerProfile(@Validated(TrainerDTO.UpdateTrainerProfile.class)
-            @PathVariable("id") Long id, @RequestBody TrainerDTO trainerDTO)
-    {
+            @PathVariable("id") Long id, @RequestBody TrainerDTO trainerDTO) throws ResourceNotFoundException {
 
         TrainerDTO updateTrainerProfile = trainerService.updateTrainerProfile(id, trainerDTO);
         return new ResponseEntity<>(updateTrainerProfile, HttpStatus.OK);
 
     }
 
-    @Operation(summary = "Get unassigned trainers list on trainee")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found unassigned trainers list",
-                    content = {@Content(mediaType = "application/json",schema = @Schema(implementation = TrainerDTO.class))}),
-            @ApiResponse(responseCode = "404",description = "Trainers list not found by trainee username",content = @Content),
-            @ApiResponse(responseCode = "400",description = "Invalid trainee username",content = @Content)})
+//    @Operation(summary = "Get unassigned trainers list on trainee")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Found unassigned trainers list",
+//                    content = {@Content(mediaType = "application/json",schema = @Schema(implementation = TrainerDTO.class))}),
+//            @ApiResponse(responseCode = "404",description = "Trainers list not found by trainee username",content = @Content),
+//            @ApiResponse(responseCode = "400",description = "Invalid trainee username",content = @Content)})
 
     @GetMapping(value = "/api/trainers/{username}")
     public ResponseEntity<List<TrainerDTO>> getUnassignedOnTraineeTrainersList(
@@ -154,17 +152,17 @@ public class TrainerController {
 
     }
 
-    @Operation(summary = "Activate or Deactivate the status")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Changed status of trainer profile",
-                    content = {@Content(mediaType = "application/json",schema = @Schema(implementation = TrainerDTO.class))}),
-            @ApiResponse(responseCode = "404",description = "Trainer not found by username",content = @Content),
-            @ApiResponse(responseCode = "400",description = "Invalid trainer username",content = @Content)})
+//    @Operation(summary = "Activate or Deactivate the status")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Changed status of trainer profile",
+//                    content = {@Content(mediaType = "application/json",schema = @Schema(implementation = TrainerDTO.class))}),
+//            @ApiResponse(responseCode = "404",description = "Trainer not found by username",content = @Content),
+//            @ApiResponse(responseCode = "400",description = "Invalid trainer username",content = @Content)})
 
     @PatchMapping(value = "/api/trainers/{username}/status")
     public ResponseEntity<Void> activateDeactivateTrainer(@Validated(TrainerDTO.ActivateDeactivateTrainer.class)
             @PathVariable("username") String username,
-                                                          @RequestBody TrainerDTO trainerDTO) {
+                                                          @RequestBody TrainerDTO trainerDTO) throws ResourceNotFoundException {
 
         trainerService.activateOrDeactivateTrainerStatus(username, trainerDTO.getActive());
         return new ResponseEntity<>(HttpStatus.OK);
@@ -180,7 +178,7 @@ public class TrainerController {
 
     @DeleteMapping(value = "/api/trainers/{username}")
     public ResponseEntity<String> deleteTrainerProfile(@Valid
-            @PathVariable("username") String username) {
+            @PathVariable("username") String username) throws ResourceNotFoundException {
 
         trainerService.deleteTrainerProfileByUsername(username);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

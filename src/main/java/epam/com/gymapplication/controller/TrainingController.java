@@ -2,6 +2,7 @@ package epam.com.gymapplication.controller;
 
 import epam.com.gymapplication.dto.TrainingDTO;
 import epam.com.gymapplication.service.TrainingService;
+import epam.com.gymapplication.utility.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,7 +35,7 @@ public class TrainingController {
 
     @PostMapping(value = "/api/trainings")
     public ResponseEntity<Void> addTraining(@Validated(TrainingDTO.AddTraining.class)
-            @RequestBody TrainingDTO trainingDTO) {
+            @RequestBody TrainingDTO trainingDTO) throws ResourceNotFoundException {
 
         trainingService.addTraining(trainingDTO);
 
