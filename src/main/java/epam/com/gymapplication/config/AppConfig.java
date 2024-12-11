@@ -1,8 +1,8 @@
 package epam.com.gymapplication.config;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
-import org.modelmapper.ModelMapper;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -28,9 +28,11 @@ public class AppConfig {
     }
 
     @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
+
+
 
 
 
