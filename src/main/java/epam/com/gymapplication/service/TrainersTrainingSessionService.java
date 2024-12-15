@@ -1,8 +1,6 @@
 package epam.com.gymapplication.service;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import epam.com.gymapplication.dao.*;
 import epam.com.gymapplication.dto.TrainingDTO;
 import epam.com.gymapplication.entity.*;
@@ -33,7 +31,6 @@ public class TrainersTrainingSessionService {
 
 
     private final RestTemplate restTemplate;
-    private final TrainersTrainingSessionProducer trainersTrainingSessionProducer;
     private static final String ADDRESS_SERVICE_URL = "http://localhost:8763/api/workload";
 
 
@@ -44,8 +41,7 @@ public class TrainersTrainingSessionService {
                                           PasswordEncoder passwordEncoder,
                                           TrainingTypeRepository trainingTypeRepository,
                                           TraineeRepository traineeRepository,
-                                          RestTemplate restTemplate,
-                                          TrainersTrainingSessionProducer trainersTrainingSessionProducer) {
+                                          RestTemplate restTemplate) {
 
         this.trainerRepository = trainerRepository;
         this.trainingRepository = trainingRepository;
@@ -55,7 +51,6 @@ public class TrainersTrainingSessionService {
         this.trainingTypeRepository = trainingTypeRepository;
         this.traineeRepository = traineeRepository;
         this.restTemplate = restTemplate;
-        this.trainersTrainingSessionProducer = trainersTrainingSessionProducer;
     }
 
     public void addTraining(TrainingDTO trainingDTO) throws ResourceNotFoundException {
