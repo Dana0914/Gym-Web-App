@@ -59,6 +59,8 @@ public class SecurityConfig {
                                 .permitAll()
                                 .requestMatchers("/api/session/trainers/trainings/cancelled")
                                 .permitAll()
+                                .requestMatchers("/sendMessage")
+                                .permitAll()
                                 .anyRequest()
                                 .authenticated()
                 )
