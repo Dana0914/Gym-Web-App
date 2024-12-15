@@ -14,13 +14,15 @@ import epam.com.gymapplication.entity.Trainer;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
+import java.io.Serializable;
 import java.time.LocalDate;
 
 
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TrainingDTO {
+public class TrainingDTO implements Serializable {
 
     public TrainingDTO() {
 
@@ -182,13 +184,6 @@ public class TrainingDTO {
     }
     public Trainee getTrainee() {
         return trainee;
-    }
-
-    public Boolean getActive() {
-        return isActive;
-    }
-    public void setActive(Boolean active) {
-        isActive = active;
     }
 
     public Integer getTrainingDuration() {
