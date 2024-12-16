@@ -8,16 +8,20 @@ import epam.com.gymapplication.dto.TrainingDTO;
 import epam.com.gymapplication.entity.*;
 import epam.com.gymapplication.profile.PasswordGenerator;
 import epam.com.gymapplication.service.TrainersTrainingSessionService;
+import epam.com.gymapplication.utility.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
+import java.util.Optional;
+
 import static org.mockito.Mockito.*;
 
 
@@ -67,7 +71,60 @@ public class TrainersTrainingSessionServiceTest {
         trainingDTO.setTrainerLastname("Doe");
         trainingDTO.setIsActive(true);
 
+        User user = new User();
+        user.setId(1L);
+        user.setUsername(trainingDTO.getTrainerUsername());
+        user.setPassword(passwordEncoder.encode("password"));
+        user.setFirstName(trainingDTO.getTrainerFirstname());
+        user.setLastName(trainingDTO.getTrainerLastname());
+        user.setActive(trainingDTO.getIsActive());
 
+        userRepository.save(user);
+
+        TrainingType trainingType = new TrainingType(1L, "aerobics");
+
+        trainingTypeRepository.save(trainingType);
+
+
+        Trainer trainer = new Trainer();
+        trainer.setUser(user);
+        trainer.setId(1L);
+        trainer.setSpecialization(trainingType.getId());
+
+        trainerRepository.save(trainer);
+
+        Trainee trainee = new Trainee();
+        trainee.setId(2L);
+        trainee.setUser(user);
+        trainee.setAddress("Street 01");
+        trainee.setDateOfBirth(LocalDate.of(2000, 1, 1));
+
+        traineeRepository.save(trainee);
+
+
+        Training training = new Training();
+        training.setId(1L);
+        training.setTrainer(trainer);
+        training.setTrainee(trainee);
+        training.setTrainingDuration(trainingDTO.getTrainingDuration());
+        training.setTrainingDate(trainingDTO.getTrainingDate());
+        training.setActionType(trainingDTO.getActionType());
+
+        trainingRepository.save(training);
+
+
+        Assertions.assertEquals(trainingDTO.getTrainerUsername(), trainer.getUser().getUsername());
+        Assertions.assertEquals(trainingDTO.getTrainerFirstname(), trainer.getUser().getFirstName());
+        Assertions.assertEquals(trainingDTO.getTrainerLastname(), trainer.getUser().getLastName());
+        Assertions.assertEquals(trainingDTO.getIsActive(), trainer.getUser().getActive());
+        Assertions.assertEquals(trainingDTO.getTrainingDuration(), training.getTrainingDuration());
+        Assertions.assertEquals(trainingDTO.getTrainingDate(), training.getTrainingDate());
+        Assertions.assertEquals(trainingDTO.getActionType(), training.getActionType());
+
+        verify(trainingRepository, times(1)).save(training);
+        verify(trainingTypeRepository, times(1)).save(trainingType);
+        verify(traineeRepository, times(1)).save(trainee);
+        verify(trainerRepository, times(1)).save(trainer);
 
     }
 
@@ -78,7 +135,7 @@ public class TrainersTrainingSessionServiceTest {
         mockTrainingDTO.setTrainerUsername("John.Doe");
         mockTrainingDTO.setTrainerFirstname("John");
         mockTrainingDTO.setTrainerLastname("Doe");
-        mockTrainingDTO.setActive(true);
+        mockTrainingDTO.setIsActive(true);
         mockTrainingDTO.setTrainingDuration(2);
         mockTrainingDTO.setTrainingDate(LocalDate.now());
         mockTrainingDTO.setActionType(ActionType.ADD);
@@ -102,7 +159,7 @@ public class TrainersTrainingSessionServiceTest {
         // act
         ResponseEntity<String> response = trainersTrainingSessionService.notifySecondaryService(mockTrainingDTO);
 
-
+        // assert
         Assertions.assertEquals(response.getBody(), mockTrainingJson);
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertTrue(response.hasBody());
@@ -141,6 +198,8 @@ public class TrainersTrainingSessionServiceTest {
         user.setLastName(trainingDTO.getTrainerLastname());
         user.setActive(trainingDTO.getIsActive());
 
+        userRepository.save(user);
+
 
         TrainingType trainingType = new TrainingType();
         trainingType.setId(1L);
@@ -153,12 +212,12 @@ public class TrainersTrainingSessionServiceTest {
         trainer.setSpecialization(trainingType.getId());
 
 
-
         Trainee trainee = new Trainee();
         trainee.setId(1L);
         trainee.setUser(user);
         trainee.setDateOfBirth(LocalDate.of(2000, 1, 1));
         trainee.setAddress("Avenue 01");
+
 
 
 
@@ -172,6 +231,15 @@ public class TrainersTrainingSessionServiceTest {
         training.setTrainingDate(trainingDTO.getTrainingDate());
         training.setActionType(training.getActionType());
 
+
+
+        Assertions.assertNull(null, trainer.getUser().getUsername());
+        Assertions.assertNull(null, trainer.getUser().getFirstName());
+        Assertions.assertNull(null, trainer.getUser().getLastName());
+        Assertions.assertNull(null, trainer.getUser().getActive().toString());
+        Assertions.assertNull(null, training.getTrainingDuration().toString());
+        Assertions.assertNull(null, training.getTrainingDate().toString());
+        Assertions.assertNull(null, String.valueOf(training.getActionType()));
 
 
 
@@ -188,9 +256,7 @@ public class TrainersTrainingSessionServiceTest {
         verify(trainingTypeRepository, times(1)).delete(trainingType);
         verify(trainingTypeRepository, times(1)).delete(trainingType);
 
-
-
-
     }
+
 }
 
