@@ -1,10 +1,9 @@
 package epam.com.gymapplication.config;
 
-
-import epam.com.gymapplication.dto.TrainingDTO;
 import jakarta.jms.Queue;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.command.ActiveMQQueue;
+import org.hibernate.validator.HibernateValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,9 +13,11 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
+import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
+import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-import java.util.HashMap;
-import java.util.Map;
+
 
 @Configuration
 @EnableJms
@@ -57,6 +58,20 @@ public class JMSConfig {
         return factory;
     }
 
+    @Bean
+    public DefaultMessageHandlerMethodFactory methodFactory() {
+        DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
+        factory.setValidator(validatorFactory());
+        return factory;
+    }
+
+    @Bean
+    public Validator validatorFactory(){
+        LocalValidatorFactoryBean factory = new LocalValidatorFactoryBean();
+        factory.setProviderClass(HibernateValidator.class);
+        return factory;
+    }
+
 
     @Bean
     public MessageConverter jacksonJmsMsgConverter() {
@@ -65,6 +80,7 @@ public class JMSConfig {
         converter.setTypeIdPropertyName("_type");
         return converter;
     }
+
 
 
 }
