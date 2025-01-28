@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -134,12 +133,12 @@ public class TrainerController {
 
     }
 
-//    @Operation(summary = "Get unassigned trainers list on trainee")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "Found unassigned trainers list",
-//                    content = {@Content(mediaType = "application/json",schema = @Schema(implementation = TrainerDTO.class))}),
-//            @ApiResponse(responseCode = "404",description = "Trainers list not found by trainee username",content = @Content),
-//            @ApiResponse(responseCode = "400",description = "Invalid trainee username",content = @Content)})
+    @Operation(summary = "Get unassigned trainers list on trainee")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found unassigned trainers list",
+                    content = {@Content(mediaType = "application/json",schema = @Schema(implementation = TrainerDTO.class))}),
+            @ApiResponse(responseCode = "404",description = "Trainers list not found by trainee username",content = @Content),
+            @ApiResponse(responseCode = "400",description = "Invalid trainee username",content = @Content)})
 
     @GetMapping(value = "/api/trainers/{username}")
     public ResponseEntity<List<TrainerDTO>> getUnassignedOnTraineeTrainersList(
@@ -152,12 +151,12 @@ public class TrainerController {
 
     }
 
-//    @Operation(summary = "Activate or Deactivate the status")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "Changed status of trainer profile",
-//                    content = {@Content(mediaType = "application/json",schema = @Schema(implementation = TrainerDTO.class))}),
-//            @ApiResponse(responseCode = "404",description = "Trainer not found by username",content = @Content),
-//            @ApiResponse(responseCode = "400",description = "Invalid trainer username",content = @Content)})
+    @Operation(summary = "Activate or Deactivate the status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Changed status of trainer profile",
+                    content = {@Content(mediaType = "application/json",schema = @Schema(implementation = TrainerDTO.class))}),
+            @ApiResponse(responseCode = "404",description = "Trainer not found by username",content = @Content),
+            @ApiResponse(responseCode = "400",description = "Invalid trainer username",content = @Content)})
 
     @PatchMapping(value = "/api/trainers/{username}/status")
     public ResponseEntity<Void> activateDeactivateTrainer(@Validated(TrainerDTO.ActivateDeactivateTrainer.class)

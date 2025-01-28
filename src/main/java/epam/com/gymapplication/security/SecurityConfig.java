@@ -1,5 +1,6 @@
 package epam.com.gymapplication.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,6 +11,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+
 
 
 @Configuration
@@ -28,8 +31,6 @@ public class SecurityConfig {
         this.customAuthenticationProvider = customAuthenticationProvider;
 
     }
-
-
 
     @Bean
     public AuthenticationManager authManager(HttpSecurity http) throws Exception {
@@ -65,10 +66,26 @@ public class SecurityConfig {
                                 .authenticated()
                 )
                 .formLogin(httpSecurityFormLoginConfigurer ->
+                {
+
                         httpSecurityFormLoginConfigurer.loginPage("/login")
+                                .loginProcessingUrl("/auth/user")
                                 .defaultSuccessUrl("/home")
-                                .permitAll())
-                .userDetailsService(customUserDetailsService);
+                                .failureUrl("/login?error")
+                                .permitAll();
+
+                })
+                .logout(httpSecurityLogoutConfigurer -> {
+                    httpSecurityLogoutConfigurer
+                            .logoutSuccessUrl("/login?logout")
+                            .permitAll();
+                })
+                .userDetailsService(customUserDetailsService)
+                .exceptionHandling(exh -> exh.authenticationEntryPoint(
+                        (request, response, ex) -> {
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
+                        }
+                ));;
 
         return http.build();
     }
