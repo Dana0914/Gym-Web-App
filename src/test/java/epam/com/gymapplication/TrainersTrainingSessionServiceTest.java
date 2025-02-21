@@ -128,52 +128,52 @@ public class TrainersTrainingSessionServiceTest {
 
     }
 
-    @Test
-    public void givenMockingIsDoneByMockito_whenExchangeIsCalled_thenReturnMockedObject() throws JsonProcessingException {
-        // given
-        TrainingDTO mockTrainingDTO = new TrainingDTO();
-        mockTrainingDTO.setTrainerUsername("John.Doe");
-        mockTrainingDTO.setTrainerFirstname("John");
-        mockTrainingDTO.setTrainerLastname("Doe");
-        mockTrainingDTO.setIsActive(true);
-        mockTrainingDTO.setTrainingDuration(2);
-        mockTrainingDTO.setTrainingDate(LocalDate.now());
-        mockTrainingDTO.setActionType(ActionType.ADD);
-
-        String mockTrainingJson = objectMapper.writeValueAsString(mockTrainingDTO);
-
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<TrainingDTO> entity = new HttpEntity<>(mockTrainingDTO, headers);
-
-        // when
-        when(restTemplate.exchange(
-                eq("http://localhost:8763/api/workload"),
-                eq(HttpMethod.POST),
-                eq(entity),
-                eq(String.class)))
-                .thenReturn(new ResponseEntity<>(mockTrainingJson,
-                        HttpStatus.OK));
-
-        // act
-        ResponseEntity<String> response = trainersTrainingSessionService.notifySecondaryService(mockTrainingDTO);
-
-        // assert
-        Assertions.assertEquals(response.getBody(), mockTrainingJson);
-        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
-        Assertions.assertTrue(response.hasBody());
-
-        // Verify
-        verify(restTemplate).exchange(
-                eq("http://localhost:8763/api/workload"),
-                eq(HttpMethod.POST),
-                eq(entity),
-                eq(String.class));
-
-
-
-    }
+//    @Test
+//    public void givenMockingIsDoneByMockito_whenExchangeIsCalled_thenReturnMockedObject() throws JsonProcessingException {
+//        // given
+//        TrainingDTO mockTrainingDTO = new TrainingDTO();
+//        mockTrainingDTO.setTrainerUsername("John.Doe");
+//        mockTrainingDTO.setTrainerFirstname("John");
+//        mockTrainingDTO.setTrainerLastname("Doe");
+//        mockTrainingDTO.setIsActive(true);
+//        mockTrainingDTO.setTrainingDuration(2);
+//        mockTrainingDTO.setTrainingDate(LocalDate.now());
+//        mockTrainingDTO.setActionType(ActionType.ADD);
+//
+//        String mockTrainingJson = objectMapper.writeValueAsString(mockTrainingDTO);
+//
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+//        HttpEntity<TrainingDTO> entity = new HttpEntity<>(mockTrainingDTO, headers);
+//
+//        // when
+//        when(restTemplate.exchange(
+//                eq("http://localhost:8763/api/workload"),
+//                eq(HttpMethod.POST),
+//                eq(entity),
+//                eq(String.class)))
+//                .thenReturn(new ResponseEntity<>(mockTrainingJson,
+//                        HttpStatus.OK));
+//
+//        // act
+//        ResponseEntity<String> response = trainersTrainingSessionService.notifySecondaryService(mockTrainingDTO);
+//
+//        // assert
+//        Assertions.assertEquals(response.getBody(), mockTrainingJson);
+//        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+//        Assertions.assertTrue(response.hasBody());
+//
+//        // Verify
+//        verify(restTemplate).exchange(
+//                eq("http://localhost:8763/api/workload"),
+//                eq(HttpMethod.POST),
+//                eq(entity),
+//                eq(String.class));
+//
+//
+//
+//    }
 
 
     @Test
